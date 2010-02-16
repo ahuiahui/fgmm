@@ -4,8 +4,8 @@
 #include <math.h> // isinf , isnan 
 #include <stdio.h>
 
-#define max_iter 20
-#define loglikelihood_eps 1e-3
+#define max_iter 1000
+#define loglikelihood_eps 1e-4
 
 /** perform em on the giver data
  * @param data : the given dataset (data_length*3 floats) 
@@ -35,6 +35,12 @@ int em( struct gaussian * GMM,
 
   float oldlik=0;
   float deltalik=0;
+  
+  for(state_i=0;state_i<num_states;state_i++)
+    {
+      invert_covar(&GMM[state_i]);
+    }
+
 
   for(niter=0;niter<max_iter;niter++)
     {
@@ -62,19 +68,19 @@ int em( struct gaussian * GMM,
 	     exit(0); */
 	  for(state_i=0;state_i<num_states;state_i++)
 	    {
-	      pix[data_i*num_states + state_i] = pxi[state_i] * GMM[state_i].prior / like;
+	      pix[data_i + state_i*data_length] = pxi[state_i] * GMM[state_i].prior / like;
 	    }
 	  
 	}
       
       log_lik/=data_length;
-      // printf("Log lik :: %f \n",log_lik);
+      printf("Log lik :: %f \n",log_lik);
       // M step 
       deltalik = log_lik - oldlik;
       oldlik = log_lik;
       
-      /*if(fabs(deltalik) < loglikelihood_eps)
-	break;*/
+      if(fabs(deltalik) < loglikelihood_eps)
+	break;
       
       //      pdata = data;
       for(state_i=0;state_i<num_states;state_i++)
@@ -118,10 +124,9 @@ int em( struct gaussian * GMM,
 
 	  GMM[state_i].prior = smat_covariance(GMM[state_i].covar,
 					       data_length,
-					       pix,
+					       &pix[state_i*data_length],
 					       data,
 					       GMM[state_i].mean);
-
 	  GMM[state_i].prior /= data_length;
 	  invert_covar(&GMM[state_i]);
 	  /*printf("gauss : %d :: \n",state_i);
