@@ -10,7 +10,7 @@ struct smat {
   int _size;
 };
 
-float smat_multv(const struct smat* m, const float * v,float * out);
+void smat_multv(const struct smat* m, const float * v,float * out);
 void smat_multf(struct smat* m,const float *f);
 void smat_zero(struct smat ** mat,int dim);
 
@@ -58,7 +58,7 @@ void smat_tbackward(const struct smat * upper, float * b, float * y);
 
 float smat_covariance(struct smat * cov, 
 		      int ndata, 
-		      float * weight,
+		      const float * weight,
 		      const float * data,
 		      float * mean);
 

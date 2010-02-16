@@ -10,7 +10,7 @@
  out = m * v 
 
 */
-float smat_multv(const struct smat* m, const float * v,float * out)
+void smat_multv(const struct smat* m, const float * v,float * out)
 {
   float * pcoef = m->_;
   int i,j;
@@ -76,7 +76,6 @@ void smat_identity(struct smat * mat)
 void smat_pmatrix(const struct smat* mat)
 {
   int i,j;
-  int curs;
   float * pmat = mat->_;
   for(i=0;i<mat->dim;i++)
     {
@@ -204,17 +203,21 @@ void smat_tbackward(const struct smat * upper, float * b, float * y)
 
 float smat_covariance(struct smat * cov, 
 		     int ndata, 
-		     float * weight,
+		     const float * weight,
 		     const float * data,
 		     float * mean)
 {
-  float * pdata = data;
-  float * pweight = weight;
+  const float * pdata = data;
+  const float * pweight = weight;
   float * pcov = cov->_;
   float cdata[cov->dim];
   int i=0,j=0,k=0;
   smat_zero(&cov,cov->dim);
   float norm=0;
+  for(i=0;i<cov->dim;i++)
+    {
+      mean[i] = 0.;
+    }
   for(i=0;i<ndata;i++)
     {
       for(j=0;j<cov->dim;j++)
