@@ -202,3 +202,51 @@ void smat_tbackward(const struct smat * upper, float * b, float * y)
   }
 }
 
+float smat_covariance(struct smat * cov, 
+		     int ndata, 
+		     float * weight,
+		     const float * data,
+		     float * mean)
+{
+  float * pdata = data;
+  float * pweight = weight;
+  float * pcov = cov->_;
+  float cdata[cov->dim];
+  int i=0,j=0,k=0;
+  smat_zero(&cov,cov->dim);
+  float norm=0;
+  for(i=0;i<ndata;i++)
+    {
+      for(j=0;j<cov->dim;j++)
+	mean[j] += (*pweight)*(*pdata++);
+      norm += *pweight;
+      pweight++;
+    }
+  for(i=0;i<cov->dim;i++)
+    {
+      mean[i] /= norm;
+    }
+  pdata = data;
+  pweight = weight;
+  for(i=0;i<ndata;i++)
+    {      
+      pcov = cov->_;
+      for(j=0;j<cov->dim;j++)
+	{
+	  cdata[j] = (*pdata++) - mean[j];
+	}
+      
+      for(j=0;j<cov->dim;j++)
+	{
+	  for(k=j;k<cov->dim;k++)
+	    {
+	      *pcov += (*pweight)*cdata[j]*cdata[k];
+	      pcov++;
+	    }
+	}
+      pweight++;
+    }
+  for(i=0;i<cov->_size;i++)
+    cov->_[i] /= norm;
+  return norm;
+}

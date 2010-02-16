@@ -1,4 +1,5 @@
 #include "smat.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>
@@ -6,6 +7,8 @@
  /* tests .. */
 #define DIM 100
 #define INVERSE_PRECISION 1e-1 
+#define COVAR_PRECISION 1e-1
+#define COVAR_SAMPLE 10000
 int main(int argc, char ** argv)
 {
   struct smat * m1 = NULL;
@@ -76,10 +79,9 @@ int main(int argc, char ** argv)
   //pmatrix(chol);
   
   smat_ttmult(chol,check);
-  //pmatrix(check);
-
+  
   for(i=0;i<m1->_size;i++)
-    assert(check->_[i] == m1->_[i]);
+    assert(fabs(check->_[i] - m1->_[i]) < 1e-5);
 
   printf("..pass\n");
 
@@ -101,6 +103,36 @@ int main(int argc, char ** argv)
       //printf("%f %f\n",a[i],b[i]); 
       assert(fabs(a[i]-b[i]) < INVERSE_PRECISION);  // see the precision of inverse .. 
       }
-
    printf("..pass\n");
+
+   printf("checking smat_covariance ..\n");
+
+   float tdata[DIM*COVAR_SAMPLE];
+   float weights[COVAR_SAMPLE];
+   float mean[DIM];
+   for(i=0;i<COVAR_SAMPLE;i++)
+     {
+       weights[i]=1.;
+     }
+   for(i=0;i<DIM*COVAR_SAMPLE;i++)
+     {
+       tdata[i] = (float)rand()*2/RAND_MAX ;
+     }
+   float norm = smat_covariance(check,COVAR_SAMPLE,weights,tdata,mean);
+
+   assert(fabs(norm - COVAR_SAMPLE) < 1e-5);
+
+   for(i=0;i<DIM;i++)
+     assert(fabs(mean[i] - 1.) < COVAR_PRECISION); /* only sampling on a 1000 points */
+   pmat = check->_;
+   for(i=0;i<DIM;i++)
+     {
+       assert(fabs((*pmat++) - 1./3) < COVAR_PRECISION);
+       for(j=i+1;j<DIM;j++)
+	 {
+	   assert(fabs(*pmat++) < COVAR_PRECISION);
+	 }
+     }
+   printf("..pass\n");
+   return 1;
 }

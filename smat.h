@@ -56,5 +56,11 @@ void smat_tbackward(const struct smat * upper, float * b, float * y);
 
 
 
+float smat_covariance(struct smat * cov, 
+		      int ndata, 
+		      float * weight,
+		      const float * data,
+		      float * mean);
+
 
 
