@@ -10,8 +10,8 @@ struct smat {
   int _size;
 };
 
-void smat_multv(const struct smat* m, const float * v,float * out);
-void smat_multf(struct smat* m,const float *f);
+inline void smat_multv(const struct smat* m, const float * v,float * out);
+inline void smat_multf(struct smat* m,const float *f);
 
 /* allocate memory for smat if mat == NULL 
    and zero the matrix in all cases */
@@ -57,8 +57,8 @@ void smat_ttmult(const struct smat* tri, struct smat* out);
    smat_tbackward(U,tmp,y);
 */ 
 
-void smat_tforward(struct smat * lower, float * b, float * y) ;
-void smat_tbackward(const struct smat * upper, float * b, float * y);
+inline void smat_tforward(struct smat * lower, float * b, float * y) ;
+inline void smat_tbackward(const struct smat * upper, float * b, float * y);
 
 
 
