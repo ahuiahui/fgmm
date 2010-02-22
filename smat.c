@@ -58,6 +58,12 @@ void smat_zero(struct smat ** mat,int dim)
     m->_[i] = 0.;
 }
 
+void smat_free(struct smat ** mat)
+{
+  free( (*mat)->_ );
+  free( *mat );
+  *mat = NULL;
+}
 
 /* fill the mat with identity  /!\ you must first 
  allocate memory (wigh smat_zero for ex .. ) */

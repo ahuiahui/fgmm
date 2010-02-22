@@ -91,7 +91,7 @@ void invert_covar(struct gaussian* g)
   g->nfactor = sqrtf( pow(M_PI,g->dim) * det);
 }
 
-void init_gaussian(struct gaussian * g,int dim)
+void gaussian_init(struct gaussian * g,int dim)
 {
   int i;
   g->dim = dim;
@@ -103,6 +103,13 @@ void init_gaussian(struct gaussian * g,int dim)
   smat_zero(&(g->covar),dim);
   smat_identity(g->covar); // just in case :) 
   smat_zero(&(g->covar_cholesky),dim);
+}
+
+void gaussian_free(struct gaussian * g)
+{
+  free(g->mean);
+  smat_free(&g->covar);
+  smat_free(&g->covar_cholesky);
 }
 /*
 void init_random(struct gaussian3d* g)

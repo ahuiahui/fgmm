@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h> // gettimeofday .. 
+#include <time.h>
 #include "em.h"
 
 #define N_STATES 6
@@ -9,7 +10,7 @@
 
 int main(int argc,char ** argv)
 {
-  srand(time());
+  srand(time(NULL));
   float *  data;
   data = (float *) malloc(DIM*N_DATA*sizeof(float));
   //   data = (float ** ) malloc(3000*3*sizeof(float)]; 
@@ -21,7 +22,7 @@ int main(int argc,char ** argv)
   /* random initialization */ 
   for(state_i=0;state_i<N_STATES;state_i++)
     {
-      init_gaussian(&GMM[state_i],DIM);
+      gaussian_init(&GMM[state_i],DIM);
       GMM[state_i].prior = 1./N_STATES;
       for(j=0;j<DIM;j++)
 	GMM[state_i].mean[j] = ((float)rand()/RAND_MAX)*2. - 1.;
@@ -57,6 +58,10 @@ int main(int argc,char ** argv)
       dump(&GMM[state_i]);
     }
   
+  for(state_i=0;state_i<N_STATES;state_i++)
+    gaussian_free(&GMM[state_i]);
+  free(GMM);
+  free(data);
   return 0;
 }
 

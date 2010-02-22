@@ -88,39 +88,6 @@ int em( struct gaussian * GMM,
 	  GMM[state_i].prior = 0;
 	  for(k=0;k<dim;k++)
 	    GMM[state_i].mean[k] = 0;
-	  /*
-	  smat_zero(GMM[state_i].covar,dim);
-	  
-	  // priors & mean
-	  for(data_i=0;data_i<data_length;data_i++)
-	    {
-	      GMM[state_i].prior += pix[data_i*num_states + state_i];
-	      for(k=0;k<dim;k++) 
-		GMM[state_i].mean[k] += data[data_i*dim + k] * pix[data_i*num_states + state_i]; // vector form .. 
-	    }
-	  for(k=0;k<dim;k++)
-	    GMM[state_i].mean[k] /= GMM[state_i].prior; // vector form
-	    //GMM[state_i].prior /= data_length;
-
-
-	  // covariance 
-
-	   for(data_i=0;data_i<data_length;data_i++)
-	    {      
-	      diff3(data + data_i*3,GMM[state_i].mean,cdata);
-	      float weight = pix[data_i*num_states + state_i];
-	      GMM[state_i].covar[0] += cdata[0]*cdata[0]*weight;
-	      GMM[state_i].covar[1] += cdata[1]*cdata[1]*weight;
-	      GMM[state_i].covar[2] += cdata[2]*cdata[2]*weight;
-	      GMM[state_i].covar[3] += cdata[0]*cdata[1]*weight;
-	      GMM[state_i].covar[4] += cdata[1]*cdata[2]*weight;
-	      GMM[state_i].covar[5] += cdata[0]*cdata[2]*weight;
-	    
-	    }
-	  
-	  for(k=0;k<6;k++)
-	    GMM[state_i].covar[k] /= GMM[state_i].prior;
-	  */
 
 	  GMM[state_i].prior = smat_covariance(GMM[state_i].covar,
 					       data_length,
@@ -131,12 +98,14 @@ int em( struct gaussian * GMM,
 	  invert_covar(&GMM[state_i]);
 	  /*printf("gauss : %d :: \n",state_i);
 	    dump(&GMM[state_i]); 
-	    printf("%f\n",GMM[state_i].nfactor); */
-	  
+	    printf("%f\n",GMM[state_i].nfactor); */	  
 	}
     }
   if(end_loglikelihood != NULL)
     *end_loglikelihood = log_lik;
+  
+  free(pxi);
+  free(pix);
   return niter; 
 }
 

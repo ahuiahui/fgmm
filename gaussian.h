@@ -16,9 +16,11 @@ struct gaussian{
     value should be at the same dimension than g->dim */
 inline float gaussian_pdf(struct gaussian* g, const float* value);
 
-/** randomize the gaussian */
-void init_gaussian(struct gaussian* g,int dim);
-
+/** alloc memory for the gaussian 
+    and init it to zero with identity covariance matrix
+*/
+void gaussian_init(struct gaussian* g,int dim);
+void gaussian_free(struct gaussian* g);
 
 void invert_covar(struct gaussian* g);
 

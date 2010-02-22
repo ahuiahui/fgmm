@@ -35,7 +35,7 @@ int main(int argc,char ** argv)
   printf("simple gaussian pdf test :\n");
   struct gaussian g;
   
-  init_gaussian(&g,3);
+  gaussian_init(&g,3);
   invert_covar(&g);
   assert(g.dim == 3);
   float v[] = {1.,1.,1.};

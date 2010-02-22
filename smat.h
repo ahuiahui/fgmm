@@ -12,8 +12,14 @@ struct smat {
 
 void smat_multv(const struct smat* m, const float * v,float * out);
 void smat_multf(struct smat* m,const float *f);
+
+/* allocate memory for smat if mat == NULL 
+   and zero the matrix in all cases */
 void smat_zero(struct smat ** mat,int dim);
 
+/* free the memory used by the matrix 
+   (allocated by smat_zero) */
+void smat_free(struct smat ** mat);
 
 /* fill the mat with identity  /!\ you must first 
  allocate memory (wigh smat_zero for ex .. ) */
