@@ -7,11 +7,18 @@ blddir = '_build_'
 def set_options(opt):
     # command-line options provided by a waf tool
     opt.tool_options('compiler_cc')
+    opt.tool_options('compiler_cxx')
 
 def configure(conf) :
     #print "configuring"
     conf.check_tool('compiler_cc')  
+    conf.check_tool('compiler_cxx')  
     conf.env.CCFLAGS = ['-Wall','-O2','-g','--fast-math']
+    conf.env['LIBPATH_MATRIX'] = '/home/fdhalluin/code/MathLib/lib/'
+    conf.env['LIB_MATRIX'] = 'Matrix'
+    conf.env['LIBPATH_GMR'] = '/home/fdhalluin/code/GMR/lib/'
+    conf.env['LIB_GMR'] = 'GMR'
+
    
 def build(bld) :
     print "compiling"
@@ -37,3 +44,9 @@ def build(bld) :
             includes = '.',
             lib = ['m'],
             add_objects=obj)
+
+    cpgmr = bld(features = 'cxx cprogram',
+                source = 'tests/oldGMR.cpp',
+                target = 'oldGMR',
+                includes = '/home/fdhalluin/code/MathLib/include/ /home/fdhalluin/code/GMR/include/',
+                uselib = ['GMR','MATRIX'])
