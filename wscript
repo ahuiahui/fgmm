@@ -11,7 +11,7 @@ def set_options(opt):
 def configure(conf) :
     #print "configuring"
     conf.check_tool('compiler_cc')  
-    conf.env.CCFLAGS = ['-Wall','-g']
+    conf.env.CCFLAGS = ['-Wall','-O2','-g','--fast-math']
    
 def build(bld) :
     print "compiling"
