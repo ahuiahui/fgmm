@@ -1,8 +1,6 @@
-#include "gaussian.h"
+#include "gmm.h"
 
-int em( struct gaussian * GMM,
+int em( struct gmm * GMM,
 	const float * data,
-	int dim,
 	int data_length, 
-	int num_states,
 	float * end_loglikelihood);

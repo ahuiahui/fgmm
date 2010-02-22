@@ -45,7 +45,7 @@ float gaussian_pdf(struct gaussian* g, const float* x)
     }
 
   smat_tforward(g->covar_cholesky,cdata,tmp);
-  smat_tforward(g->covar_cholesky,tmp,ivect);
+  smat_tbackward(g->covar_cholesky,tmp,ivect);
   
   for(i=0;i<g->dim;i++)
     {
@@ -130,7 +130,7 @@ void init_random(struct gaussian3d* g)
 void gaussian_draw(struct gaussian * g, float * out)
 {
   int i=0;
-  float tvec[3];
+  float tvec[g->dim];
   for(;i<g->dim;i++)
     tvec[i] = randn_boxmuller();
   smat_multv(g->covar_cholesky,tvec,out);
