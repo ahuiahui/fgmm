@@ -6,6 +6,26 @@
 #include <stdio.h>
 #include <assert.h>
 
+
+#define ranf() ( (float) rand())/RAND_MAX
+
+/* fast normal law generator */
+float randn_boxmuller()
+{
+  float x1, x2, w;
+ 
+  do {
+    x1 = 2.0 * ranf() - 1.0;
+    x2 = 2.0 * ranf() - 1.0;
+    w = x1 * x1 + x2 * x2;
+  } while ( w >= 1.0 );
+
+  w = sqrt( (-2.0 * log( w ) ) / w );
+  x1 *= w;
+  /* x2 *= w */   /* 2nd indpdt gaussian */
+  return x1;
+}
+
 /* check the inverse covariance computation */ 
 /* #define CHECK_INVERSE  */ 
 
@@ -99,4 +119,14 @@ void init_random(struct gaussian3d* g)
   invert_covar(g);
   }*/
   
-  
+
+void gaussian_draw(struct gaussian * g, float * out)
+{
+  int i=0;
+  float tvec[3];
+  for(;i<g->dim;i++)
+    tvec[i] = randn_boxmuller();
+  smat_multv(g->covar_cholesky,tvec,out);
+  for(i=0;i<g->dim;i++)
+    out[i] += g->mean[i];
+}

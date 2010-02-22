@@ -23,3 +23,9 @@ void init_gaussian(struct gaussian* g,int dim);
 void invert_covar(struct gaussian* g);
 
 void dump(struct gaussian* g);
+
+/* draw one sample from the gaussian */
+void gaussian_draw(struct gaussian* g, float * out);
+
+/** random sample from normal law ( mu = 0, sigma = 1. ) **/ 
+float randn_boxmuller();
