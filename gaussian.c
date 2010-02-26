@@ -31,9 +31,11 @@ float randn_boxmuller()
 
 float gaussian_pdf(struct gaussian* g, const float* x)
 {
-  float dist = 0;
+  
+  
   /* dist = -.5 * (x - mu)^T Sigma^-1 (x-mu) */
-
+  /*
+  float dist = 0;
   float cdata[g->dim];
   float tmp[g->dim];
   float ivect[g->dim];
@@ -51,6 +53,9 @@ float gaussian_pdf(struct gaussian* g, const float* x)
     {
       dist += ivect[i]*cdata[i];
     }
+  */
+  
+  float dist = smat_sesq(g->icovar_cholesky,g->mean,x);
   dist *= .5;
   dist =  expf(-dist)/g->nfactor;
   //dist = 0.2;
@@ -79,11 +84,14 @@ void dump(struct gaussian* g)
 void invert_covar(struct gaussian* g)
 {
   float det=1.;
-  int i=0,diag=0;
+  int i=0,diag=0,j=0;
   smat_cholesky(g->covar,g->covar_cholesky);
   for(i=0;i<g->dim;i++)
     {
       det *= g->covar_cholesky->_[diag];
+      g->icovar_cholesky->_[diag] = 1./g->covar_cholesky->_[diag];
+      for(j=i+1;j<g->dim;j++)
+	g->icovar_cholesky->_[diag+j] = g->covar_cholesky->_[diag+j];
       diag += g->dim - i;
       
     }
@@ -98,6 +106,8 @@ void gaussian_init(struct gaussian * g,int dim)
   g->mean = (float *) malloc(dim* sizeof(float));
   g->covar = NULL;
   g->covar_cholesky = NULL;
+  g->icovar_cholesky = NULL;
+  smat_zero(&(g->icovar_cholesky),dim);
   for(i=0;i<dim;i++)
     g->mean[i] = 0.;
   smat_zero(&(g->covar),dim);
@@ -110,6 +120,7 @@ void gaussian_free(struct gaussian * g)
   free(g->mean);
   smat_free(&g->covar);
   smat_free(&g->covar_cholesky);
+  smat_free(&g->icovar_cholesky);
 }
 /*
 void init_random(struct gaussian3d* g)

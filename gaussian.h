@@ -8,6 +8,7 @@ struct gaussian{
   float * mean ;
   struct smat * covar; /* covariance matrix */ 
   struct smat * covar_cholesky; /* cache for cholesky decomp of covar */ 
+  struct smat * icovar_cholesky; /* cholesky matrix with inverse diagonal */
   float nfactor; /* cache for determinant of covar */ 
 };   
 
