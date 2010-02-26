@@ -166,6 +166,32 @@ void smat_ttmult(const struct smat* tri, struct smat* out)
     }
 }
 
+/** returns (x - bias)' (ichol^T ichol)^-1 ( x - bias ) 
+ *  ichol is the cholesky decomposition of Sigma, with inverted diagonal 
+ */
+
+float smat_sesq(struct smat * ichol,const float * bias,const float * x)
+{
+  float out = 0.;
+  int i,j;
+  float cdata[ichol->dim];
+  float * pichol = ichol->_;
+  for(i=0;i<ichol->dim;i++)
+    cdata[i] = 0.;      
+  for(i=0;i<ichol->dim;i++)
+    {
+      cdata[i] += x[i] - bias[i];
+      cdata[i] *= *pichol++;
+      for(j=i+1;j<ichol->dim;j++)
+	{
+	  cdata[j] -= (*pichol++)*cdata[i];
+	}
+      out += cdata[i]*cdata[i];
+    }
+  return out;
+}
+  
+
 /* resolve  L*y = b 
    where L is * LOWER *  triangular */ 
 

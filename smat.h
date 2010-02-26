@@ -61,6 +61,7 @@ inline void smat_tforward(struct smat * lower, float * b, float * y) ;
 inline void smat_tbackward(const struct smat * upper, float * b, float * y);
 
 
+inline float smat_sesq(struct smat * ichol,const float * bias,const float * x);
 
 float smat_covariance(struct smat * cov, 
 		      int ndata, 
