@@ -9,7 +9,7 @@
 /* check the inverse covariance computation */ 
 /* #define CHECK_INVERSE  */ 
 
-float gaussian_pdf(struct gaussian3d* g, const float* x)
+float gaussian3_pdf(struct gaussian3d* g, const float* x)
 {
   float dist = 0;
   /* dist = -.5 * (x - mu)^T Sigma^-1 (x-mu) */
@@ -31,7 +31,7 @@ float gaussian_pdf(struct gaussian3d* g, const float* x)
 }
 
 
-void dump(struct gaussian3d* g)
+void dump3(struct gaussian3d* g)
 {
   int k=0;
   printf("  prior : %f \n",g->prior);
@@ -51,7 +51,7 @@ void dump(struct gaussian3d* g)
 
 }
 
-void invert_covar(struct gaussian3d* g)
+void invert_covar3(struct gaussian3d* g)
 {
   float det=0;
   det = g->covar[0]*g->covar[1]*g->covar[2] +	\
@@ -86,7 +86,7 @@ void invert_covar(struct gaussian3d* g)
   
 }
 
-void init_random(struct gaussian3d* g)
+void init_random3(struct gaussian3d* g)
 {
   int k=0;
   for(k=0;k<3;k++)

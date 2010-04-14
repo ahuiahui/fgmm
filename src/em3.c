@@ -14,7 +14,7 @@
  * @param num_states : number of states of the GMM
  * @return  # of iterations 
  */
-int em( struct gaussian3d * GMM,
+int em3( struct gaussian3d * GMM,
 	const float * data, 
 	int data_length, 
 	int num_states,
@@ -129,56 +129,57 @@ int em( struct gaussian3d * GMM,
   return niter; 
 }
 
-#define N_DATA 10000
-#define DIM 3
 
-int main(int argc,char ** argv)
-{
-  int num_state = 6;
-  float *  data;
-  data = (float *) malloc(N_DATA*DIM*sizeof(float));
-  //   data = (float ** ) malloc(3000*3*sizeof(float)]; 
-  int state_i;
-  struct gaussian3d * GMM;
-  GMM = (struct gaussian3d *) malloc(sizeof(struct gaussian3d) * num_state);
+/* #define N_DATA 10000 */
+/* #define DIM 3 */
+
+/* int main(int argc,char ** argv) */
+/* { */
+/*   int num_state = 6; */
+/*   float *  data; */
+/*   data = (float *) malloc(N_DATA*DIM*sizeof(float)); */
+/*   //   data = (float ** ) malloc(3000*3*sizeof(float)];  */
+/*   int state_i; */
+/*   struct gaussian3d * GMM; */
+/*   GMM = (struct gaussian3d *) malloc(sizeof(struct gaussian3d) * num_state); */
     
-  /* random initialization */ 
-  for(state_i=0;state_i<num_state;state_i++)
-    {
-      init_random(&GMM[state_i]);
-      GMM[state_i].prior = 1./3;
-      // dump(&GMM[state_i]);
-    }
+/*   /\* random initialization *\/  */
+/*   for(state_i=0;state_i<num_state;state_i++) */
+/*     { */
+/*       init_random(&GMM[state_i]); */
+/*       GMM[state_i].prior = 1./3; */
+/*       // dump(&GMM[state_i]); */
+/*     } */
 
 
-  int i=0;
-  FILE * infile;
-  infile=fopen("test.txt","r");
-  if(infile == NULL)
-    printf("can't open file -- will gently segfault later :)) \n");
-  float * pdata = data;
-  for(i=0;i<N_DATA;i++)
-    {
-      fscanf(infile,"%f  %f  %f\n",pdata,pdata +1,pdata +2);
-      pdata +=3 ;
-    }
+/*   int i=0; */
+/*   FILE * infile; */
+/*   infile=fopen("test.txt","r"); */
+/*   if(infile == NULL) */
+/*     printf("can't open file -- will gently segfault later :)) \n"); */
+/*   float * pdata = data; */
+/*   for(i=0;i<N_DATA;i++) */
+/*     { */
+/*       fscanf(infile,"%f  %f  %f\n",pdata,pdata +1,pdata +2); */
+/*       pdata +=3 ; */
+/*     } */
   
-  printf("end loading file\n");
-  float lik;
-  struct timeval t1,t2;
-  gettimeofday(&t1,NULL);
-  int iterations = em(GMM,data,N_DATA,num_state,&lik);
-  gettimeofday(&t2,NULL);
-  timersub(&t2,&t1,&t1);
-  printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
-  printf("%d iterations %f\n",iterations,lik);
+/*   printf("end loading file\n"); */
+/*   float lik; */
+/*   struct timeval t1,t2; */
+/*   gettimeofday(&t1,NULL); */
+/*   int iterations = em(GMM,data,N_DATA,num_state,&lik); */
+/*   gettimeofday(&t2,NULL); */
+/*   timersub(&t2,&t1,&t1); */
+/*   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations); */
+/*   printf("%d iterations %f\n",iterations,lik); */
 
-  for(state_i=0;state_i<num_state;state_i++)
-    {
-      printf("Gaussian %d ::\n",state_i);
-      dump(&GMM[state_i]);
-    }
+/*   for(state_i=0;state_i<num_state;state_i++) */
+/*     { */
+/*       printf("Gaussian %d ::\n",state_i); */
+/*       dump(&GMM[state_i]); */
+/*     } */
   
-  return 0;
-}
+/*   return 0; */
+/* } */
   

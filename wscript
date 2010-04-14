@@ -23,16 +23,22 @@ def configure(conf) :
    
 def build(bld) :
     print "compiling"
-    obj_src = bld.path.ant_glob("*.c")
+    obj_src = bld.path.ant_glob("src/*.c")
     test_src = bld.path.ant_glob("tests/test_*.c")
     obj = []
-    for src in obj_src.split():
-        print src
-        targ_name = os.path.splitext(src)[0]+'.o'
-        bld(features='cc',
-            target = targ_name,
-            source=src)
-        obj.append(targ_name)
+    
+#     for src in obj_src.split():
+#         print src
+#         targ_name = os.path.splitext(src)[0]+'.o'
+#         bld(features='cc',
+#             target = targ_name,
+#             source=src)
+#         obj.append(targ_name)
+
+    bld(features='cc cstaticlib',
+        target = 'fgmm',
+        source = obj_src,
+        export_incdirs="src/")
 
     for src in test_src.split():
 
@@ -44,7 +50,8 @@ def build(bld) :
             target = targ_name,
             includes = '.',
             lib = ['m'],
-            add_objects=obj)
+            uselib_local="fgmm")
+            #add_objects=obj)
 
     cpgmr = bld(features = 'cxx cprogram',
                 source = 'tests/oldGMR.cpp',
