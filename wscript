@@ -13,7 +13,8 @@ def configure(conf) :
     #print "configuring"
     conf.check_tool('compiler_cc')  
     conf.check_tool('compiler_cxx')  
-    conf.env.CCFLAGS = ['-Wall','-O2','-g','--fast-math']
+    conf.env.CCFLAGS = ['-Wall','-O2','-g','--fast-math','-pg']
+    conf.env.LINKFLAGS = ['-pg']
     conf.env['LIBPATH_MATRIX'] = '/home/fdhalluin/code/MathLib/lib/'
     conf.env['LIB_MATRIX'] = 'Matrix'
     conf.env['LIBPATH_GMR'] = '/home/fdhalluin/code/GMR/lib/'
