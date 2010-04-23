@@ -1,4 +1,5 @@
 import numpy
+import subprocess
 
 def generate_data(states=3,dim=3,npoints=10000) :
     
@@ -23,3 +24,6 @@ def generate_data(states=3,dim=3,npoints=10000) :
     f.close()
 
 generate_data(3,2)
+subprocess.call(["./test_smat"])
+subprocess.call(["./test_gaussian"])
+subprocess.call(["./test_em","test.txt","6"])

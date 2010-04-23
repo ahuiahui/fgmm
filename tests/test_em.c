@@ -91,13 +91,13 @@ int main(int argc,char ** argv)
   float lik;
   struct timeval t1,t2;
   gettimeofday(&t1,NULL);
-  int iterations = em(&GMM,data,N_DATA,&lik);
+  int iterations = em(&GMM,data,n_data,&lik);
   gettimeofday(&t2,NULL);
   timersub(&t2,&t1,&t1);
   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
   printf("%d iterations %f\n",iterations,lik);
 
-  for(state_i=0;state_i<N_STATES;state_i++)
+  for(state_i=0;state_i<n_states;state_i++)
     {
       printf("Gaussian %d ::\n",state_i);
       dump(&GMM.gauss[state_i]);
