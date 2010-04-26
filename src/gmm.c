@@ -1,4 +1,6 @@
 #include "gmm.h"
+#include "gaussian.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 void gmm_alloc(struct gmm * gm,int nstates,int dim)
@@ -39,3 +41,35 @@ void gmm_draw_sample(struct gmm * gmm, float * out)
   //printf("%d %f %f\n",st,v,cumprod);
   gaussian_draw(&(gmm->gauss[st]),out);
 }
+
+
+void gmm_set_prior(struct gmm * gmm,int state, float prior)
+{
+  gmm->gauss[state].prior = prior;
+}
+
+void gmm_set_mean(struct gmm * gmm,int state, float * mean)
+{
+  int i=0;
+  for(;i<gmm->dim;i++)
+    gmm->gauss[state].mean[i] = mean[i];
+}
+
+void gmm_set_covar(struct gmm * gmm,int state, float * covar)
+{
+  int i=0;
+  for(;i<gmm->gauss[state].covar->_size;i++)
+    gmm->gauss[state].covar->_[i] = covar[i];
+  invert_covar(&gmm->gauss[state]);
+}
+
+void gmm_dump(struct gmm * gmm)
+{
+  int state_i=0;
+  for(;state_i<gmm->nstates;state_i++)
+    {
+      printf("Gaussian %d ::\n",state_i);
+      dump(&(gmm->gauss[state_i]));
+    }
+}
+  

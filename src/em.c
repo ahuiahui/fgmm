@@ -1,4 +1,5 @@
-#include "em.h"
+#include "gmm.h"
+#include "gaussian.h"
 //#include "vec3.h"
 #include <stdlib.h>
 #include <math.h> // isinf , isnan 

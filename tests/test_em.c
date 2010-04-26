@@ -4,7 +4,7 @@
 #include <time.h>
 #include <string.h>
 
-#include "em.h"
+#include "gmm.h"
 
 static char usage[] = "test_em infile #states \n infile text with space separated floats \n # state number of gaussians .. ";
 
@@ -79,11 +79,14 @@ int main(int argc,char ** argv)
   int state_i=0;
   //int i=0,j=0;
   /* random initialization */ 
+  float mean[dim];
   for(state_i=0;state_i<n_states;state_i++)
     {
-      GMM.gauss[state_i].prior = 1./n_states;
+      gmm_set_prior( &GMM ,state_i , 1./n_states);
+      
       for(j=0;j<dim;j++)
-	GMM.gauss[state_i].mean[j] = ((float)rand()/RAND_MAX)*2. - 1.;
+	mean[j] = ((float)rand()/RAND_MAX)*2. - 1.;
+      gmm_set_mean(&GMM,state_i,mean);
       //dump(&GMM[state_i]);
     }
   
@@ -96,12 +99,7 @@ int main(int argc,char ** argv)
   timersub(&t2,&t1,&t1);
   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
   printf("%d iterations %f\n",iterations,lik);
-
-  for(state_i=0;state_i<n_states;state_i++)
-    {
-      printf("Gaussian %d ::\n",state_i);
-      dump(&GMM.gauss[state_i]);
-    }
+  gmm_dump(&GMM);
   /*  
   float samp[3];
   for(i=0;i<N_DATA;i++)
