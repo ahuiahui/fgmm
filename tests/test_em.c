@@ -75,20 +75,8 @@ int main(int argc,char ** argv)
   
   struct gmm GMM;
   gmm_alloc(&GMM,n_states,dim);
-
-  int state_i=0;
-  //int i=0,j=0;
   /* random initialization */ 
-  float mean[dim];
-  for(state_i=0;state_i<n_states;state_i++)
-    {
-      gmm_set_prior( &GMM ,state_i , 1./n_states);
-      
-      for(j=0;j<dim;j++)
-	mean[j] = ((float)rand()/RAND_MAX)*2. - 1.;
-      gmm_set_mean(&GMM,state_i,mean);
-      //dump(&GMM[state_i]);
-    }
+  gmm_init_random(&GMM,data,n_data);
   
   printf("end loading file\n");
   float lik;

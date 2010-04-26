@@ -26,7 +26,42 @@ void gmm_free(struct gmm * gmm)
     gaussian_free(&gmm->gauss[i]);
   free(gmm->gauss);
 }
-    
+  
+/* associate one random data point to 
+   a gaussian */
+void gmm_init_random(struct gmm * gmm,
+		     const float * data,
+		     int data_len)
+{
+  int state_i =0;
+  int i=0;
+  int point_idx=0;
+  float weights[data_len];
+  for(i=0;i<data_len;i++)
+    {
+      weights[i] = 1.;
+    }
+ 
+  smat_covariance(gmm->gauss[0].covar,
+		  data_len,
+		  weights,
+		  data,
+		  gmm->gauss[0].mean);
+
+  float xx = 1./gmm->nstates;
+  smat_multf(gmm->gauss[0].covar,&xx);
+
+  for(;state_i < gmm->nstates;state_i++)
+    {
+      point_idx = rand()%data_len;
+      gmm_set_mean(gmm,state_i,&data[point_idx*gmm->dim]);
+      if(state_i>0) 
+	{
+	  gmm_set_covar(gmm,state_i,gmm->gauss[0].covar->_);
+	}
+      gmm_set_prior(gmm,state_i,1./gmm->nstates);
+    }
+}
 
 void gmm_draw_sample(struct gmm * gmm, float * out)
 {

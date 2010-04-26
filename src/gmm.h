@@ -24,6 +24,21 @@ void gmm_alloc(struct gmm *, int nstates, int dim);
  */
 void gmm_free(struct gmm *);
 
+/**
+ * initialize the model from the data by :
+ *  for each gaussian :
+ *     - pick one random data point from data 
+ *     - set the mean to this point 
+ *     - set covariance to data covariance/nstates
+ *     - set prior to 1./nstates
+ *
+ * the model must be first alloc'd (with gmm_alloc) 
+ */
+void gmm_init_random(struct gmm * gmm,
+		     const float * data,
+		     int data_len);
+
+
 void gmm_set_prior(struct gmm *,int state, float prior);
 void gmm_set_mean(struct gmm *,int state, float * mean);
 /**
