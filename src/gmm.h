@@ -61,3 +61,9 @@ int em( struct gmm * GMM,
 	const float * data,
 	int data_length, 
 	float * end_loglikelihood);
+
+/**
+ * return likelihood of point
+ */
+float gmm_get_pdf( struct gmm * gmm,
+		   float * point);

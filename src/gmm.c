@@ -108,3 +108,15 @@ void gmm_dump(struct gmm * gmm)
     }
 }
   
+float gmm_get_pdf( struct gmm * gmm,
+		   float * point)
+{
+  int state_i = 0;
+  float like=0;
+  for(;state_i<gmm->nstates;state_i++)
+    {
+      like += gmm->gauss[state_i].prior * \
+	gaussian_pdf(&(gmm->gauss[state_i],point));
+    }
+  return like;
+}
