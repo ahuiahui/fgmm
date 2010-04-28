@@ -40,7 +40,7 @@ void gmm_init_random(struct gmm * gmm,
 
 
 void gmm_set_prior(struct gmm *,int state, float prior);
-void gmm_set_mean(struct gmm *,int state, float * mean);
+void gmm_set_mean(struct gmm *,int state, const float * mean);
 /**
  * Set the covariance of state # 
  *

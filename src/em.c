@@ -22,7 +22,6 @@ int em( struct gmm * GMM,
   int data_i=0;
   int state_i=0;
   int k=0;
-  float cdata[3];
   float * pxi;
   float * pix;
   float like;

@@ -83,7 +83,7 @@ void gmm_set_prior(struct gmm * gmm,int state, float prior)
   gmm->gauss[state].prior = prior;
 }
 
-void gmm_set_mean(struct gmm * gmm,int state, float * mean)
+void gmm_set_mean(struct gmm * gmm,int state, const float * mean)
 {
   int i=0;
   for(;i<gmm->dim;i++)
@@ -115,8 +115,7 @@ float gmm_get_pdf( struct gmm * gmm,
   float like=0;
   for(;state_i<gmm->nstates;state_i++)
     {
-      like += gmm->gauss[state_i].prior * \
-	gaussian_pdf(&(gmm->gauss[state_i],point));
+      like += gmm->gauss[state_i].prior * gaussian_pdf(&(gmm->gauss[state_i]),point);
     }
   return like;
 }
