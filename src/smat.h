@@ -17,6 +17,8 @@ inline void smat_multf(struct smat* m,const float *f);
    and zero the matrix in all cases */
 void smat_zero(struct smat ** mat,int dim);
 
+float smat_get_value(struct smat * mat,int row,int col);
+
 /* free the memory used by the matrix 
    (allocated by smat_zero) */
 void smat_free(struct smat ** mat);

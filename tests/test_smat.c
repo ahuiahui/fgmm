@@ -25,7 +25,7 @@ int main(int argc, char ** argv)
   smat_zero(&m1,DIM);
   smat_zero(&chol,DIM);
   
-  for(i=0;i++;i<check->_size)
+  for(i=0;i<check->_size;i++)
     assert(check->_[i] == 0.);
 
   printf("..pass\n");
@@ -63,7 +63,7 @@ int main(int argc, char ** argv)
     }
   printf("..pass\n");
 
-  printf("testing cholesky \n");
+ 
   float * pmat = m1->_;
   for(i=0;i<DIM;i++)
     {
@@ -74,6 +74,14 @@ int main(int argc, char ** argv)
 	  pmat++;
 	}
     }
+  //smat_pmatrix(m1);
+  printf("testing get_value \n");
+  printf("%f %f \n",smat_get_value(m1,1,1),smat_get_value(m1,1,2));
+  assert( smat_get_value(m1,0,0) == DIM);
+  assert( smat_get_value(m1,1,1) == DIM);
+  assert( smat_get_value(m1,1,2) == DIM - 1 );
+  printf("..pass\n");
+  printf("testing cholesky \n");
   //pmatrix(m1);
   smat_cholesky(m1,chol);
   //pmatrix(chol);

@@ -58,6 +58,26 @@ void smat_zero(struct smat ** mat,int dim)
     m->_[i] = 0.;
 }
 
+float smat_get_value(struct smat * mat,int row, int col)
+{
+  int tmp;
+  assert((row < mat->dim ) && (col < mat->dim));
+  if(row > col)
+    {
+      tmp = row;
+      row = col;
+      col = tmp;
+    }
+  int i=0;
+  int idx=0;
+  for(;i<row;i++)
+    {
+      idx += mat->dim - i;
+      col -= (i+1);
+    }
+  return mat->_[idx+col];
+}
+
 void smat_free(struct smat ** mat)
 {
   free( (*mat)->_ );
