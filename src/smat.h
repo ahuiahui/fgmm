@@ -18,6 +18,8 @@ inline void smat_multf(struct smat* m,const float *f);
 void smat_zero(struct smat ** mat,int dim);
 
 float smat_get_value(struct smat * mat,int row,int col);
+void smat_get_submatrix(struct smat * mat , struct smat * res,
+			int n_dims, int * dims);
 
 /* free the memory used by the matrix 
    (allocated by smat_zero) */
@@ -62,7 +64,12 @@ void smat_ttmult(const struct smat* tri, struct smat* out);
 inline void smat_tforward(struct smat * lower, float * b, float * y) ;
 inline void smat_tbackward(const struct smat * upper, float * b, float * y);
 
-
+/**
+ * computes sesquilinear form :
+ *   (x - bias)^T Sigma^-1 (x-bias) 
+ * given two vectors x and bias and the cholesky decomposition of Sigma 
+ * ichol 
+ */
 inline float smat_sesq(struct smat * ichol,const float * bias,const float * x);
 
 float smat_covariance(struct smat * cov, 

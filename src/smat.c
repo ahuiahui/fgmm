@@ -78,6 +78,25 @@ float smat_get_value(struct smat * mat,int row, int col)
   return mat->_[idx+col];
 }
 
+void smat_get_submatrix(struct smat * mat , struct smat * res,
+			 int n_dims, int * dims )
+{
+  int i=0;
+  int j;
+  float *pres = res->_;
+
+  for(;i<n_dims;i++)
+    {
+      for(j=i;j<n_dims;j++)
+	{
+	  *pres = smat_get_value(mat,dims[i],dims[j]);
+	  pres++;
+	}
+    }
+}
+	    
+
+
 void smat_free(struct smat ** mat)
 {
   free( (*mat)->_ );
