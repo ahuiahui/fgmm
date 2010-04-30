@@ -148,3 +148,16 @@ void gaussian_draw(struct gaussian * g, float * out)
   for(i=0;i<g->dim;i++)
     out[i] += g->mean[i];
 }
+
+void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
+			   int n_dim, int * dims)
+{
+  if(result->dim != n_dim)
+    {
+      gaussian_free(result);
+      gaussian_init(result,n_dim);
+    }
+  smat_get_submatrix(g->covar,result->covar,n_dim,dims);
+  invert_covar(result);
+}
+      

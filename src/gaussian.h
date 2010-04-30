@@ -30,5 +30,10 @@ void dump(struct gaussian* g);
 /* draw one sample from the gaussian */
 void gaussian_draw(struct gaussian* g, float * out);
 
+/* get the projection of the gaussian on the given dimensions 
+ * if result in NULL or wrong dimension .. is it (re) alloc'd */
+void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
+			   int n_dim, int * dims);
+
 /** random sample from normal law ( mu = 0, sigma = 1. ) **/ 
 inline float randn_boxmuller();
