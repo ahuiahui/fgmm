@@ -158,6 +158,9 @@ void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
       gaussian_init(result,n_dim);
     }
   smat_get_submatrix(g->covar,result->covar,n_dim,dims);
+  int i=0;
+  for(;i<n_dim;i++)
+    result->mean[i] = g->mean[dims[i]];
   invert_covar(result);
 }
       
