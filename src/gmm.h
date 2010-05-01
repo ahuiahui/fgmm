@@ -67,3 +67,22 @@ int em( struct gmm * GMM,
  */
 float gmm_get_pdf( struct gmm * gmm,
 		   float * point);
+
+
+struct gmm_reg;
+
+void gmm_regression_alloc_simple(struct gmm_reg ** regression,
+				 struct gmm * gmm,
+				 int input_len);
+
+
+void gmm_regression_alloc(struct gmm_reg ** regression,
+			  struct gmm * gmm,
+			  int input_len, int * input_dim,
+			  int output_len, int * output_dim);
+
+
+void gmm_regression_init(struct gmm_reg * reg);
+
+
+void gmm_regression(struct gmm_reg * reg, float * inputs, float * outputs);

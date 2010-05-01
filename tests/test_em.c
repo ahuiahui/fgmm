@@ -88,14 +88,18 @@ int main(int argc,char ** argv)
   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
   printf("%d iterations %f\n",iterations,lik);
   gmm_dump(&GMM);
-  /*  
-  float samp[3];
-  for(i=0;i<N_DATA;i++)
+  
+  FILE * sample_file = fopen("samples.txt","w");
+
+  float samp[dim];
+  for(i=0;i<100;i++)
     {
       gmm_draw_sample(&GMM,samp);
-      printf("%f %f %f\n",samp[0],samp[1],samp[2]);
+      for(j=0;j<dim;j++)
+	fprintf(sample_file,"%f ",samp[j]);
+      fprintf(sample_file,"\n");
     } 
-  */
+  
   gmm_free(&GMM);
   free(data);
   return 0;

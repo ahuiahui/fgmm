@@ -1,30 +1,7 @@
-#include "gaussian.h"
-#include "gmm.h"
 #include <stdlib.h>
 #include <float.h>
 #include <assert.h>
-
-struct gaussian_reg {
-  struct gaussian * gauss;
-  struct gaussian * subgauss; // input subgaussian Used to compute the weight of this
-  int * input_dim;
-  int * output_dim;
-  int input_len;
-  int output_len;
-  float * reg_matrix; // store in->out A matrix 
-};
-
-
-struct gmm_reg {
-  struct gmm * model;
-  int * input_dim;
-  int * output_dim;
-  int input_len;
-  int output_len;
-  struct gaussian_reg * subgauss;
-};
-
-
+#include "regression.h"
 
 void gmm_regression_init_g(struct gaussian_reg * gr)
 {
@@ -47,6 +24,7 @@ void gmm_regression_init_g(struct gaussian_reg * gr)
 							 gr->input_dim[i]);
 	}
     }
+  dump(gr->subgauss);
 }
 
 
@@ -64,16 +42,21 @@ void gmm_regression_init(struct gmm_reg * reg)
 void gmm_regression_gaussian(struct gaussian_reg* gr, float * inputs,float * result)
 {
   /*float result[gr->output_len];*/
+  int j=0,i=0;
   float tmp[gr->input_len]; 
   float tmp2[gr->input_len]; 
   /* OPT : this computation is also done for the 
      subgauss pdf (ie weight of the gaussian in the regression .. */
-  smat_tforward(gr->subgauss->covar_cholesky,inputs,tmp2);
+
+  for(;i<gr->input_len;i++)
+      tmp[i] = inputs[i] - gr->subgauss->mean[i];
+
+  smat_tforward(gr->subgauss->covar_cholesky,tmp,tmp2);
   smat_tbackward(gr->subgauss->covar_cholesky,tmp2,tmp);
-  int j=0,i=0;
-  for(;i<gr->output_len;i++)
+
+  for(i=0;i<gr->output_len;i++)
     {
-      result[i] = gr->subgauss->mean[i];
+      result[i] = gr->gauss->mean[ gr->output_dim[i]];
       for(;j<gr->input_len;j++)
 	{
 	  result[i] += gr->reg_matrix[i * gr->input_len + j]*tmp[j];
@@ -82,10 +65,10 @@ void gmm_regression_gaussian(struct gaussian_reg* gr, float * inputs,float * res
 }
 
 
-void gmm_regression(struct gmm_reg * reg, float * inputs)
+void gmm_regression(struct gmm_reg * reg, float * inputs,float * result)
 {
   float weight = 0;
-  float result[reg->output_len];
+  /*float result[reg->output_len];*/
   float tmp[reg->output_len];
   float likelihood = 0;
   int state = 0;
@@ -120,8 +103,8 @@ void gmm_regression_alloc(struct gmm_reg ** regression,
 			  int output_len, int * output_dim)
 {
 
-  struct gmm_reg * reg = *regression;
-  reg = (struct gmm_reg*) malloc(sizeof(struct gmm_reg));
+  struct gmm_reg * reg; 
+  reg = (struct gmm_reg*) malloc(sizeof(struct gmm_reg)); 
 
   int i = 0;
   reg->model = gmm;
@@ -143,7 +126,9 @@ void gmm_regression_alloc(struct gmm_reg ** regression,
       reg->subgauss[state].output_len = output_len;
       reg->subgauss[state].output_dim = reg->output_dim;
       reg->subgauss[state].input_dim = reg->input_dim;
+      reg->subgauss[state].reg_matrix = NULL;
     }
+  *regression = reg;
 }
 
 /**
