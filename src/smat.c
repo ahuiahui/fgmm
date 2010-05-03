@@ -148,7 +148,6 @@ void smat_cholesky(const struct smat* in,struct smat* out)
   float tmp[in->dim][in->dim];
   int line=0;
   int col=0;
-  int curs=0;
   int i;
   float ts=0;
   float *pout = out->_;
@@ -160,7 +159,6 @@ void smat_cholesky(const struct smat* in,struct smat* out)
 	  ts += tmp[i][line]*tmp[i][line];
       assert((*pin - ts) > 0.);
       tmp[line][line] = *pout = sqrtf( *pin - ts);
-      curs = line + in->dim;
       pout++;
       pin++;
       for(col=line+1;col<in->dim;col++)
@@ -169,7 +167,6 @@ void smat_cholesky(const struct smat* in,struct smat* out)
 	  for(i=0;i<line;i++)
 	    ts += tmp[i][line]*tmp[i][col];
 	  tmp[line][col] = *pout = (*pin - ts) / tmp[line][line];
-	  //curs += in->dim - (col - line);
 	  pin++;
 	  pout++;
 	}    
