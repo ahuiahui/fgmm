@@ -86,14 +86,21 @@ void invert_covar(struct gaussian* g)
   float det=1.;
   int i=0,diag=0,j=0;
   smat_cholesky(g->covar,g->covar_cholesky);
+  float * pichol = g->icovar_cholesky->_;
+  float * chol = g->covar_cholesky->_;
+
   for(i=0;i<g->dim;i++)
     {
-      det *= g->covar_cholesky->_[diag];
-      g->icovar_cholesky->_[diag] = 1./g->covar_cholesky->_[diag];
+      det *= *chol;
+      *pichol = 1./(*chol);
+
+      chol++;
+      pichol++;
+
       for(j=i+1;j<g->dim;j++)
-	g->icovar_cholesky->_[diag+j] = g->covar_cholesky->_[diag+j];
-      diag += g->dim - i;
-      
+	{
+	  *chol++ = *pichol++;
+	}
     }
   det = det*det;
   g->nfactor = sqrtf( pow(M_PI,g->dim) * det);
@@ -103,7 +110,7 @@ void gaussian_init(struct gaussian * g,int dim)
 {
   int i;
   g->dim = dim;
-  g->mean = (float *) malloc(dim* sizeof(float));
+  g->mean = (float *) malloc(dim * sizeof(float));
   g->covar = NULL;
   g->covar_cholesky = NULL;
   g->icovar_cholesky = NULL;
