@@ -30,6 +30,7 @@ def configure(conf) :
         conf.env.LINKFLAGS = ['-pg']
 
     if Options.options.oldGMR :
+        conf.env.CCXFlAGS = ['-O2','-g','--fast-math']
         conf.env['build_old_gmr'] = True
         conf.env['LIBPATH_MATRIX'] = '/home/fdhalluin/code/MathLib/lib/'
         conf.env['LIB_MATRIX'] = 'Matrix'
@@ -39,9 +40,6 @@ def configure(conf) :
 
    
 def build(bld) :
-    print "compiling"
-    print dir(bld)
-    print bld.lst_variants
     obj_src = bld.path.ant_glob("src/*.c")
     test_src = bld.path.ant_glob("tests/test_*.c")
     obj = []
