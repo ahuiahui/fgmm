@@ -3,6 +3,7 @@
 //#include "vec3.h"
 #include <stdlib.h>
 #include <math.h> // isinf , isnan 
+#include <float.h>
 #include <stdio.h>
 
 #define max_iter 100
@@ -56,7 +57,7 @@ int em( struct gmm * GMM,
 	      /* pdata++;
 		 ppxi++; */
 	    }
-	  if(like==0)
+	  if(like<= FLT_MIN)
 	    {
 	      printf("too far from current distrib %d\n",data_i);
 	      exit(0);
