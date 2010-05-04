@@ -5,7 +5,7 @@
 #include <time.h>
 #include <stdlib.h>
 
-#define randn_samples 100000
+#define randn_samples 1000000
 #define one_sigma 0.682  /* percent of samples between -sigma and sigma */
 #define three_sigma 0.044 /* percent of samples outside 2 sigma */
 
@@ -14,6 +14,7 @@
 int main(int argc,char ** argv)
 {
   srand(time(NULL));
+  printf("gaussian test suite, each test uses %d samples \n",randn_samples);
   int i;
   float vn=0;
   int sig_perc=0, sig3_perc=0;
@@ -71,7 +72,7 @@ int main(int argc,char ** argv)
   for(i=0;i<3;i++)
     {
       assert(fabs(mean[i]) < 1e-2);
-      assert( fabs(*(pcv++)- 1.) < 1e-2);
+      assert( fabs(*(pcv++)- 1.) < 2e-2);
       for(k=i+1;k<3;k++)
 	assert(fabs(*pcv++) < 1e-2);
       
