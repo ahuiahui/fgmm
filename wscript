@@ -30,10 +30,12 @@ def configure(conf) :
         conf.env.LINKFLAGS = ['-pg']
 
     if Options.options.oldGMR :
+        conf.env['build_old_gmr'] = True
         conf.env['LIBPATH_MATRIX'] = '/home/fdhalluin/code/MathLib/lib/'
         conf.env['LIB_MATRIX'] = 'Matrix'
         conf.env['LIBPATH_GMR'] = '/home/fdhalluin/code/GMR/lib/'
         conf.env['LIB_GMR'] = 'GMR'
+        
 
    
 def build(bld) :
@@ -73,8 +75,8 @@ def build(bld) :
     bld(target="run_test.py",
         source = "tests/run_test.py",
         rule= "cp ${SRC} ${TGT}")
-        
-    if Options.options.oldGMR :
+
+    if bld.env.build_old_gmr :
         cpgmr = bld(features = 'cxx cprogram',
                     source = 'tests/oldGMR.cpp',
                     target = 'oldGMR',
