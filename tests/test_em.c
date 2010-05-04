@@ -40,9 +40,12 @@ int main(int argc,char ** argv)
   int dim=0;
 
   int i=0;
-  while(!feof(infile))
+  while(1)
     {
-      fgets(line,1024,infile);
+      if(fgets(line,1024,infile)==NULL) // eof
+	{
+	  break;
+	}
       if(dim==0)
 	{
 	  pline = strtok(line," ");
@@ -54,7 +57,6 @@ int main(int argc,char ** argv)
 	}
       n_data++;
     }
-  n_data--;
   dim--;
   rewind(infile);
   printf("%d , %d\n",n_data,dim);
@@ -67,7 +69,11 @@ int main(int argc,char ** argv)
     {
       for(j=0;j<dim;j++)
 	{
-	  fscanf(infile,"%f",pdata);
+	  if(fscanf(infile,"%f",pdata)<1)
+	    {
+	      printf("error reading file");
+	      exit(1);
+	    }
 	  pdata++;
 	}
     }
@@ -82,7 +88,7 @@ int main(int argc,char ** argv)
   float lik;
   struct timeval t1,t2;
   gettimeofday(&t1,NULL);
-  int iterations = em(&GMM,data,n_data,&lik);
+  int iterations = em(&GMM,data,n_data,&lik,1e-4);
   gettimeofday(&t2,NULL);
   timersub(&t2,&t1,&t1);
   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
