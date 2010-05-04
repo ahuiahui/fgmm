@@ -56,11 +56,14 @@ void gmm_set_covar(struct gmm *,int state, float * covar);
  */
 void gmm_dump(struct gmm * gmm);
 
+#define loglikelihood_eps 1e-4
+
 /** EM algorithm */
 int em( struct gmm * GMM,
 	const float * data,
 	int data_length, 
-	float * end_loglikelihood);
+	float * end_loglikelihood,
+	float likelihood_epsilon);
 
 /**
  * return likelihood of point
@@ -81,6 +84,7 @@ void gmm_regression_alloc(struct gmm_reg ** regression,
 			  int input_len, int * input_dim,
 			  int output_len, int * output_dim);
 
+void gmm_regression_free(struct gmm_reg ** regression);
 
 void gmm_regression_init(struct gmm_reg * reg);
 

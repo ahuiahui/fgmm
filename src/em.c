@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 #define max_iter 100
-#define loglikelihood_eps 1e-4
+
 
 /** perform em on the giver data
  * @param data : the given dataset (data_length*3 floats) 
@@ -18,7 +18,8 @@
 int em( struct gmm * GMM,
 	const float * data,
 	int data_length, 
-	float * end_loglikelihood)
+	float * end_loglikelihood,
+	float likelihood_epsilon)
 {
   int data_i=0;
   int state_i=0;
@@ -78,7 +79,7 @@ int em( struct gmm * GMM,
       deltalik = log_lik - oldlik;
       oldlik = log_lik;
       
-      if(fabs(deltalik) < loglikelihood_eps)
+      if(fabs(deltalik) < likelihood_epsilon)
 	break;
       
       //      pdata = data;

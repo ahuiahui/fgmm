@@ -159,3 +159,20 @@ void gmm_regression(struct gmm * gmm,
 		    float * input,
 		    float * output)
 */
+
+void gmm_regression_free(struct gmm_reg ** regression)
+{
+  struct gmm_reg * reg = *regression;
+  free(reg->input_dim);
+  free(reg->output_dim);
+  int g=0;
+  for(;g<reg->model->nstates;g++)
+    {
+      if(reg->subgauss[g].reg_matrix != NULL)
+	free( reg->subgauss[g].reg_matrix );
+    }
+  free( reg->subgauss );
+  free( reg );
+  *regression = NULL;
+}
+  
