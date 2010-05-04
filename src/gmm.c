@@ -48,8 +48,8 @@ void gmm_init_random(struct gmm * gmm,
 		  data,
 		  gmm->gauss[0].mean);
 
-  float xx = 1./gmm->nstates;
-  smat_multf(gmm->gauss[0].covar,&xx);
+  /*  float xx = 1./gmm->nstates;
+      smat_multf(gmm->gauss[0].covar,&xx);*/
 
   for(;state_i < gmm->nstates;state_i++)
     {
