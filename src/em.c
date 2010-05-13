@@ -15,11 +15,11 @@
  * @param num_states : number of states of the GMM
  * @return  # of iterations 
  */
-int em( struct gmm * GMM,
-	const float * data,
-	int data_length, 
-	float * end_loglikelihood,
-	float likelihood_epsilon)
+int fgmm_em( struct gmm * GMM,
+	     const float * data,
+	     int data_length, 
+	     float * end_loglikelihood,
+	     float likelihood_epsilon)
 {
   int data_i=0;
   int state_i=0;

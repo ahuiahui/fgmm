@@ -31,7 +31,7 @@ int main(int argc, char ** argv)
   fgmm_alloc(&gmm,10,2);
   fgmm_init_random(&gmm,data,data_len);
   float likelihood;
-  em(&gmm,data,data_len,&likelihood,1e-3);
+  fgmm_em(&gmm,data,data_len,&likelihood,1e-3);
   
   // fgmm_dump(&gmm);
 
@@ -76,7 +76,7 @@ int main(int argc, char ** argv)
   
   fgmm_alloc(&gmm , 16 , 4 );
   fgmm_init_random(&gmm,data,data_len);
-  em(&gmm,data,data_len,&likelihood,1e-2);
+  fgmm_em(&gmm,data,data_len,&likelihood,1e-2);
  
   fgmm_regression_alloc_simple(&regression, &gmm, 2);
   fgmm_regression_init(regression);
