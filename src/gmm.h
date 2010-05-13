@@ -1,4 +1,3 @@
-// #include "gaussian.h"
 
 /**
  * structure holding one state of the  gmm 
@@ -139,21 +138,52 @@ float fgmm_get_pdf( struct gmm * gmm,
 		   float * point);
 
 
+/**
+ * Structure holding stuffs for the regression 
+ * 
+ * This must be alloc'd using fgmm_regression_alloc* on a 
+ *  non allocated pointer. 
+ */
+
 struct fgmm_reg;
 
+/**
+ * init a fgmm_reg structure for a regression 
+ * were the input_len first input dimenstion are 
+ * the inputs and the remaining dimensions the output
+ */
 void fgmm_regression_alloc_simple(struct fgmm_reg ** regression,
 				 struct gmm * gmm,
 				 int input_len);
 
-
+/**
+ * init a fgmm_reg structure 
+ * @param gmm : the model to perform regression on 
+ * @param input_len is the number of input dimensions
+ * @param input_dim are the indexes of the input dimensions
+ * @param output_len is the number of outputs 
+ * @param output_dim is their indexes .. 
+ */ 
 void fgmm_regression_alloc(struct fgmm_reg ** regression,
 			  struct gmm * gmm,
 			  int input_len, int * input_dim,
 			  int output_len, int * output_dim);
 
+/**
+ * free all the memory allocated for the regression structure 
+ */
 void fgmm_regression_free(struct fgmm_reg ** regression);
 
+/**
+ * does all intermediate computation, call this 
+ * between alloc and regression. Call this also if 
+ * the gmm relative to the regression has changed
+ *
+ * this caches the inverse covariance matrices for instance
+ */
 void fgmm_regression_init(struct fgmm_reg * reg);
 
-
+/**
+ * does the regression 
+ */
 void fgmm_regression(struct fgmm_reg * reg, float * inputs, float * outputs);
