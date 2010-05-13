@@ -120,6 +120,7 @@ void gaussian_init(struct gaussian * g,int dim)
   smat_zero(&(g->covar),dim);
   smat_identity(g->covar); // just in case :) 
   smat_zero(&(g->covar_cholesky),dim);
+  invert_covar(g);
 }
 
 void gaussian_free(struct gaussian * g)

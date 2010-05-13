@@ -87,6 +87,12 @@ def build(bld) :
                     target = 'oldGMR',
                     includes = '/home/fdhalluin/code/MathLib/include/ /home/fdhalluin/code/GMR/include/',
                     uselib = ['GMR','MATRIX'])    
+        cpgmr = bld(features = 'cxx cprogram',
+                    source = 'tests/bench.cpp',
+                    target = 'bench',
+                    includes = '/home/fdhalluin/code/MathLib/include/ /home/fdhalluin/code/GMR/include/',
+                    uselib = ['GMR','MATRIX'],
+                    uselib_local="fgmm")    
 
 def test(ctx) :
     print ctx.env

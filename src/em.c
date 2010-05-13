@@ -74,7 +74,9 @@ int fgmm_em( struct gmm * GMM,
 	}
       
       log_lik/=data_length;
+      #ifndef NDEBUG 
       printf("Log lik :: %f \n",log_lik);
+      #endif
       // M step 
       deltalik = log_lik - oldlik;
       oldlik = log_lik;
