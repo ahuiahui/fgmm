@@ -15,6 +15,9 @@ def set_options(opt):
     opt.add_option('--old',dest="oldGMR",action='store_true',
                    default=False, help='Build test using old GMR lib for comparison')
 
+    opt.add_option('--debug',dest="debug",action="store_true",
+                   default=False, help='Build debug symbols')
+
 #     opt.add_option('--check',dest="check",action='store_true',
 #                    default=False, help='run the tests')
 
@@ -23,14 +26,18 @@ def configure(conf) :
    
     conf.check_tool('compiler_cc')  
     conf.check_tool('compiler_cxx')  
-    conf.env.CCFLAGS = ['-Wall','-O2','-g','--fast-math'] 
+    if Options.options.debug :
+        conf.env.CCFLAGS = ['-Wall','-g'] 
+    else :
+        conf.env.CCFLAGS = ['-Wall','-O3','--fast-math']
+        conf.env.CPPFLAGS = ['-DNDEBUG'] # no more asserts.. 
 
     if Options.options.use_gprof :
         conf.env.CCFLAGS.append('-pg')
         conf.env.LINKFLAGS = ['-pg']
 
     if Options.options.oldGMR :
-        conf.env.CCXFlAGS = ['-O2','-g','--fast-math']
+        conf.env.CCXFlAGS = conf.env.CCFLAGS
         conf.env['build_old_gmr'] = True
         conf.env['LIBPATH_MATRIX'] = '/home/fdhalluin/code/MathLib/lib/'
         conf.env['LIB_MATRIX'] = 'Matrix'
