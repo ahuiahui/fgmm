@@ -1,5 +1,5 @@
 #include "gaussian.h"
-#include "gmm.h"
+#include "fgmm.h"
 
 struct gaussian_reg {
   struct gaussian * gauss;

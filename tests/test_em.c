@@ -4,7 +4,7 @@
 #include <time.h>
 #include <string.h>
 
-#include "gmm.h"
+#include "fgmm.h"
 
 static char usage[] = "test_em infile #states \n infile text with space separated floats \n # state number of gaussians .. ";
 

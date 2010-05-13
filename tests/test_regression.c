@@ -1,4 +1,4 @@
-#include "gmm.h"
+#include "fgmm.h"
 //#include "regression.h"
 #include <math.h>
 #include <stdlib.h>

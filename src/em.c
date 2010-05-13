@@ -1,4 +1,4 @@
-#include "gmm.h"
+#include "fgmm.h"
 #include "gaussian.h"
 //#include "vec3.h"
 #include <stdlib.h>
