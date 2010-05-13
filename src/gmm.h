@@ -11,18 +11,18 @@ struct gmm {
 /** 
  * draw one sample from the gmm 
  */
-void gmm_draw_sample(struct gmm *, float * out);
+void fgmm_draw_sample(struct gmm *, float * out);
 
 /**
  *  alloc all the memory needed by the model 
  *  
  *  all gaussians are init'd to zero mean, unity covariance 
  *  zero prior proba */
-void gmm_alloc(struct gmm *, int nstates, int dim);
+void fgmm_alloc(struct gmm *, int nstates, int dim);
 
 /** free everything allocated by the above function 
  */
-void gmm_free(struct gmm *);
+void fgmm_free(struct gmm *);
 
 /**
  * initialize the model from the data by :
@@ -32,15 +32,15 @@ void gmm_free(struct gmm *);
  *     - set covariance to data covariance/nstates
  *     - set prior to 1./nstates
  *
- * the model must be first alloc'd (with gmm_alloc) 
+ * the model must be first alloc'd (with fgmm_alloc) 
  */
-void gmm_init_random(struct gmm * gmm,
+void fgmm_init_random(struct gmm * gmm,
 		     const float * data,
 		     int data_len);
 
 
-void gmm_set_prior(struct gmm *,int state, float prior);
-void gmm_set_mean(struct gmm *,int state, const float * mean);
+void fgmm_set_prior(struct gmm *,int state, float prior);
+void fgmm_set_mean(struct gmm *,int state, const float * mean);
 /**
  * Set the covariance of state # 
  *
@@ -49,12 +49,12 @@ void gmm_set_mean(struct gmm *,int state, const float * mean);
  *  [ 2 5 6 7 ]
  *  [ 3 6 8 9 ]
  *  [ 4 7 9 10]] .. */
-void gmm_set_covar(struct gmm *,int state, float * covar);
+void fgmm_set_covar(struct gmm *,int state, float * covar);
 
 /**
  * print the gmm parameters to screen 
  */
-void gmm_dump(struct gmm * gmm);
+void fgmm_dump(struct gmm * gmm);
 
 #define loglikelihood_eps 1e-4
 
@@ -68,25 +68,25 @@ int em( struct gmm * GMM,
 /**
  * return likelihood of point
  */
-float gmm_get_pdf( struct gmm * gmm,
+float fgmm_get_pdf( struct gmm * gmm,
 		   float * point);
 
 
-struct gmm_reg;
+struct fgmm_reg;
 
-void gmm_regression_alloc_simple(struct gmm_reg ** regression,
+void fgmm_regression_alloc_simple(struct fgmm_reg ** regression,
 				 struct gmm * gmm,
 				 int input_len);
 
 
-void gmm_regression_alloc(struct gmm_reg ** regression,
+void fgmm_regression_alloc(struct fgmm_reg ** regression,
 			  struct gmm * gmm,
 			  int input_len, int * input_dim,
 			  int output_len, int * output_dim);
 
-void gmm_regression_free(struct gmm_reg ** regression);
+void fgmm_regression_free(struct fgmm_reg ** regression);
 
-void gmm_regression_init(struct gmm_reg * reg);
+void fgmm_regression_init(struct fgmm_reg * reg);
 
 
-void gmm_regression(struct gmm_reg * reg, float * inputs, float * outputs);
+void fgmm_regression(struct fgmm_reg * reg, float * inputs, float * outputs);

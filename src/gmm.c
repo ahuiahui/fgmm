@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void gmm_alloc(struct gmm * gm,int nstates,int dim)
+void fgmm_alloc(struct gmm * gm,int nstates,int dim)
 {
   int i=0;
   gm->nstates = nstates;
@@ -19,7 +19,7 @@ void gmm_alloc(struct gmm * gm,int nstates,int dim)
 	//dump(&GMM[state_i]); */
 }
 
-void gmm_free(struct gmm * gmm)
+void fgmm_free(struct gmm * gmm)
 {
   int i=0;
   for(i=0;i<gmm->nstates;i++)
@@ -29,7 +29,7 @@ void gmm_free(struct gmm * gmm)
   
 /* associate one random data point to 
    a gaussian */
-void gmm_init_random(struct gmm * gmm,
+void fgmm_init_random(struct gmm * gmm,
 		     const float * data,
 		     int data_len)
 {
@@ -54,16 +54,16 @@ void gmm_init_random(struct gmm * gmm,
   for(;state_i < gmm->nstates;state_i++)
     {
       point_idx = rand()%data_len;
-      gmm_set_mean(gmm,state_i,&data[point_idx*gmm->dim]);
+      fgmm_set_mean(gmm,state_i,&data[point_idx*gmm->dim]);
       if(state_i>0) 
 	{
-	  gmm_set_covar(gmm,state_i,gmm->gauss[0].covar->_);
+	  fgmm_set_covar(gmm,state_i,gmm->gauss[0].covar->_);
 	}
-      gmm_set_prior(gmm,state_i,1./gmm->nstates);
+      fgmm_set_prior(gmm,state_i,1./gmm->nstates);
     }
 }
 
-void gmm_draw_sample(struct gmm * gmm, float * out)
+void fgmm_draw_sample(struct gmm * gmm, float * out)
 {
   int st=-1;
   float cumprod=0.;
@@ -78,19 +78,19 @@ void gmm_draw_sample(struct gmm * gmm, float * out)
 }
 
 
-void gmm_set_prior(struct gmm * gmm,int state, float prior)
+void fgmm_set_prior(struct gmm * gmm,int state, float prior)
 {
   gmm->gauss[state].prior = prior;
 }
 
-void gmm_set_mean(struct gmm * gmm,int state, const float * mean)
+void fgmm_set_mean(struct gmm * gmm,int state, const float * mean)
 {
   int i=0;
   for(;i<gmm->dim;i++)
     gmm->gauss[state].mean[i] = mean[i];
 }
 
-void gmm_set_covar(struct gmm * gmm,int state, float * covar)
+void fgmm_set_covar(struct gmm * gmm,int state, float * covar)
 {
   int i=0;
   for(;i<gmm->gauss[state].covar->_size;i++)
@@ -98,7 +98,7 @@ void gmm_set_covar(struct gmm * gmm,int state, float * covar)
   invert_covar(&gmm->gauss[state]);
 }
 
-void gmm_dump(struct gmm * gmm)
+void fgmm_dump(struct gmm * gmm)
 {
   int state_i=0;
   for(;state_i<gmm->nstates;state_i++)
@@ -108,7 +108,7 @@ void gmm_dump(struct gmm * gmm)
     }
 }
   
-float gmm_get_pdf( struct gmm * gmm,
+float fgmm_get_pdf( struct gmm * gmm,
 		   float * point)
 {
   int state_i = 0;

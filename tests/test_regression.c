@@ -28,24 +28,24 @@ int main(int argc, char ** argv)
     }
 
   struct gmm gmm;
-  gmm_alloc(&gmm,10,2);
-  gmm_init_random(&gmm,data,data_len);
+  fgmm_alloc(&gmm,10,2);
+  fgmm_init_random(&gmm,data,data_len);
   float likelihood;
   em(&gmm,data,data_len,&likelihood,1e-3);
   
-  // gmm_dump(&gmm);
+  // fgmm_dump(&gmm);
 
-  struct gmm_reg  * regression;
+  struct fgmm_reg  * regression;
   
-  gmm_regression_alloc_simple(&regression, &gmm, 1);
-  gmm_regression_init(regression);
+  fgmm_regression_alloc_simple(&regression, &gmm, 1);
+  fgmm_regression_init(regression);
 
   float input,output;
   float error=0.;
   for(i=0;i<100;i++)
     {
       input = ((float) i )/100;
-      gmm_regression(regression,&input,&output);
+      fgmm_regression(regression,&input,&output);
       error += pow(output-sin(2*input*M_PI),2);
       }
   error /= 100.;
@@ -54,8 +54,8 @@ int main(int argc, char ** argv)
   assert(error < .25);
   printf(".. pass \n");
   
-  gmm_free(&gmm);
-  gmm_regression_free(&regression);
+  fgmm_free(&gmm);
+  fgmm_regression_free(&regression);
   free(data);
 
   /* multidim 4 d data set */ 
@@ -74,12 +74,12 @@ int main(int argc, char ** argv)
       //printf("%f %f %f %f \n",data[4*i], data[4*i+1], data[4*i+2], data[4*i+3]);
     }
   
-  gmm_alloc(&gmm , 16 , 4 );
-  gmm_init_random(&gmm,data,data_len);
+  fgmm_alloc(&gmm , 16 , 4 );
+  fgmm_init_random(&gmm,data,data_len);
   em(&gmm,data,data_len,&likelihood,1e-2);
  
-  gmm_regression_alloc_simple(&regression, &gmm, 2);
-  gmm_regression_init(regression);
+  fgmm_regression_alloc_simple(&regression, &gmm, 2);
+  fgmm_regression_init(regression);
 
   error = 0.;
   float in[2];
@@ -96,7 +96,7 @@ int main(int argc, char ** argv)
       in[0] = x;
       in[1] = y;
 
-      gmm_regression(regression,in,out);
+      fgmm_regression(regression,in,out);
       
       gt[0] =   sin(x) + cos(y);
       gt[1] =   cos(2*x) - sin(y+2);

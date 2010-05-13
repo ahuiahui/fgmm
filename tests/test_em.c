@@ -80,9 +80,9 @@ int main(int argc,char ** argv)
 
   
   struct gmm GMM;
-  gmm_alloc(&GMM,n_states,dim);
+  fgmm_alloc(&GMM,n_states,dim);
   /* random initialization */ 
-  gmm_init_random(&GMM,data,n_data);
+  fgmm_init_random(&GMM,data,n_data);
   
   printf("end loading file\n");
   float lik;
@@ -93,20 +93,20 @@ int main(int argc,char ** argv)
   timersub(&t2,&t1,&t1);
   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
   printf("%d iterations %f\n",iterations,lik);
-  gmm_dump(&GMM);
+  fgmm_dump(&GMM);
   
   FILE * sample_file = fopen("samples.txt","w");
 
   float samp[dim];
   for(i=0;i<100;i++)
     {
-      gmm_draw_sample(&GMM,samp);
+      fgmm_draw_sample(&GMM,samp);
       for(j=0;j<dim;j++)
 	fprintf(sample_file,"%f ",samp[j]);
       fprintf(sample_file,"\n");
     } 
   
-  gmm_free(&GMM);
+  fgmm_free(&GMM);
   free(data);
   return 0;
 }

@@ -3,7 +3,7 @@
 #include <assert.h>
 #include "regression.h"
 
-void gmm_regression_init_g(struct gaussian_reg * gr)
+void fgmm_regression_init_g(struct gaussian_reg * gr)
 {
   int i,j;
   gr->subgauss = (struct gaussian *) malloc(sizeof(struct gaussian));
@@ -28,18 +28,18 @@ void gmm_regression_init_g(struct gaussian_reg * gr)
 }
 
 
-void gmm_regression_init(struct gmm_reg * reg)
+void fgmm_regression_init(struct fgmm_reg * reg)
 {
   int state=0;
   for(;state < reg->model->nstates ; state++)
     {
-      gmm_regression_init_g(&reg->subgauss[state]);
+      fgmm_regression_init_g(&reg->subgauss[state]);
     }
 }
 
 
 
-void gmm_regression_gaussian(struct gaussian_reg* gr, float * inputs,float * result)
+void fgmm_regression_gaussian(struct gaussian_reg* gr, float * inputs,float * result)
 {
   /*float result[gr->output_len];*/
   int j=0,i=0;
@@ -65,7 +65,7 @@ void gmm_regression_gaussian(struct gaussian_reg* gr, float * inputs,float * res
 }
 
 
-void gmm_regression(struct gmm_reg * reg, float * inputs,float * result)
+void fgmm_regression(struct fgmm_reg * reg, float * inputs,float * result)
 {
   float weight = 0;
   /*float result[reg->output_len];*/
@@ -79,7 +79,7 @@ void gmm_regression(struct gmm_reg * reg, float * inputs,float * result)
   for(;state<reg->model->nstates;state++)
     {
       weight = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
-      gmm_regression_gaussian(&reg->subgauss[state],inputs,tmp);
+      fgmm_regression_gaussian(&reg->subgauss[state],inputs,tmp);
       for(i=0;i<reg->output_len;i++)
 	result[i] += weight*tmp[i];
       likelihood += weight;
@@ -91,20 +91,20 @@ void gmm_regression(struct gmm_reg * reg, float * inputs,float * result)
 
 
 /**
- * should be like gmm_regression_alloc() 
- *                gmm_regression_alloc_simple()
+ * should be like fgmm_regression_alloc() 
+ *                fgmm_regression_alloc_simple()
  *
- * then gmm_regression_init() 
+ * then fgmm_regression_init() 
  *                         _g() for single gaussian 
  */
-void gmm_regression_alloc(struct gmm_reg ** regression,
+void fgmm_regression_alloc(struct fgmm_reg ** regression,
 			  struct gmm * gmm,
 			  int input_len, int * input_dim,
 			  int output_len, int * output_dim)
 {
 
-  struct gmm_reg * reg; 
-  reg = (struct gmm_reg*) malloc(sizeof(struct gmm_reg)); 
+  struct fgmm_reg * reg; 
+  reg = (struct fgmm_reg*) malloc(sizeof(struct fgmm_reg)); 
 
   int i = 0;
   reg->model = gmm;
@@ -135,7 +135,7 @@ void gmm_regression_alloc(struct gmm_reg ** regression,
  * initialise a regression structure , considering that 
  * first input_len dimensions are input and the rest the output
  */
-void gmm_regression_alloc_simple(struct gmm_reg ** regression,
+void fgmm_regression_alloc_simple(struct fgmm_reg ** regression,
 				 struct gmm * gmm,
 				 int input_len)
 {
@@ -151,18 +151,18 @@ void gmm_regression_alloc_simple(struct gmm_reg ** regression,
     {
       outs[i] = input_len + i;
     }
-  gmm_regression_alloc(regression,gmm,input_len,inputs,output_len,outs);
+  fgmm_regression_alloc(regression,gmm,input_len,inputs,output_len,outs);
 }
 
 /*
-void gmm_regression(struct gmm * gmm, 
+void fgmm_regression(struct gmm * gmm, 
 		    float * input,
 		    float * output)
 */
 
-void gmm_regression_free(struct gmm_reg ** regression)
+void fgmm_regression_free(struct fgmm_reg ** regression)
 {
-  struct gmm_reg * reg = *regression;
+  struct fgmm_reg * reg = *regression;
   free(reg->input_dim);
   free(reg->output_dim);
   int g=0;

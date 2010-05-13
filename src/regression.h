@@ -12,7 +12,7 @@ struct gaussian_reg {
 };
 
 
-struct gmm_reg {
+struct fgmm_reg {
   struct gmm * model;
   int * input_dim;
   int * output_dim;
