@@ -84,7 +84,7 @@ void dump(struct gaussian* g)
 void invert_covar(struct gaussian* g)
 {
   float det=1.;
-  int i=0,diag=0,j=0;
+  int i=0,j=0;
   smat_cholesky(g->covar,g->covar_cholesky);
   float * pichol = g->icovar_cholesky->_;
   float * chol = g->covar_cholesky->_;
