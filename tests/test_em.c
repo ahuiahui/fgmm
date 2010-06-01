@@ -79,28 +79,28 @@ int main(int argc,char ** argv)
     }
 
   
-  struct gmm GMM;
+  struct gmm * GMM;
   fgmm_alloc(&GMM,n_states,dim);
   /* random initialization */ 
-  fgmm_init_random(&GMM,data,n_data);
+  fgmm_init_random(GMM,data,n_data);
   
   printf("end loading file\n");
   float lik;
   struct timeval t1,t2;
   gettimeofday(&t1,NULL);
-  int iterations = fgmm_em(&GMM,data,n_data,&lik,1e-4);
+  int iterations = fgmm_em(GMM,data,n_data,&lik,1e-4);
   gettimeofday(&t2,NULL);
   timersub(&t2,&t1,&t1);
   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
   printf("%d iterations %f\n",iterations,lik);
-  fgmm_dump(&GMM);
+  fgmm_dump(GMM);
   
   FILE * sample_file = fopen("samples.txt","w");
 
   float samp[dim];
   for(i=0;i<100;i++)
     {
-      fgmm_draw_sample(&GMM,samp);
+      fgmm_draw_sample(GMM,samp);
       for(j=0;j<dim;j++)
 	fprintf(sample_file,"%f ",samp[j]);
       fprintf(sample_file,"\n");

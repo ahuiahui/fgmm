@@ -3,15 +3,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void fgmm_alloc(struct gmm * gm,int nstates,int dim)
+void fgmm_alloc(struct gmm ** gmm,int nstates,int dim)
 {
   int i=0;
+  struct gmm * gm;
+  gm = (struct gmm *) malloc(sizeof(struct gmm));
   gm->nstates = nstates;
   gm->dim = dim;
   gm->gauss = (struct gaussian *) malloc(sizeof(struct gaussian) * nstates );
   
   for(i=0;i<nstates;i++)
     gaussian_init(&gm->gauss[i],dim); // this alloc memory for each gaussian 
+  *gmm = gm; 
   /*
       GMM[state_i].prior = 1./N_STATES;
       for(j=0;j<DIM;j++)
@@ -19,12 +22,14 @@ void fgmm_alloc(struct gmm * gm,int nstates,int dim)
 	//dump(&GMM[state_i]); */
 }
 
-void fgmm_free(struct gmm * gmm)
+void fgmm_free(struct gmm ** gmm)
 {
+  struct gmm * gm = *gmm;
   int i=0;
-  for(i=0;i<gmm->nstates;i++)
-    gaussian_free(&gmm->gauss[i]);
-  free(gmm->gauss);
+  for(i=0;i<gm->nstates;i++)
+    gaussian_free(&gm->gauss[i]);
+  free(gm->gauss);
+  free(gm);
 }
   
 /* associate one random data point to 

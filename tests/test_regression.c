@@ -27,17 +27,17 @@ int main(int argc, char ** argv)
       // printf("%f %f \n",data[2*i],data[2*i+1]); 
     }
 
-  struct gmm gmm;
+  struct gmm * gmm;
   fgmm_alloc(&gmm,10,2);
-  fgmm_init_random(&gmm,data,data_len);
+  fgmm_init_random(gmm,data,data_len);
   float likelihood;
-  fgmm_em(&gmm,data,data_len,&likelihood,1e-3);
+  fgmm_em(gmm,data,data_len,&likelihood,1e-3);
   
   // fgmm_dump(&gmm);
 
   struct fgmm_reg  * regression;
   
-  fgmm_regression_alloc_simple(&regression, &gmm, 1);
+  fgmm_regression_alloc_simple(&regression, gmm, 1);
   fgmm_regression_init(regression);
 
   float input,output;
@@ -75,10 +75,10 @@ int main(int argc, char ** argv)
     }
   
   fgmm_alloc(&gmm , 16 , 4 );
-  fgmm_init_random(&gmm,data,data_len);
-  fgmm_em(&gmm,data,data_len,&likelihood,1e-2);
+  fgmm_init_random(gmm,data,data_len);
+  fgmm_em(gmm,data,data_len,&likelihood,1e-2);
  
-  fgmm_regression_alloc_simple(&regression, &gmm, 2);
+  fgmm_regression_alloc_simple(&regression, gmm, 2);
   fgmm_regression_init(regression);
 
   error = 0.;

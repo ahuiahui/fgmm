@@ -38,16 +38,16 @@ struct gmm {
  *  all gaussians are init'd to zero mean, unity covariance 
  *  zero prior proba
  *
- *  @param *gmm : pointer to an *alloc'd* gmm struct  
+ *  @param **gmm : pointer to an gmm struct  
  *  @param nstates : number of states 
  *  @param dim : dimensionnality of input space 
  */
-void fgmm_alloc(struct gmm *, int nstates, int dim);
+void fgmm_alloc(struct gmm ** gmm, int nstates, int dim);
 
 /**
  * free everything allocated by the above function 
  */
-void fgmm_free(struct gmm *);
+void fgmm_free(struct gmm ** gmm);
 
 /**
  * initialize the model from the data by :

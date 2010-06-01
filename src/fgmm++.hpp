@@ -19,8 +19,8 @@ private :
 public :
   Gmm(int states, int dim)
   {
-    c_gmm = (struct gmm *) malloc(sizeof(struct gmm ));
-    fgmm_alloc(c_gmm,states,dim);
+    //c_gmm = (struct gmm *) malloc(sizeof(struct gmm ));
+    fgmm_alloc(&c_gmm,states,dim);
     c_reg = NULL;
   };
 
@@ -28,8 +28,7 @@ public :
   {
     if(c_reg != NULL) 
 	fgmm_regression_free(&c_reg);
-    fgmm_free(c_gmm);
-    free(c_gmm);
+    fgmm_free(&c_gmm);
   };
 
   void init(float * data,int len)
@@ -61,5 +60,17 @@ public :
   {
     fgmm_draw_sample(this->c_gmm,sample);
   };
+
+  void InitRegression(int ninput){
+    if( c_reg != NULL) 
+      fgmm_regression_free(&c_reg);
+    fgmm_regression_alloc_simple(&c_reg,c_gmm,ninput);
+    fgmm_regression_init(c_reg);
+  }
+
+  void DoRegression(float * input, float * output)
+  {
+    fgmm_regression(c_reg,input,output);
+  }
 };
 
