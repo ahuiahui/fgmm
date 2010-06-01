@@ -62,7 +62,11 @@ def build(bld) :
     bld(features='cc cstaticlib',
         target = 'fgmm',
         source = obj_src,
-        export_incdirs="src/")
+        export_incdirs="src/",
+        install_path='${PREFIX}/lib') # <-- UGLY NON PORTABLE STUFF 
+
+    bld.install_files('${PREFIX}/include/',  # <-- again ! 
+                      ["src/fgmm.h","src/fgmm++.hpp"])
 
     for src in test_src.split():
 
@@ -74,9 +78,9 @@ def build(bld) :
                 target = targ_name,
                 includes = '.',
                 lib = ['m'],
-                uselib_local="fgmm")
+                uselib_local="fgmm",
+                install_path=False)
             #add_objects=obj)
-
     bld(target="run_test.py",
         source = "tests/run_test.py",
         rule= "cp ${SRC} ${TGT}")
@@ -86,13 +90,15 @@ def build(bld) :
                     source = 'tests/oldGMR.cpp',
                     target = 'oldGMR',
                     includes = '/home/fdhalluin/code/MathLib/include/ /home/fdhalluin/code/GMR/include/',
-                    uselib = ['GMR','MATRIX'])    
+                    uselib = ['GMR','MATRIX'],
+                    install=False)    
         cpgmr = bld(features = 'cxx cprogram',
                     source = 'tests/bench.cpp',
                     target = 'bench',
                     includes = '/home/fdhalluin/code/MathLib/include/ /home/fdhalluin/code/GMR/include/',
                     uselib = ['GMR','MATRIX'],
-                    uselib_local="fgmm")    
+                    uselib_local="fgmm",
+                    install=False)    
 
 def test(ctx) :
     print ctx.env
