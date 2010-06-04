@@ -37,3 +37,6 @@ void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
 
 /** random sample from normal law ( mu = 0, sigma = 1. ) **/ 
 inline float randn_boxmuller();
+
+/** incremental mean/var update */
+void gaussian_update(struct gaussian * g, float * datapoint, float learning_rate);

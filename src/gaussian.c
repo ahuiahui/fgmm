@@ -172,3 +172,19 @@ void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
   invert_covar(result);
 }
       
+void gaussian_update(struct gaussian * g, float * data, float lr)
+{
+  int i=0;
+  int j=0;
+  int curs=0;
+  for(;i<g->dim;i++)
+    {
+      g->mean[i] += lr*(data[i] - g->mean[i]);
+      for(j=i;j<g->dim;j++)
+	{
+	  g->covar->_[curs] += lr*( (data[i]-g->mean[i])*(data[j] - g->mean[j]) - g->covar->_[curs]) ;
+	  curs++;
+	}
+    }
+}
+	    
