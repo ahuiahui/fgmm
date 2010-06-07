@@ -306,14 +306,16 @@ float smat_covariance(struct smat * cov,
 	{
 	  cdata[j] = (*pdata++) - mean[j];
 	}
-      
-      for(j=0;j<cov->dim;j++)
+
+      j=0;
+      k=0;
+      while(j<cov->dim)
 	{
-	  for(k=j;k<cov->dim;k++)
-	    {
-	      *pcov += (*pweight)*cdata[j]*cdata[k];
-	      pcov++;
-	    }
+	  *pcov += (*pweight)*cdata[j]*cdata[k];
+	  pcov++;
+	  k++;
+	  if(k==cov->dim) // next line
+	    k=++j;
 	}
       pweight++;
     }
