@@ -39,7 +39,9 @@ void fgmm_regression_init(struct fgmm_reg * reg)
 
 
 
-void fgmm_regression_gaussian(struct gaussian_reg* gr, float * inputs,float * result)
+void fgmm_regression_gaussian(struct gaussian_reg* gr, 
+			      float * inputs,
+			      struct gaussian * result)
 {
   /*float result[gr->output_len];*/
   int j=0,i=0;
@@ -56,37 +58,89 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr, float * inputs,float * re
 
   for(i=0;i<gr->output_len;i++)
     {
-      result[i] = gr->gauss->mean[ gr->output_dim[i]];
+      result->mean[i] = gr->gauss->mean[ gr->output_dim[i]];
       for(;j<gr->input_len;j++)
 	{
-	  result[i] += gr->reg_matrix[i * gr->input_len + j]*tmp[j];
+	  result->mean[i] += gr->reg_matrix[i * gr->input_len + j]*tmp[j];
 	}
     }
+
+  // result->covar = gr->gauss->covar - gr->reg_matrix *  (gr->subgauss->covar)^-1 gr->reg_matrix
+  for(i=0;i<result->covar->_size;i++)
+    {
+      result->covar->_[i] = gr->gauss->covar->_[i];
+    }
+
+  float element;
+  int off,k;
+  for(i=0 ; i<gr->output_len ; i++)
+  {
+    
+    for(j=0;j<gr->input_len;j++)
+      tmp[j] = gr->reg_matrix[i*gr->input_len+j];
+
+    smat_tforward(gr->subgauss->covar_cholesky,tmp,tmp2);
+    smat_tbackward(gr->subgauss->covar_cholesky,tmp2,tmp);
+    
+    element = 0.;
+    off = 0;
+    
+    for(j=0;j<(i+1);j++)
+      {
+	for(k=0;k<gr->input_len;k++) // scalar product here 
+	  element += gr->reg_matrix[i*gr->input_len + k]*tmp[k];
+	// column wise filling .. 
+	result->covar->_[i+off] += element;
+	off += (gr->input_len - j - 1); 
+      }
+  }
 }
 
 
-void fgmm_regression(struct fgmm_reg * reg, float * inputs,float * result)
+void fgmm_regression(struct fgmm_reg * reg, 
+		     float * inputs, // inputs dim (reg->input_len 
+		     float * result, // outputs    (reg->output_len) /!\ alloc'd by user
+		     float * covar)  // out covar  (reg->output_len ** 2/2)  /!\ alloc'd
 {
   float weight = 0;
+  float weight2 = 0;
   /*float result[reg->output_len];*/
-  float tmp[reg->output_len];
+  //float tmp[reg->output_len];
+
+  struct gaussian loc_model ;
+  gaussian_init(&loc_model,reg->output_len);
+
   float likelihood = 0;
   int state = 0;
   int i=0;
+  
   for(i=0;i<reg->output_len;i++)
     result[i] = 0;
-     
+  
+  for(i=0;i<loc_model.covar->_size;i++)
+    covar[i] = 0.;
+  
   for(;state<reg->model->nstates;state++)
     {
       weight = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
-      fgmm_regression_gaussian(&reg->subgauss[state],inputs,tmp);
+      fgmm_regression_gaussian(&reg->subgauss[state],inputs,&loc_model);
+
       for(i=0;i<reg->output_len;i++)
-	result[i] += weight*tmp[i];
+	result[i] += weight*loc_model.mean[i];
+
+      weight2 = weight*weight;
+
+      for(i=0;i<loc_model.covar->_size;i++)
+	covar[i] += weight2*loc_model.covar->_[i];
+
       likelihood += weight;
     }
   assert(likelihood > FLT_MIN);
   for(i=0;i<reg->output_len;i++)
     result[i] /= likelihood;
+
+  gaussian_free(&loc_model);
+
 }
 
 
@@ -176,3 +230,35 @@ void fgmm_regression_free(struct fgmm_reg ** regression)
   *regression = NULL;
 }
   
+
+/* conditionnal sampling */
+/*
+void fgmm_regression_sampling(struct fgmm_reg * regression, 
+			      const float * inputs,
+			      float * output)
+{
+  float weights[regression->model->nstates];
+  float nf=0;
+  float tmp[reg->output_len];
+  float likelihood = 0;
+  int state = 0;
+  int i=0;
+
+  float picker = (float) rand())/RAND_MAX;
+     
+  for(;state<reg->model->nstates;state++)
+    {
+      weights[state] = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
+      nf += weights[state];
+    }
+
+state = 0;
+while(picker < acc)
+  {
+    acc += weights[state]/nf;
+    state++;
+  }
+   assert(likelihood > FLT_MIN);
+  for(i=0;i<reg->output_len;i++)
+    result[i] /= likelihood;
+*/

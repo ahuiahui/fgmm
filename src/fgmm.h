@@ -186,7 +186,8 @@ void fgmm_regression_init(struct fgmm_reg * reg);
 /**
  * does the regression 
  */
-void fgmm_regression(struct fgmm_reg * reg, float * inputs, float * outputs);
+void fgmm_regression(struct fgmm_reg * reg, float * inputs, 
+		     float * outputs, float * covar);
 
 /**
  * incremental update, update the model with a new datapoint

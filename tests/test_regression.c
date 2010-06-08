@@ -40,12 +40,12 @@ int main(int argc, char ** argv)
   fgmm_regression_alloc_simple(&regression, gmm, 1);
   fgmm_regression_init(regression);
 
-  float input,output;
+  float input,output,cvar;
   float error=0.;
   for(i=0;i<100;i++)
     {
       input = ((float) i )/100;
-      fgmm_regression(regression,&input,&output);
+      fgmm_regression(regression,&input,&output,&cvar);
       error += pow(output-sin(2*input*M_PI),2);
       }
   error /= 100.;
@@ -84,6 +84,7 @@ int main(int argc, char ** argv)
   error = 0.;
   float in[2];
   float out[2];
+  float cov[3];
   float gt[2];
   FILE * rfuke = fopen("result.txt","w");
   float var = 0;
@@ -96,7 +97,7 @@ int main(int argc, char ** argv)
       in[0] = x;
       in[1] = y;
 
-      fgmm_regression(regression,in,out);
+      fgmm_regression(regression,in,out,cov);
       
       gt[0] =   sin(x) + cos(y);
       gt[1] =   cos(2*x) - sin(y+2);
