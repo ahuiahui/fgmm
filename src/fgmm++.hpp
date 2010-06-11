@@ -1,4 +1,3 @@
-
 #include <cstdlib>
 
 extern "C" {
@@ -10,12 +9,13 @@ extern "C" {
 
 class Gmm
 {
-private :
 
+private :
   struct gmm * c_gmm;
   struct fgmm_reg * c_reg;
   float likelihood;
   int ninput;
+
 public :
   Gmm(int states, int dim)
   {
@@ -86,6 +86,11 @@ public :
     fgmm_draw_sample(this->c_gmm,sample);
   };
 
+  void Draw(float * sample,int dimo)
+  {
+    this->Draw(sample);
+  };
+
   void InitRegression(int ninput){
     if( c_reg != NULL) 
       fgmm_regression_free(&c_reg);
@@ -94,11 +99,14 @@ public :
     fgmm_regression_init(c_reg);
   };
 
-  void DoRegression(float * input, float * output)
+  void DoRegression(const float * input, float * output, float * covar=NULL)
   {
-    float * covar = new float[this->c_gmm->dim - this->ninput];
     fgmm_regression(c_reg,input,output,covar);
-    delete [] covar;
+  };
+
+  void DoSamplingRegression(const float * input, float * output)
+  {
+    fgmm_regression_sampling(c_reg,input,output);
   };
 
   void DoRegression(float * input, int dimi,
@@ -108,5 +116,12 @@ public :
 	return;*/
     this->DoRegression(input,output);
   };
+
+
+  void Update(const float * point)
+  {
+    fgmm_update(c_gmm,point);
+  };
+
 };
 

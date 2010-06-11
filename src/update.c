@@ -1,7 +1,7 @@
 #include "fgmm.h"
 #include "gaussian.h"
 
-void fgmm_update(struct gmm * gmm, float * data_point)
+void fgmm_update(struct gmm * gmm,const float * data_point)
 {
   int state_i=0;
   float pxi[gmm->nstates];

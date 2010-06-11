@@ -40,7 +40,7 @@ void fgmm_regression_init(struct fgmm_reg * reg)
 
 
 void fgmm_regression_gaussian(struct gaussian_reg* gr, 
-			      float * inputs,
+			      const float * inputs,
 			      struct gaussian * result)
 {
   /*float result[gr->output_len];*/
@@ -96,9 +96,15 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
   }
 }
 
-
+/** use a fgmm_ref struct to perform regression 
+ * result and covare stores resulting mean and covariance (covariance 
+ * is in magic smat order .. 
+ * They must be alloc'd before calling this . 
+ *
+ * if covar == NULL , don't compute covariance 
+ */
 void fgmm_regression(struct fgmm_reg * reg, 
-		     float * inputs, // inputs dim (reg->input_len 
+		     const float * inputs, // inputs dim (reg->input_len 
 		     float * result, // outputs    (reg->output_len) /!\ alloc'd by user
 		     float * covar)  // out covar  (reg->output_len ** 2/2)  /!\ alloc'd
 {
@@ -117,9 +123,12 @@ void fgmm_regression(struct fgmm_reg * reg,
   for(i=0;i<reg->output_len;i++)
     result[i] = 0;
   
-  for(i=0;i<loc_model.covar->_size;i++)
-    covar[i] = 0.;
-  
+  if(covar != NULL)
+    {
+      for(i=0;i<loc_model.covar->_size;i++)
+	covar[i] = 0.;
+    }
+
   for(;state<reg->model->nstates;state++)
     {
       weight = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
@@ -129,9 +138,12 @@ void fgmm_regression(struct fgmm_reg * reg,
 	result[i] += weight*loc_model.mean[i];
 
       weight2 = weight*weight;
-
-      for(i=0;i<loc_model.covar->_size;i++)
-	covar[i] += weight2*loc_model.covar->_[i];
+      
+      if(covar != NULL)
+	{
+	  for(i=0;i<loc_model.covar->_size;i++)
+	    covar[i] += weight2*loc_model.covar->_[i];
+	}
 
       likelihood += weight;
     }
@@ -232,33 +244,43 @@ void fgmm_regression_free(struct fgmm_reg ** regression)
   
 
 /* conditionnal sampling */
-/*
+
 void fgmm_regression_sampling(struct fgmm_reg * regression, 
 			      const float * inputs,
 			      float * output)
 {
   float weights[regression->model->nstates];
   float nf=0;
-  float tmp[reg->output_len];
-  float likelihood = 0;
+  //float tmp[regression->output_len];
+  //float likelihood = 0;
+  float acc=0;
   int state = 0;
-  int i=0;
+  //  int i=0;
 
-  float picker = (float) rand())/RAND_MAX;
-     
-  for(;state<reg->model->nstates;state++)
+  float picker = ((float) rand())/RAND_MAX;
+  
+  for(;state<regression->model->nstates;state++)
     {
-      weights[state] = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
+      weights[state] = gaussian_pdf(regression->subgauss[state].subgauss,inputs);
       nf += weights[state];
     }
 
-state = 0;
-while(picker < acc)
-  {
-    acc += weights[state]/nf;
-    state++;
-  }
-   assert(likelihood > FLT_MIN);
-  for(i=0;i<reg->output_len;i++)
-    result[i] /= likelihood;
-*/
+  state = 0;
+  while(picker < acc)
+    {
+      acc += weights[state]/nf;
+      state++;
+    }
+  
+  struct gaussian * loc_model = (struct gaussian *) malloc(sizeof(struct gaussian));
+  gaussian_init(loc_model,regression->output_len);
+  
+  fgmm_regression_gaussian(&regression->subgauss[state],inputs,loc_model);
+
+  invert_covar(loc_model);
+  gaussian_draw(loc_model,output);
+  
+  gaussian_free(loc_model);
+  free(loc_model);
+}
+    

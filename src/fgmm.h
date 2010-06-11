@@ -186,12 +186,23 @@ void fgmm_regression_init(struct fgmm_reg * reg);
 /**
  * does the regression 
  */
-void fgmm_regression(struct fgmm_reg * reg, float * inputs, 
+void fgmm_regression(struct fgmm_reg * reg, const float * inputs, 
 		     float * outputs, float * covar);
+
+
+/**
+ * Conditional sampling
+ *
+ * draw a sample in the output subspace, given the input point 
+ * out ~ p(x | input) 
+ */
+void fgmm_regression_sampling(struct fgmm_reg * reg,const float * inputs,
+			      float * output);
 
 /**
  * incremental update, update the model with a new datapoint
  * 
  * Highly experimental .. 
  */
-void fgmm_update(struct gmm * gmm, float * data_point);
+void fgmm_update(struct gmm * gmm, const float * data_point);
+
