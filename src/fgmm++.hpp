@@ -15,7 +15,7 @@ private :
   struct gmm * c_gmm;
   struct fgmm_reg * c_reg;
   float likelihood;
-
+  int ninput;
 public :
   Gmm(int states, int dim)
   {
@@ -36,9 +36,34 @@ public :
     fgmm_init_random(c_gmm,data,len);
   };
 
+  void init(float * data,int len, int dim)
+  {
+    if(dim != c_gmm->dim) 
+      {
+	printf("Wrong dimension in init");
+	return;
+      }
+    this->init(data,len);
+  };
+
+  void Dump()
+  {
+    fgmm_dump(this->c_gmm);
+  };
+
   int Em(float * data,int len)
   {
     return fgmm_em(c_gmm,data,len,&likelihood,1e-4);
+  };
+
+  int Em(float * data,int len, int dim)
+  {
+    if(dim != c_gmm->dim) 
+      {
+	printf("Wrong dimension in EM");
+	return -1;
+      }
+    return this->Em(data,len);
   };
 
   void SetPrior(int state, float val)
@@ -64,13 +89,24 @@ public :
   void InitRegression(int ninput){
     if( c_reg != NULL) 
       fgmm_regression_free(&c_reg);
+    this->ninput = ninput;
     fgmm_regression_alloc_simple(&c_reg,c_gmm,ninput);
     fgmm_regression_init(c_reg);
-  }
+  };
 
   void DoRegression(float * input, float * output)
   {
-    fgmm_regression(c_reg,input,output);
-  }
+    float * covar = new float[this->c_gmm->dim - this->ninput];
+    fgmm_regression(c_reg,input,output,covar);
+    delete [] covar;
+  };
+
+  void DoRegression(float * input, int dimi,
+		    float * output, int dimo)
+  {
+    /*  if(dimi != this->c_reg->input_len or dimo != this->c_reg->output_len) 
+	return;*/
+    this->DoRegression(input,output);
+  };
 };
 
