@@ -205,4 +205,5 @@ void fgmm_regression_sampling(struct fgmm_reg * reg,const float * inputs,
  * Highly experimental .. 
  */
 void fgmm_update(struct gmm * gmm, const float * data_point);
+void fgmm_update_wta(struct gmm * gmm, const float * data_point);
 

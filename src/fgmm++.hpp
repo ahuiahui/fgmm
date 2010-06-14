@@ -118,9 +118,12 @@ public :
   };
 
 
-  void Update(const float * point)
+  void Update(const float * point,bool wta=false)
   {
-    fgmm_update(c_gmm,point);
+    if(wta) 
+      fgmm_update_wta(c_gmm,point);
+    else 
+      fgmm_update(c_gmm,point);
   };
 
 };

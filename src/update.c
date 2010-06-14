@@ -20,5 +20,28 @@ void fgmm_update(struct gmm * gmm,const float * data_point)
       invert_covar(&gmm->gauss[state_i]);
     }
 }
+
+
+/* winner take all approach */
+
+void fgmm_update_wta(struct gmm * gmm,const float * data_point)
+{
+  int state_i=0;
+  int the_state = 0;
+  float eta = .05;
+  float max_p = 0.;
+  float w =  0.;
+  for(;state_i<gmm->nstates;state_i++)
+    {
+      w = gaussian_pdf(&gmm->gauss[state_i], data_point);
+      if(w>max_p) 
+	{
+	  max_p = w;
+	  the_state = state_i;
+	}
+    }
+  gaussian_update(&gmm->gauss[the_state],data_point,eta);
+  invert_covar(&gmm->gauss[the_state]);
+}
   
   
