@@ -1,3 +1,33 @@
+/**
+   ------------
+   FGMM library 
+   ------------
+   
+   a fast(er) and light Gaussian mixture model implementation. 
+   
+   Florent D'halluin <florent.dhalluin@epfl.ch> 
+ */
+
+/** @file fgmm.h 
+ *  @brief Awesome fast Gaussian Mixture Model library. 
+ */
+
+/**  @mainpage FGMM Library
+ * 
+ * This library provides a fast(er) and light GMM implementation with the following 
+ * nice features : 
+ *    - sampling
+ *    - EM learning 
+ *    - online update rule (experimental) 
+ *    - No dependencies ( seriously, at all !!) 
+ *    - faster that the previous C++ implementation 
+ *    - pure C implementation (with a C++ wrapper) 
+ *       
+ *  To learn more about C API see fgmm.h 
+ *  
+ *  Or you might want some nice OO programming, then check out Gmm class
+ */
+
 
 /**
  * structure holding one state of the  gmm 
@@ -12,6 +42,7 @@ struct gaussian;
  * this must be initialised by fgmm_alloc 
  *
  * short example  : 
+ * \code
  *   struct gmm mygmm;
  *   fgmm_alloc(&mygmm,4,1) // 1D 4 states GMM 
  *   int i = 0;
@@ -24,11 +55,23 @@ struct gaussian;
  *    float sample; 
  *    fgmm_draw_sample(&mygmm,&sample);
  *    fgmm_free(&mygmm);
+ * \endcode
  */
        
 struct gmm {
+  /**
+   * opaque structure representing a gaussian 
+   * you can access to parameters using 
+   * fgmm_get_* functions 
+   */
   struct gaussian * gauss;
+  /**
+   * number of states 
+   */
   int nstates;
+  /**
+   * dimensionnality of the space 
+   */
   int dim;
 };
 
@@ -200,10 +243,15 @@ void fgmm_regression_sampling(struct fgmm_reg * reg,const float * inputs,
 			      float * output);
 
 /**
- * incremental update, update the model with a new datapoint
+ * incremental updates, update the model with a new datapoint
  * 
  * Highly experimental .. 
  */
 void fgmm_update(struct gmm * gmm, const float * data_point);
+
+/**
+ * on-line update, with winner take all (only update the most 
+ * likely gaussian ) 
+ */
 void fgmm_update_wta(struct gmm * gmm, const float * data_point);
 
