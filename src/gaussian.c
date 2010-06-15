@@ -172,7 +172,9 @@ void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
   invert_covar(result);
 }
       
-void gaussian_update(struct gaussian * g, float * data, float lr)
+void gaussian_update(struct gaussian * g,
+		     const float * data, 
+		     float lr)
 {
   int i=0;
   int j=0;
