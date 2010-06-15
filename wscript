@@ -1,6 +1,19 @@
 import os.path
 import Options
 
+def get_hg_version() :
+    from mercurial import ui, hg
+    r = hg.repository(ui.ui(),".")
+    ctx = r.parents()[0]
+    return "0.1-r" + str(ctx.rev())
+
+
+APPNAME = "FGMM"
+try :
+    VERSION = get_hg_version()
+except :
+    VERSION = "0.1a"
+
 srcdir = '.'
 blddir = '_build_'
 
