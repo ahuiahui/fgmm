@@ -124,6 +124,14 @@ void fgmm_set_prior(struct gmm *,int state, float prior);
 void fgmm_set_mean(struct gmm *,int state, const float * mean);
 
 /**
+ * get a pointer to the given state mean 
+ * 
+ * this is a pointer to the actual mean, so take care .. 
+ */
+
+float * fgmm_get_mean(struct gmm * gmm,int state);
+
+/**
  * Set the covariance of a given state 
  *
  * @param state : index of the state 
@@ -138,7 +146,34 @@ void fgmm_set_mean(struct gmm *,int state, const float * mean);
  *  covar must be a float table of lenght (dim*dim+1)/2 
  */
 
-void fgmm_set_covar(struct gmm *,int state, float * covar);
+void fgmm_set_covar_smat(struct gmm *,int state, const float * covar);
+
+/**
+ * Set the covariance of a given state from a square 
+ * matrix (row order : [i*dim + j] =  [i][j] )
+ */
+void fgmm_set_covar(struct gmm * gmm,int state, 
+		    const float * square_covar);
+
+/**
+ * get the address of the symetric form of the covar matrix
+ *
+ * this is the actuall address of covariance matrix, all kind 
+ * of trouble can happen to you with this .. 
+ */
+float * fgmm_get_covar_smat(struct gmm * gmm, int state) ;
+
+/**
+ * copy the covariance matrix in a square matrix ( row 
+ * order ) 
+ *
+ * way safer than the smat variant .. 
+ * @param square_covar : a dim*dim alloc'd float array
+ * @param state : the state index we are interested in 
+ */
+void fgmm_get_covar(struct gmm * gmm, 
+		    int state,
+		    float * square_covar); /* -> must be alloc'd */ 
 
 /**
  * print the gmm parameters to screen 

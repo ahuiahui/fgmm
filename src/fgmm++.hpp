@@ -118,24 +118,49 @@ public :
    * set the covariance of the specified state 
    *
    * @param  state : the state index
-   * @param  covar : covariance matrix , **Using symetric matrix** 
+   * @param  covar : covariance matrix 
+   * @param  AsSymetric : Using symetric matrix 
    *                 order .. dim*(dim+1)/2 
    * 
    *      Symetric matrix form : 
-   *         [[ 1 2 3 4 ]
+   *         [[ 1 2 3 4 ] 
    *          [ 2 5 6 7 ]
    *          [ 3 6 8 9 ]
    *          [ 4 7 9 10]]  
-   *
+   *  
+   * if not we are using a standart row order . 
    */
  
-  void SetCovariance(int state, float * covar)
+  void SetCovariance(int state, float * covar, bool AsSymetric=true)
   {
-    fgmm_set_covar(this->c_gmm,state,covar);
+    if(AsSymetric) 
+      fgmm_set_covar_smat(this->c_gmm,state,covar);
+    else
+      fgmm_set_covar(this->c_gmm,state,covar);
   };
 
 
+  void GetMean(int state, float * output)
+  {
+    float * pMean = fgmm_get_mean(this->c_gmm,state);
+    for(int i=0;i<this->c_gmm->dim;i++)
+      output[i] = pMean[i];
+  }
 
+  void GetCovariance(int state, float * out,bool AsSymetric=false)
+  {
+    if(!AsSymetric)
+      {
+	fgmm_get_covar(this->c_gmm,state,out);
+      }
+    else 
+      {
+	float * pC = fgmm_get_covar_smat(this->c_gmm,state);
+	for(int i=0;i<this->c_gmm->dim*(this->c_gmm->dim+1)/2;
+	    i++)
+	  out[i] = pC[i];
+      }
+  }
   /**
    * draw a random sample from the model
    *

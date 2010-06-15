@@ -62,7 +62,7 @@ void fgmm_init_random(struct gmm * gmm,
       fgmm_set_mean(gmm,state_i,&data[point_idx*gmm->dim]);
       if(state_i>0) 
 	{
-	  fgmm_set_covar(gmm,state_i,gmm->gauss[0].covar->_);
+	  fgmm_set_covar_smat(gmm,state_i,gmm->gauss[0].covar->_);
 	}
       fgmm_set_prior(gmm,state_i,1./gmm->nstates);
     }
@@ -88,6 +88,11 @@ void fgmm_set_prior(struct gmm * gmm,int state, float prior)
   gmm->gauss[state].prior = prior;
 }
 
+float fgmm_get_prior(struct gmm * gmm, int state)
+{
+  return gmm->gauss[state].prior;
+}
+
 void fgmm_set_mean(struct gmm * gmm,int state, const float * mean)
 {
   int i=0;
@@ -95,13 +100,43 @@ void fgmm_set_mean(struct gmm * gmm,int state, const float * mean)
     gmm->gauss[state].mean[i] = mean[i];
 }
 
-void fgmm_set_covar(struct gmm * gmm,int state, float * covar)
+float * fgmm_get_mean(struct gmm * gmm,int state)
+{
+  return gmm->gauss[state].mean;
+}
+
+void fgmm_set_covar_smat(struct gmm * gmm,int state, 
+			 const float * covar)
 {
   int i=0;
   for(;i<gmm->gauss[state].covar->_size;i++)
     gmm->gauss[state].covar->_[i] = covar[i];
   invert_covar(&gmm->gauss[state]);
 }
+
+
+void fgmm_set_covar(struct gmm * gmm,int state, 
+		    const float * square_covar)
+{
+  smat_from_square( gmm->gauss[state].covar,square_covar);
+  invert_covar(&gmm->gauss[state]);
+}
+
+/* returns pointer to actual address of the covar matrix, 
+   that SHALL NOT be altered ... */
+float * fgmm_get_covar_smat(struct gmm * gmm, int state) 
+{
+  return gmm->gauss[state].covar->_; // arghhh 
+}
+
+/* safer here .. copy values of the covariance matrix */
+void fgmm_get_covar(struct gmm * gmm, 
+		    int state,
+		    float * square_covar) /* -> must be alloc'd */ 
+{
+  smat_as_square(gmm->gauss[state].covar, square_covar); 
+}
+
 
 void fgmm_dump(struct gmm * gmm)
 {
