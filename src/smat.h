@@ -68,6 +68,9 @@ void smat_identity(struct smat * mat);
 /* print matrix to screen (for debug purposes ) */ 
 void smat_pmatrix(const struct smat* mat);
 
+/* transform a symetric ordered matrix to a square one .. */ 
+void smat_as_square(const struct smat* mat, float *  square);
+void smat_from_square(struct smat * mat, const float * square);
 
 /* Cholesky decomposition 
   

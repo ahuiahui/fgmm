@@ -109,11 +109,13 @@ void smat_free(struct smat ** mat)
 void smat_identity(struct smat * mat)
 {
   int i=0;
+  int j;
   float * pmat = mat->_;
   for(;i<mat->dim;i++)
     {
-      *pmat = 1.;
-      pmat += (mat->dim - i);
+      (*pmat++) = 1.;
+      for(j=i+1;j<mat->dim;j++)
+	(*pmat++) = 0.;
     }
 }
 
@@ -246,6 +248,37 @@ void smat_tforward(struct smat * lower, float * b, float * y)
 	  y[j] -= (*pL++)*y[i];
 	}
       
+    }
+}
+
+void smat_as_square(const struct smat * mat, float * square) 
+{
+  int i,j;
+  float * pmat = mat->_;
+  for(i=0;i<mat->dim;i++) 
+    {
+      square[i*mat->dim + i] = (*pmat++);
+      for(j=i+1;j<mat->dim;j++)
+	{
+	  square[i*mat->dim + j] = *pmat;
+	  square[j*mat->dim + i] = *pmat;
+	  pmat++;
+	}
+    }
+}
+
+void smat_from_square(struct smat * mat, const float * square)
+{
+  int i,j;
+  float * pmat = mat->_;
+  for(i=0;i<mat->dim;i++) 
+    {
+      (*pmat++) = square[i*mat->dim + i];
+      for(j=i+1;j<mat->dim;j++)
+	{
+	  *pmat = square[i*mat->dim + j];
+	  pmat++;
+	}
     }
 }
 

@@ -39,6 +39,21 @@ int main(int argc, char ** argv)
   
   printf("..pass\n");
   
+  printf("testing to/from square \n");
+  
+  float sq[DIM * DIM]; 
+  smat_as_square(m1,sq);
+  assert(sq[3*DIM + 3]==1.);
+  assert(sq[3*DIM + 4]==0.);
+  sq[1]=2.5;
+  smat_from_square(m1,sq);
+  assert(m1->_[1] == 2.5);
+  
+  smat_identity(m1);
+
+  printf("..pass\n");
+    
+  
   printf("testing smat_ttmult \n");
   smat_ttmult(m1,check);
   pm1 = m1->_;
