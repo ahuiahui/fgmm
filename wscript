@@ -13,10 +13,13 @@ def set_options(opt):
                    default=False, help='Link with gprof for profiling')
 
     opt.add_option('--old',dest="oldGMR",action='store_true',
-                   default=False, help='Build test using old GMR lib for comparison')
+                   default=False, help='Build benchmarks using old GMR lib for comparison')
 
     opt.add_option('--debug',dest="debug",action="store_true",
                    default=False, help='Build debug symbols')
+
+    opt.add_option('--no-test',dest="test",action="store_false",
+                   default=True,help="disable building tests (type ./waf test to run them)")
 
 #     opt.add_option('--check',dest="check",action='store_true',
 #                    default=False, help='run the tests')
@@ -35,29 +38,24 @@ def configure(conf) :
     if Options.options.use_gprof :
         conf.env.CCFLAGS.append('-pg')
         conf.env.LINKFLAGS = ['-pg']
+        
+    if Options.options.test :
+        conf.env.build_test = True
 
     if Options.options.oldGMR :
         conf.env.CCXFlAGS = conf.env.CCFLAGS
         conf.env['build_old_gmr'] = True
         conf.env['LIBPATH_MATRIX'] = '/home/fdhalluin/code/MathLib/lib/'
         conf.env['LIB_MATRIX'] = 'Matrix'
-        conf.env['LIBPATH_GMR'] = '/home/fdhalluin/code/GMR/lib/'
+        conf.env['LIBPATH_GMR'] = '/home/fdhalluin/code/gmr/lib/'
         conf.env['LIB_GMR'] = 'GMR'
+        conf.env['CPPPATH_GMR'] = '/home/fdhalluin/code/gmr/include/'
+        conf.env['CPPPATH_MATRIX'] = '/home/fdhalluin/code/MathLib/include/'
         
 
    
 def build(bld) :
     obj_src = bld.path.ant_glob("src/*.c")
-    test_src = bld.path.ant_glob("tests/test_*.c")
-    obj = []
-    
-#     for src in obj_src.split():
-#         print src
-#         targ_name = os.path.splitext(src)[0]+'.o'
-#         bld(features='cc',
-#             target = targ_name,
-#             source=src)
-#         obj.append(targ_name)
 
     bld(features='cc cstaticlib',
         target = 'fgmm',
@@ -68,12 +66,14 @@ def build(bld) :
     bld.install_files('${PREFIX}/include/',  # <-- again ! 
                       ["src/fgmm.h","src/fgmm++.hpp"])
 
-    for src in test_src.split():
+    if bld.env.build_test :
+        test_src = bld.path.ant_glob("tests/test_*.c")
+        for src in test_src.split():
 
-        targ_name = os.path.basename(src)
-        targ_name = os.path.splitext(targ_name)[0]
+            targ_name = os.path.basename(src)
+            targ_name = os.path.splitext(targ_name)[0]
 
-        bld(features = 'cc cprogram',
+            bld(features = 'cc cprogram',
                 source = src,
                 target = targ_name,
                 includes = '.',
@@ -81,27 +81,41 @@ def build(bld) :
                 uselib_local="fgmm",
                 install_path=False)
             #add_objects=obj)
-    bld(target="run_test.py",
-        source = "tests/run_test.py",
-        rule= "cp ${SRC} ${TGT}")
+        bld(target="run_test.py",
+            source = "tests/run_test.py",
+            rule= "cp ${SRC} ${TGT}")
 
     if bld.env.build_old_gmr :
         cpgmr = bld(features = 'cxx cprogram',
                     source = 'tests/oldGMR.cpp',
                     target = 'oldGMR',
-                    includes = '/home/fdhalluin/code/MathLib/include/ /home/fdhalluin/code/GMR/include/',
                     uselib = ['GMR','MATRIX'],
                     install=False)    
         cpgmr = bld(features = 'cxx cprogram',
                     source = 'tests/bench.cpp',
                     target = 'bench',
-                    includes = '/home/fdhalluin/code/MathLib/include/ /home/fdhalluin/code/GMR/include/',
                     uselib = ['GMR','MATRIX'],
                     uselib_local="fgmm",
-                    install=False)    
+                    install=False)  
+  
+import Scripting, Build, Environment,Utils
+import os,sys,subprocess
 
 def test(ctx) :
-    print ctx.env
-    print ctx.curdir
-    print dir(ctx)
-    print "launching tests .. hihi"
+    # getting the project context 
+    try:
+        proj=Environment.Environment(Options.lockfile)
+    except IOError:
+        raise Utils.WafError("Project not configured (run 'waf configure' first)")
+
+    bld = Build.BuildContext()
+    bld.load_dirs(proj['srcdir'], proj['blddir']) 
+    bld.load_envs()
+    
+    pybin = sys.executable  # hey you should have a python exe to run this .. 
+            
+    for v in bld.lst_variants :
+        trunner = subprocess.Popen([pybin,os.path.join(bld.bdir,v,'run_test.py')],
+                                   cwd = os.path.join(bld.bdir,v))
+        trunner.wait()
+        
