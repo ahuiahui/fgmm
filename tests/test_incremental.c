@@ -85,8 +85,6 @@ int main(int argc,char ** argv)
   fgmm_init_random(GMM,data,n_data);
   
   printf("end loading file\n");
-  float lik;
-
   /*  struct timeval t1,t2;
   gettimeofday(&t1,NULL);
   int iterations = fgmm_em(GMM,data,n_data,&lik,1e-4);
