@@ -30,11 +30,16 @@ public :
    * @param dim    : dimensionnality of the space we are working in
    */
 
+  int dim;
+  int ninput;
+
   Gmm(int states, int dim)
   {
     //c_gmm = (struct gmm *) malloc(sizeof(struct gmm ));
     fgmm_alloc(&c_gmm,states,dim);
     c_reg = NULL;
+    this->dim = dim;
+    this->ninput = 0;
   };
 
   ~Gmm()
@@ -58,15 +63,6 @@ public :
     fgmm_init_random(c_gmm,data,len);
   };
 
-  void init(float * data,int len, int dim)
-  {
-    if(dim != c_gmm->dim) 
-      {
-	printf("Wrong dimension in init");
-	return;
-      }
-    this->init(data,len);
-  };
 
   /**
    * Just print the model's parameter on stdout
@@ -83,17 +79,6 @@ public :
   {
     return fgmm_em(c_gmm,data,len,&likelihood,1e-4);
   };
-
-  int Em(float * data,int len, int dim)
-  {
-    if(dim != c_gmm->dim) 
-      {
-	printf("Wrong dimension in EM");
-	return -1;
-      }
-    return this->Em(data,len);
-  };
-
 
   /**
    * set Prior probability for the desired state
@@ -172,11 +157,6 @@ public :
     fgmm_draw_sample(this->c_gmm,sample);
   };
 
-  void Draw(float * sample,int dimo)
-  {
-    this->Draw(sample);
-  };
-
 
   /**
    * Initilization for Gaussian Mixture Regression 
@@ -205,15 +185,6 @@ public :
     fgmm_regression(c_reg,input,output,covar);
   };
 
-  
-  void DoRegression(float * input, int dimi,
-		    float * output, int dimo)
-  {
-    /*  if(dimi != this->c_reg->input_len or dimo != this->c_reg->output_len) 
-	return;*/
-    this->DoRegression(input,output);
-  };
-
 
   /**
    * Conditional sampling from the model : 
@@ -221,10 +192,10 @@ public :
    * input subspace. 
    * you must call InitRegression before. 
    */
-  void DoSamplingRegression(const float * input, float * output)
-  {
-    fgmm_regression_sampling(c_reg,input,output);
-  };
+   void DoSamplingRegression(const float * input, float * output)
+   {
+     fgmm_regression_sampling(c_reg,input,output);
+   };
 
 
   /**
@@ -247,7 +218,6 @@ private :
   struct gmm * c_gmm;
   struct fgmm_reg * c_reg;
   float likelihood;
-  int ninput;
 
 };
 
