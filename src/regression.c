@@ -24,7 +24,7 @@ void fgmm_regression_init_g(struct gaussian_reg * gr)
 							 gr->input_dim[i]);
 	}
     }
-  dump(gr->subgauss);
+  //dump(gr->subgauss);
 }
 
 
@@ -266,12 +266,14 @@ void fgmm_regression_sampling(struct fgmm_reg * regression,
     }
 
   state = 0;
-  while(picker < acc)
+  printf("%f %f \n",picker,acc);
+  while(picker > acc)
     {
       acc += weights[state]/nf;
       state++;
     }
-  
+  state--;
+  printf("rand state %d\n",state);
   struct gaussian * loc_model = (struct gaussian *) malloc(sizeof(struct gaussian));
   gaussian_init(loc_model,regression->output_len);
   
