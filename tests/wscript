@@ -1,0 +1,46 @@
+import os
+import Options
+
+def configure(conf) :
+    conf.check_tool('compiler_cxx')  
+    
+    if Options.options.oldGMR :
+        conf.env.CCXFlAGS = conf.env.CCFLAGS
+        mathlib_dir = '/home/fdhalluin/code/MathLib'
+        gmr_dir = '/home/fdhalluin/code/gmr'
+        conf.env['build_old_gmr'] = True
+        conf.env['LIBPATH_MATRIX'] = os.path.join(mathlib_dir,'lib')
+        conf.env['LIB_MATRIX'] = 'Matrix'
+        conf.env['LIBPATH_GMR'] = os.path.join(gmr_dir,'lib')
+        conf.env['LIB_GMR'] = 'GMR'
+        conf.env['CPPPATH_GMR'] = os.path.join(gmr_dir,'include')
+        conf.env['CPPPATH_MATRIX'] = os.path.join(mathlib_dir,'include')
+        
+
+def build(bld) :
+    test_src = bld.path.ant_glob("test_*.c")
+    for src in test_src.split():
+        targ_name = os.path.basename(src)
+	targ_name = os.path.splitext(targ_name)[0]
+
+	bld(features = 'cc cprogram',
+	    source = src,
+	    target = targ_name,
+	    includes = '.',
+	    lib = ['m'],
+	    uselib_local="fgmm",
+	    install_path=False)
+    
+    if bld.env.build_old_gmr :
+        cpgmr = bld(features = 'cxx cprogram',
+                    source = 'oldGMR.cpp',
+                    target = 'oldGMR',
+                    uselib = ['GMR','MATRIX'],
+                    install=False)    
+
+        cpgmr = bld(features = 'cxx cprogram',
+                    source = 'bench.cpp',
+                    target = 'bench',
+                    uselib = ['GMR','MATRIX'],
+                    uselib_local="fgmm",
+                    install=False)  

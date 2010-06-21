@@ -1,0 +1,12 @@
+
+def build(bld) :
+    obj_src = bld.path.ant_glob("*.c")
+
+    bld(features='cc cstaticlib',
+        target = 'fgmm',
+        source = obj_src,
+        export_incdirs=".",
+        install_path='${PREFIX}/lib') # <-- UGLY NON PORTABLE STUFF 
+
+    bld.install_files('${PREFIX}/include/',  # <-- again ! 
+                      ["fgmm.h","fgmm++.hpp"])
