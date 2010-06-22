@@ -34,6 +34,9 @@ def set_options(opt):
     opt.add_option('--no-test',dest="test",action="store_false",
                    default=True,help="disable building tests (type ./waf test to run them)")
 
+    opt.add_option('--python',dest="python",action="store_true",
+                   default=False,help="build python bindings")
+
 #     opt.add_option('--check',dest="check",action='store_true',
 #                    default=False, help='run the tests')
 
@@ -51,15 +54,21 @@ def configure(conf) :
         conf.env.LINKFLAGS = ['-pg']
         
     if Options.options.test :
-        conf.env.build_test = True
-        
-    conf.recurse("tests")
+        conf.env.build_test = True 
+        conf.recurse("tests")
+
+    if Options.options.python :
+        conf.env.python = True
+        conf.recurse("python")
 
 def build(bld) :
     bld.recurse("src")
 
     if bld.env.build_test :
         bld.recurse("tests")
+
+    if bld.env.python :
+        bld.recurse("python")
 
 import Scripting, Build, Environment,Utils
 import os,sys,subprocess
@@ -81,6 +90,6 @@ def test(ctx) :
 
     for v in bld.lst_variants :
         trunner = subprocess.Popen([pybin,os.path.join(proj['srcdir'],"tests",'run_test.py')],
-                                   cwd = os.path.join(bld.bdir,v,"tests"h))
+                                   cwd = os.path.join(bld.bdir,v,"tests"))
         trunner.wait()
         
