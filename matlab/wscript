@@ -1,0 +1,38 @@
+import Options
+
+def configure(conf) :
+    if Options.options.matlab :
+        #check if mex is in path .. 
+        conf.env.matlab = True
+        conf.find_program("mex",mandatory=True)
+        conf.env['MEX_COMP'] = "mex"
+        conf.env['MEX_EXT'] = "mexglx"
+
+    if Options.options.octave :
+        conf.env.octave = True
+        conf.find_program("mkoctfile")
+        conf.env['MEX_COMP'] = "mkoctfile --mex"
+        conf.env['MEX_EXT'] = "mex"
+
+def build(bld) :
+    obj_src = bld.path.ant_glob("*.c")
+    for mx_file in obj_src.split() :
+        bld( rule =  "${MEX_COMP} ${SRC} -I%s -L%s -lfgmm --output ${TGT}.${MEX_EXT}"%(bld.srcnode,bld.bdir),
+             source = mx_file,
+             target = mx_file.split('.')[0])
+           
+
+# import TaskGen
+
+# import Task
+# Task.simple_task_type('mex',
+#                       'echo ${SRC} ${TGT}', 
+#                       color='PINK')
+
+# @TaskGen.feature("mex")
+# def compile(self) :
+#     self.env['MEXCOMP'] = 'mex'
+#     for ulib in self.to_list(self.uselib_local):
+#         other = self.bld.name_to_obj(ulib,self.env)
+#         other.post()
+#     self.create_task("mex",self.source)

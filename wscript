@@ -37,6 +37,12 @@ def set_options(opt):
     opt.add_option('--python',dest="python",action="store_true",
                    default=False,help="build python bindings")
 
+    opt.add_option('--matlab',dest="matlab",action="store_true",
+                   default=False,help="build matlab mex files")
+
+    opt.add_option('--octave',dest="octave",action="store_true",
+                   default=False,help="build octave mex files")
+
 #     opt.add_option('--check',dest="check",action='store_true',
 #                    default=False, help='run the tests')
 
@@ -60,6 +66,9 @@ def configure(conf) :
     if Options.options.python :
         conf.env.python = True
         conf.recurse("python")
+    
+    if Options.options.matlab or Options.options.octave :
+        conf.recurse("matlab")
 
 def build(bld) :
     bld.recurse("src")
@@ -69,6 +78,9 @@ def build(bld) :
 
     if bld.env.python :
         bld.recurse("python")
+
+    if bld.env.matlab or bld.env.octave :
+        bld.recurse("matlab")
 
 import Scripting, Build, Environment,Utils
 import os,sys,subprocess
