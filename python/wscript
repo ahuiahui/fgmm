@@ -1,22 +1,15 @@
 
-
 def configure(conf): 
     """
     -- python headers 
     -- numpy headers 
     -- c++ compiler
     """
-    conf.check_tool('compiler_cxx')  
-    conf.check_cfg(path="python-config",
-                   args='--cflags --libs',
-                   package='', uselib_store='PY',
-                   msg="checking for python .. ", 
-                   mandatory=True  ) 
-    
+    conf.check_tool('python')  
+    conf.check_python_headers()    
+
 def build(bld) :
-    bld.env.shlib_PATTERN = "%s.so"
-    bld(features="cxx cshlib",
+    bld(features="cxx cshlib pyext",
         source="_fgmm.cpp",
-        target="fgmm", # not -lib- please..
-        uselib="PY",
+        target="fgmm",
         uselib_local="fgmm")
