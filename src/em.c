@@ -49,6 +49,9 @@ float fgmm_e_step(struct gmm * GMM,
       for(state_i=0;state_i<GMM->nstates;state_i++)
 	{
 	  pix[data_i + state_i*data_len] = pxi[state_i] * GMM->gauss[state_i].prior / like;
+	  if(pix[data_i + state_i*data_len] <= FLT_MIN) 
+	    pix[data_i + state_i*data_len] = FLT_MIN;
+	      
 	}
 	  
     }
