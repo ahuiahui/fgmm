@@ -35,6 +35,9 @@ for t in inp :
 s=np.vstack([g.Draw() for _ in range(1000)])
 pyplot.plot(inp,r,'r-',linewidth=3)
 pyplot.plot(s[:,0],s[:,1],'b.')
+
+print g.GetMean(1)
+print g.GetCovariance(1)
 pyplot.show()
 
 

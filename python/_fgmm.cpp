@@ -116,6 +116,42 @@ Gmm_Dump(GMM * self)
 }
 
 static PyObject *
+Gmm_Pdf(GMM * self, PyObject * args)
+{
+  PyObject * input_data;
+  float * output;
+
+  PyObject * output_data;
+  if( ! PyArg_ParseTuple(args, "O", &input_data))
+    return NULL;
+
+  if( !PyArray_Check(input_data))
+    return NULL;
+
+  PyArrayObject * arr=NULL;
+  bool new_arr = false;
+  if( !PyArray_ISCONTIGUOUS(input_data) )
+    {
+      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
+							
+      new_arr = true;
+    }
+  else 
+    arr = (PyArrayObject *) input_data;
+
+  output = (float *) malloc( sizeof(float) * (self->g->nstates));
+  
+  self->g->Pdf((float *) PyArray_DATA(input_data), 
+	       output);
+
+  npy_intp dims[1];
+  dims[0] = self->g->nstates;
+
+  output_data = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) output);
+  return output_data;
+}
+
+static PyObject *
 Gmm_InitRegression(GMM * self, PyObject * args)
 { 
 
@@ -227,100 +263,105 @@ Gmm_Draw(GMM * self)
   return result;
 }
   
-/*
-static PyObject *
-Gmm_getMeans(Gmm * self)
-{
-  
-}
 
 static PyObject *
-Gmm_getCovar(Gmm * self)
+Gmm_getMean(GMM * self,PyObject * args)
 {
-  PyObject * covars;
-  covars = PyList_New(0);
-  for(int i=0;i<self->g->nState;i++)
-    {
-      PyList_Append(covars,matrix_to_list(self->g->sigma[i]));
-    }
-  return covars;
-}
-		 
-static PyObject *
-Gmm_gmr(Gmm * self, PyObject * args, PyObject * kwds)
-{
+  float * output;
   PyObject * result;
-  PyObject * input_list;
-  PyObject * like_py;
-  PyObject * dimi_list; // input dimensions
-  PyObject * dimo_list; // output dimension python list
-  Vector input_vector;
-  Vector input_dim;
-  Vector output_dim;
-  PyObject * result_sigma;
-  if(! PyArg_ParseTuple(args, "OOO", &input_list,&dimi_list,&dimo_list))
+
+  int state = 0;
+  if( ! PyArg_ParseTuple(args, "i", &state))
     return NULL;
-  input_vector = list_to_vector(input_list);
-  input_dim = list_to_vector(dimi_list);
-  output_dim = list_to_vector(dimo_list);
-  Matrix sigma;
-  double likelihood;
-  Vector  result_m = self->g->doRegression(input_vector,sigma,
-					   input_dim,output_dim,likelihood);
-  result = vector_to_list(result_m);
-  result_sigma = matrix_to_list(sigma);
-  like_py = PyFloat_FromDouble(likelihood);
-  return PyTuple_Pack(3,result,result_sigma,like_py);
+
+  output = (float *) malloc(sizeof(float) * self->g->dim);
+  self->g->GetMean(state,output);
+
+  npy_intp dims[1];
+  dims[0] = self->g->dim;
+  result = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) output);
+  return result;
 }
+
+
+static PyObject *
+Gmm_getCovariance(GMM * self,PyObject * args)
+{
+  float * output;
+  PyObject * result;
+
+  int state = 0;
+  if( ! PyArg_ParseTuple(args, "i", &state))
+    return NULL;
+
+  output = (float *) malloc(sizeof(float) * self->g->dim * self->g->dim );
+  self->g->GetCovariance(state,output);
+
+  npy_intp dims[2];
+  dims[0] = self->g->dim;
+  dims[1] = self->g->dim;
+  result = PyArray_SimpleNewFromData(2,dims,NPY_FLOAT,(void *) output);
+  return result;
+
+}
+
+
+static PyObject *
+Gmm_getPrior(GMM * self, PyObject * args)
+{
+  int state=0;
+  if( ! PyArg_ParseTuple(args, "i", &state))
+    return NULL;
+  float p = self->g->GetPrior(state);
+  return PyFloat_FromDouble((double) p);
+}
+
+static PyObject *
+Gmm_getstate(GMM * self, PyObject * args)
+{
+  int res=0;
+  PyObject * obs=NULL;
+
+  if( ! PyArg_ParseTuple(args,"O", &obs))
+    return NULL;
+
   
+  PyArrayObject * arr=NULL;
+  bool new_arr = false;
+  if( !PyArray_ISCONTIGUOUS(obs) )
+    {
+      arr = (PyArrayObject*) PyArray_ContiguousFromAny(obs,NPY_FLOAT,0,0);
+      new_arr = true;
+    }
+  else 
+    arr = (PyArrayObject *) obs;
 
-static PyObject *
-Gmm_getPriors(Gmm * self)
-{
-  PyObject * priors;
-  priors = PyList_New(0);
-  for(int i=0;i<self->g->nState;i++)
-    PyList_Append(priors,PyFloat_FromDouble(self->g->priors[i]));
-  return priors;
+  if( PyArray_DIM(arr,0) != self->g->dim) 
+    {
+      return NULL;
+    }
+
+  res = self->g->GetLikelyState((float *)PyArray_DATA(arr));
+  if(new_arr)
+    Py_DECREF(arr);
+  return PyInt_FromLong(res);
 }
+
   
-static PyObject *
-Gmm_save(Gmm * self,PyObject * args, PyObject *kwds)
-{
-  const char * filename;
-  if( !PyArg_ParseTuple(args, "s", &filename))
-    return NULL;
-  self->g->saveParams(filename);
-  return PyInt_FromLong(1);
-}
-
-static PyObject *
-Gmm_load(Gmm * self,PyObject * args, PyObject *kwds)
-{
-  const char * filename;
-  if( !PyArg_ParseTuple(args, "s", &filename))
-    return NULL;
-  self->g->loadParams(filename);
-  return PyInt_FromLong(1);
-}
-
-*/
-
 
 static PyMethodDef Gmm_methods[] = {
   {"init",(PyCFunction) Gmm_init_random,METH_VARARGS | METH_KEYWORDS, "initialize EM process ."},
   {"Em",(PyCFunction) Gmm_doEm,METH_VARARGS | METH_KEYWORDS, "perform EM."},
   {"Dump",(PyCFunction) Gmm_Dump,METH_NOARGS,"dump gmm parameters on stdout"},
+  {"Pdf",(PyCFunction) Gmm_Pdf,METH_VARARGS,"pdf"},
   {"InitRegression",(PyCFunction) Gmm_InitRegression,METH_VARARGS, "initialize Regression"},
   {"DoRegression",(PyCFunction) Gmm_DoRegression,METH_VARARGS, "Do Regression"},
   {"DoSamplingRegression",(PyCFunction) Gmm_DoSamplingRegression,METH_VARARGS, ""},
   {"Draw",(PyCFunction) Gmm_Draw,METH_NOARGS,"draw a random point from model"},
-  /*  {"getMeans",(PyCFunction) Gmm_getMeans,METH_NOARGS, "means"},
-  {"getCovar",(PyCFunction) Gmm_getCovar,METH_NOARGS, "covariances"},
-  {"getPriors",(PyCFunction) Gmm_getPriors,METH_NOARGS, "priors .."},
-  {"gmr",(PyCFunction) Gmm_gmr,METH_VARARGS | METH_KEYWORDS, "do regression"},
-  {"save",(PyCFunction) Gmm_save,METH_VARARGS | METH_KEYWORDS, "save Model to file"},
-  {"load",(PyCFunction) Gmm_load,METH_VARARGS | METH_KEYWORDS, "load model from file"},*/
+  {"GetCovariance",(PyCFunction) Gmm_getCovariance,METH_VARARGS, "covariances"},
+  {"GetMean",(PyCFunction) Gmm_getMean,METH_VARARGS, "covariances"},
+  {"GetPrior",(PyCFunction) Gmm_getPrior,METH_NOARGS, "priors .."},
+  {"GetLikelyState",(PyCFunction) Gmm_getstate,METH_VARARGS, "get the most likely state index"},
   {NULL}
 };
 

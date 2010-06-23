@@ -37,3 +37,10 @@ this time using doxygen, a doxyfile is provided
 generates you html doc in the doc dir. 
 
 see also the tests examples.  
+
+
+Python wrappers 
+===============
+
+call ./waf configure with --python option. (you must have the python-dev and numpy-dev packages
+somewhere ) 
