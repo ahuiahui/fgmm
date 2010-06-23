@@ -32,6 +32,7 @@ public :
 
   int dim;
   int ninput;
+  int nstates;
 
   Gmm(int states, int dim)
   {
@@ -40,6 +41,7 @@ public :
     c_reg = NULL;
     this->dim = dim;
     this->ninput = 0;
+    this->nstates = states;
   };
 
   ~Gmm()
@@ -78,6 +80,12 @@ public :
   int Em(float * data,int len)
   {
     return fgmm_em(c_gmm,data,len,&likelihood,1e-4);
+  };
+
+
+  float Pdf(float * obs, float * weights=NULL)
+  {
+    return fgmm_get_pdf(c_gmm,obs,weights);
   };
 
   /**
@@ -124,6 +132,11 @@ public :
       fgmm_set_covar(this->c_gmm,state,covar);
   };
 
+
+  float GetPrior(int state)
+  {
+    return fgmm_get_prior(this->c_gmm,state);
+  };
 
   void GetMean(int state, float * output)
   {
@@ -213,6 +226,11 @@ public :
       fgmm_update(c_gmm,point);
   };
 
+
+  int GetLikelyState(const float * point)
+  {
+    return fgmm_most_likely_state(this->c_gmm,point);
+  };
   
 private :
   struct gmm * c_gmm;
