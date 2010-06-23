@@ -149,13 +149,38 @@ void fgmm_dump(struct gmm * gmm)
 }
   
 float fgmm_get_pdf( struct gmm * gmm,
-		   float * point)
+		    float * point,
+		    float * weights)
 {
   int state_i = 0;
   float like=0;
+  float p=0;
   for(;state_i<gmm->nstates;state_i++)
     {
-      like += gmm->gauss[state_i].prior * gaussian_pdf(&(gmm->gauss[state_i]),point);
+      p = gmm->gauss[state_i].prior * gaussian_pdf(&(gmm->gauss[state_i]),point);
+      if(weights != NULL)
+	weights[state_i] = p;
+      like += p;
     }
   return like;
+}
+
+int fgmm_most_likely_state(struct gmm * gmm,
+			   const float * obs)
+{
+  int state_i = 0;
+  int r=0;
+  float max_like=0;
+  float like;
+  
+  for(;state_i<gmm->nstates;state_i++)
+    {
+      like = gmm->gauss[state_i].prior * gaussian_pdf(&(gmm->gauss[state_i]),obs);
+      if(like > max_like)
+	{
+	  max_like = like;
+	  r = state_i;
+	}
+    }
+  return r;
 }

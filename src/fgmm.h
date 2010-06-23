@@ -123,6 +123,8 @@ void fgmm_set_prior(struct gmm *,int state, float prior);
 
 void fgmm_set_mean(struct gmm *,int state, const float * mean);
 
+float fgmm_get_prior(struct gmm * gmm, int state);
+
 /**
  * get a pointer to the given state mean 
  * 
@@ -211,9 +213,11 @@ int fgmm_em( struct gmm * GMM,
 
 /**
  * return likelihood of point
+ * if weights != NULL , return normalized weights of each gaussian
  */
 float fgmm_get_pdf( struct gmm * gmm,
-		   float * point);
+		    float * point,
+		    float * weights);
 
 
 /**
@@ -276,6 +280,12 @@ void fgmm_regression(struct fgmm_reg * reg, const float * inputs,
  */
 void fgmm_regression_sampling(struct fgmm_reg * reg,const float * inputs,
 			      float * output);
+
+
+/**
+ * return index of the most likely state, given an observation
+ */
+int fgmm_most_likely_state(struct gmm *, const float * obs);
 
 /**
  * incremental updates, update the model with a new datapoint
