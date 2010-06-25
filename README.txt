@@ -44,3 +44,27 @@ Python wrappers
 
 call ./waf configure with --python option. (you must have the python-dev and numpy-dev packages
 somewhere ) 
+
+
+Matlab/Octave wrappers 
+======================
+
+/!\ Highly untested .. 
+
+For now I just wrapped the EM algorithm 
+
+compile with 
+./waf configure [--matlab | --octave]  
+./waf
+
+get the mex files in the _build_/default/matlab/ 
+and put them wherever you want matlab/octave to find
+them. 
+
+use with 
+
+(my data is  n datapointx x dim , you want a 8 state GMM) 
+
+[priors,mu,Sigmas] = fgmm_em(my_data, 8)  
+
+This does a random initialization + EM run. 

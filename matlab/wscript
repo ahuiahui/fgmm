@@ -16,10 +16,17 @@ def configure(conf) :
 
 def build(bld) :
     obj_src = bld.path.ant_glob("*.c")
+    fgmm_task_gen = bld.name_to_obj('fgmm',bld.env)
+    fgmm_task_gen.post()
+    inc_ = fgmm_task_gen.path.srcpath(bld.env)
+    libp_ = fgmm_task_gen.path.abspath(bld.env)
+  
     for mx_file in obj_src.split() :
-        bld( rule =  "${MEX_COMP} ${SRC} -I%s -L%s -lfgmm --output ${TGT}.${MEX_EXT}"%(bld.srcnode,bld.bdir),
-             source = mx_file,
-             target = mx_file.split('.')[0])
+        m = bld( rule =  "${MEX_COMP} ${SRC} -I%s -L%s -lfgmm -o ${TGT}"%(inc_,libp_),
+                 source = mx_file,
+                 target = mx_file.split('.')[0]+"."+bld.env["MEX_EXT"])
+                 
+      
            
 
 # import TaskGen

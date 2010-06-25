@@ -22,6 +22,7 @@
  *    - No dependencies ( seriously, at all !!) 
  *    - faster that the previous C++ implementation 
  *    - pure C implementation (with a C++ wrapper) 
+ *    - comes with Matlab/Octave wrappers and a Python wrapper. 
  *       
  *  To learn more about C API see fgmm.h 
  *  
