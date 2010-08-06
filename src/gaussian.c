@@ -13,7 +13,6 @@
 float randn_boxmuller()
 {
   float x1, x2, w;
- 
   do {
     x1 = 2.0 * ranf() - 1.0;
     x2 = 2.0 * ranf() - 1.0;
@@ -57,12 +56,18 @@ float gaussian_pdf(struct gaussian* g, const float* x)
   
   float dist = smat_sesq(g->icovar_cholesky,g->mean,x);
   dist *= .5;
-  dist =  expf(-dist)/g->nfactor;
+  
+  float dist2 =  expf(-dist)/g->nfactor;
   //dist = 0.2;
   // returning zero here would give weird results for EM 
-  if(dist == 0)
-    dist = FLT_MIN;
-  return dist;
+  if( isnan(dist2))
+    {
+      printf("NaN gaussian pdf .. ");
+      printf(" %e %e \n ", dist, g->nfactor);
+    }
+  if(dist2 == 0)
+    dist2 = FLT_MIN;
+  return dist2;
 }
 
 
@@ -102,8 +107,19 @@ void invert_covar(struct gaussian* g)
 	  *chol++ = *pichol++;
 	}
     }
+
   det = det*det;
   g->nfactor = sqrtf( pow(M_PI,g->dim) * det);
+
+  if(g->nfactor <= FLT_MIN)
+    {
+      // almost non invertible gaussian :: lets add some noise
+      g->nfactor = FLT_MIN;
+      smat_add_diagonal(g->covar, 1.);
+      printf("determinant :: %e %e \n", det);
+      invert_covar(g);
+      //exit(0);
+    }
 }
 
 void gaussian_init(struct gaussian * g,int dim)
