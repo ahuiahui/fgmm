@@ -40,6 +40,8 @@ void smat_free(struct smat ** mat);
  *
  *  out = m * v 
  */
+
+// fixme sous windows :: __inline__ 
 inline void smat_multv(const struct smat* m, const float * v,float * out);
 
 /**
@@ -63,6 +65,12 @@ void smat_get_submatrix(struct smat * mat , struct smat * res,
 /* fill the mat with identity  /!\ you must first 
  allocate memory (wigh smat_zero for ex .. ) */
 void smat_identity(struct smat * mat);
+
+/** 
+ * add value on the diagonal .. (e.g. add diag noise on 
+ * a gaussian .. ) 
+ */
+void smat_add_diagonal(struct smat * mat , float value );
 
 
 /* print matrix to screen (for debug purposes ) */ 
@@ -128,3 +136,8 @@ float smat_covariance(struct smat * cov,
 
 
 
+float smat_covariance_diag(struct smat * cov, 
+			   int ndata, 
+			   const float * weight,
+			   const float * data,
+			   float * mean);

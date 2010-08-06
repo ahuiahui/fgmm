@@ -77,9 +77,9 @@ public :
   /**
    * Expectation Maximization Algorithm. 
    */
-  int Em(float * data,int len)
+  int Em(float * data,int len, float epsilon=1e-4)
   {
-    return fgmm_em(c_gmm,data,len,&likelihood,1e-4);
+    return fgmm_em(c_gmm,data,len,&likelihood,epsilon);
   };
 
 

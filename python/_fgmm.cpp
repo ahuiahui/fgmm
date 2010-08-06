@@ -55,7 +55,6 @@ Gmm_init_random(GMM * self,PyObject *args, PyObject *kwds)
   if( !PyArray_ISCONTIGUOUS(input_data) )
     {
       arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
-							
       new_arr = true;
     }
   else 
@@ -78,9 +77,12 @@ Gmm_doEm(GMM * self,PyObject * args, PyObject *kwds)
   PyObject * input_data;
   float * data;
   int data_size;
-  if( !PyArg_ParseTuple(args, "O", &input_data))
+  float epsilon = 1e-4;
+
+  if( !PyArg_ParseTuple(args, "O|f", &input_data,&epsilon))
     return NULL;
 
+  printf("delta epsilon %e\n",epsilon);
   PyArrayObject* arr=NULL;
   bool new_arr = false;
 
@@ -101,7 +103,7 @@ Gmm_doEm(GMM * self,PyObject * args, PyObject *kwds)
   data = (float *) PyArray_DATA(arr);
   data_size = PyArray_DIM(arr,0);
   
-  int steps = self->g->Em(data,data_size);
+  int steps = self->g->Em(data,data_size,epsilon);
   if(new_arr)
     Py_DECREF(arr);
   return PyInt_FromLong(steps);
@@ -171,7 +173,6 @@ Gmm_DoRegression(GMM * self, PyObject * args)
 { 
   PyObject * input_data;
   float * output;
-
   PyObject * output_data;
   if( ! PyArg_ParseTuple(args, "O", &input_data))
     return NULL;
@@ -275,6 +276,12 @@ Gmm_getMean(GMM * self,PyObject * args)
     return NULL;
 
   output = (float *) malloc(sizeof(float) * self->g->dim);
+
+  if(state > self->g->nstates) 
+    {
+      printf("Wrong index for GetMean, got %d out of %d\n",state,self->g->nstates);
+      return NULL;
+    }
   self->g->GetMean(state,output);
 
   npy_intp dims[1];

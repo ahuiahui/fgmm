@@ -119,6 +119,19 @@ void smat_identity(struct smat * mat)
     }
 }
 
+void smat_add_diagonal(struct smat * mat, float value)
+{
+  int i=0;
+  int j;
+  float * pmat = mat->_;
+  for(;i<mat->dim;i++)
+    {
+      *pmat += value;      
+      pmat += (mat->dim - i);
+    }
+}
+  
+
 /* print matrix to screen (for debug purposes ) */ 
 void smat_pmatrix(const struct smat* mat)
 {
@@ -130,7 +143,7 @@ void smat_pmatrix(const struct smat* mat)
 	printf("       ");
       for(;j<mat->dim;j++)
 	{
-	  printf("%.3f  ",*pmat);
+	  printf("%e  ",*pmat);
 	  pmat++;
 	}
       printf("\n");
@@ -311,7 +324,7 @@ float smat_covariance(struct smat * cov,
   const float * pdata = data;
   const float * pweight = weight;
   float * pcov = cov->_;
-  float cdata[cov->dim];
+  float cdata[cov->dim]; // fixme
   int i=0,j=0,k=0;
   smat_zero(&cov,cov->dim);
   float norm=0;
@@ -352,6 +365,73 @@ float smat_covariance(struct smat * cov,
 	}
       pweight++;
     }
+  for(i=0;i<cov->_size;i++)
+    cov->_[i] /= norm;
+  return norm;
+}
+
+float smat_covariance_diag(struct smat * cov, 
+			   int ndata, 
+			   const float * weight,
+			   const float * data,
+			   float * mean)
+{
+  const float * pdata = data;
+  const float * pweight = weight;
+  float * pcov = (float *) malloc(sizeof(float) * cov->dim);
+  float cdata[cov->dim];
+  float *pmat = cov->_;
+
+  int i=0,j=0,k=0;
+  smat_zero(&cov,cov->dim);
+  float norm=0;
+  for(i=0;i<cov->dim;i++)
+    {
+      mean[i] = 0.;
+      pcov[i] = 0.;
+    }
+  for(i=0;i<ndata;i++)
+    {
+      for(j=0;j<cov->dim;j++)
+	mean[j] += (*pweight)*(*pdata++);
+      norm += *pweight;
+      pweight++;
+    }
+  for(i=0;i<cov->dim;i++)
+    {
+      mean[i] /= norm;
+    }
+  pdata = data;
+  pweight = weight;
+  for(i=0;i<ndata;i++)
+    {      
+      pcov = cov->_;
+      for(j=0;j<cov->dim;j++)
+	{
+	  cdata[j] = (*pdata++) - mean[j];
+	}
+
+      j=0;
+      /*k=0;*/
+      for(j=0;j<cov->dim;j++)
+	{
+	  pcov[j] += (*pweight) * cdata[j]*cdata[j];
+	  /* *pcov += (*pweight)*cdata[j]*cdata[k]; */
+	  /* pcov++; */
+	  /* k++; */
+	  /* if(k==cov->dim) // next line */
+	  /*   k=++j; */
+	}
+      pweight++;
+    }
+
+  for(k=0;k<cov->dim;k++)
+    {
+      (*pmat++) = pcov[k];
+      for(j=k+1;j<cov->dim;j++)
+	(*pmat++) = 0.;
+    }
+
   for(i=0;i<cov->_size;i++)
     cov->_[i] /= norm;
   return norm;
