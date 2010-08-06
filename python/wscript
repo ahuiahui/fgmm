@@ -12,4 +12,5 @@ def build(bld) :
     bld(features="cxx cshlib pyext",
         source="_fgmm.cpp",
         target="fgmm",
-        uselib_local="fgmm")
+        uselib_local="fgmm",
+        install_path = '${PYTHONDIR}')
