@@ -30,6 +30,20 @@ def build(bld) :
 	    lib = ['m'],
 	    uselib_local="fgmm",
 	    install_path=False)
+
+    test_src_cpp = bld.path.ant_glob("test_*.cpp")
+    for src in test_src_cpp.split():
+        targ_name = os.path.basename(src)
+	targ_name = os.path.splitext(targ_name)[0]
+
+        bld(features = 'cxx cprogram',
+	    source = src,
+	    target = targ_name,
+	    includes = '.',
+	    lib = ['m'],
+	    uselib_local="fgmm",
+	    install_path=False)
+
     
     if bld.env.build_old_gmr :
         cpgmr = bld(features = 'cxx cprogram',
