@@ -110,6 +110,7 @@ void fgmm_regression(struct fgmm_reg * reg,
 		     float * covar)  // out covar  (reg->output_len ** 2/2)  /!\ alloc'd
 {
   float weight = 0;
+  float weights[reg->model->nstates];
   float weight2 = 0;
   /*float result[reg->output_len];*/
   //float tmp[reg->output_len];
@@ -132,23 +133,29 @@ void fgmm_regression(struct fgmm_reg * reg,
 
   for(;state<reg->model->nstates;state++)
     {
-      weight = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
+      weights[state] = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
       fgmm_regression_gaussian(&reg->subgauss[state],inputs,&loc_model);
 
       for(i=0;i<reg->output_len;i++)
-	result[i] += weight*loc_model.mean[i];
+	result[i] += weights[state] *loc_model.mean[i];
 
-      weight2 = weight*weight;
+      // weight2 = weight*weight;
+      likelihood += weights[state];
+    }
+  assert(likelihood > FLT_MIN);
+
       
-      if(covar != NULL)
+  if(covar != NULL)
+    {
+      for(state=0;state<reg->model->nstates;state++)
 	{
+	  weight2 = weights[state] / likelihood;
+	  weight2 *= weight2;
 	  for(i=0;i<loc_model.covar->_size;i++)
 	    covar[i] += weight2*loc_model.covar->_[i];
 	}
-
-      likelihood += weight;
     }
-  assert(likelihood > FLT_MIN);
+
   for(i=0;i<reg->output_len;i++)
     result[i] /= likelihood;
 
