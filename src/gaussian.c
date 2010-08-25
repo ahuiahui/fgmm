@@ -104,7 +104,7 @@ void invert_covar(struct gaussian* g)
 
       for(j=i+1;j<g->dim;j++)
 	{
-	  *chol++ = *pichol++;
+	  *pichol++ = *chol++;
 	}
     }
 
@@ -168,7 +168,7 @@ void gaussian_draw(struct gaussian * g, float * out)
   float tvec[g->dim];
   for(;i<g->dim;i++)
     tvec[i] = randn_boxmuller();
-  smat_multv(g->covar_cholesky,tvec,out);
+  smat_multv_lt(g->covar_cholesky,tvec,out);
   for(i=0;i<g->dim;i++)
     out[i] += g->mean[i];
 }

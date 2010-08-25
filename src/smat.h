@@ -37,12 +37,22 @@ void smat_free(struct smat ** mat);
 
 /**
  *  Matrix x Vector multiplication 
- *
+ *  When m is symetrical 
  *  out = m * v 
  */
 
 // fixme sous windows :: __inline__ 
 inline void smat_multv(const struct smat* m, const float * v,float * out);
+
+
+/**
+ *  Matrix x Vector multiplication 
+ *  When m is LOWER TRIANGULAR ( eg cholesky decomp of a covariance .. ) 
+ *  out = m * v 
+ */
+
+inline void smat_multv_lt(const struct smat* m, const float * v,float * out);
+
 
 /**
  *  _in place _ Matrix x float  multiplication 

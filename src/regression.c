@@ -8,6 +8,7 @@ void fgmm_regression_init_g(struct gaussian_reg * gr)
   int i,j;
   gr->subgauss = (struct gaussian *) malloc(sizeof(struct gaussian));
   gaussian_init(gr->subgauss,gr->input_len);
+  smat_cholesky(gr->gauss->covar, gr->gauss->covar_cholesky);
   gaussian_get_subgauss(gr->gauss,gr->subgauss,
 			gr->input_len,gr->input_dim);
   // reg_matrix = (Sigma^00)-1 * (Sigma^0i)

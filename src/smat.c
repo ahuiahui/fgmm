@@ -28,6 +28,22 @@ void smat_multv(const struct smat* m, const float * v,float * out)
     }
 }
 
+void smat_multv_lt(const struct smat* m, const float * v,float * out)
+{
+  float * pcoef = m->_;
+  int i,j;
+  for(i=0;i<m->dim;i++)
+    out[i] = 0;
+  for(i=0;i<m->dim;i++)
+    {
+      for(j=i;j<m->dim;j++)
+	{
+	  out[j] += *pcoef * v[i];
+	  pcoef++;
+	}
+    }
+}
+
 /* scales Matrix with a float :: 
 
    m = m*f 
