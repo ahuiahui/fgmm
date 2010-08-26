@@ -15,7 +15,25 @@ struct gaussian{
 /** compute the probability density at vector value 
     
     value should be at the same dimension than g->dim */
-inline float gaussian_pdf(struct gaussian* g, const float* value);
+inline float gaussian_pdf(struct gaussian* g, const float* x)
+{
+  float dist2;
+  float dist = smat_sesq(g->icovar_cholesky,g->mean,x);
+  dist *= .5;
+  
+  dist2 =  expf(-dist)/g->nfactor;
+  //dist = 0.2;
+  // returning zero here would give weird results for EM 
+  if( isnan(dist2))
+    {
+      printf("NaN gaussian pdf .. ");
+      printf(" %e %e \n ", dist, g->nfactor);
+    }
+  if(dist2 == 0)
+    dist2 = FLT_MIN;
+  return dist2;
+};
+
 
 /** alloc memory for the gaussian 
     and init it to zero with identity covariance matrix
@@ -36,7 +54,7 @@ void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
 			   int n_dim, int * dims);
 
 /** random sample from normal law ( mu = 0, sigma = 1. ) **/ 
-inline float randn_boxmuller();
+inline float randn_boxmuller( void );
 
 /** incremental mean/var update */
 void gaussian_update(struct gaussian * g, 

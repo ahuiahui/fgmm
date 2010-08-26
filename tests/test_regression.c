@@ -1,5 +1,6 @@
 #include "fgmm.h"
 //#include "regression.h"
+#define _USE_MATH_DEFINES  // force visual studio to define M_PI ... sigh .. 
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,11 +14,24 @@
 int main(int argc, char ** argv)
 {
  
-  srand ( time(NULL) );
   int data_len = 1000;
   int i=0;
   float * data = (float *)malloc( sizeof(float)*data_len*2);
+  struct gmm * gmm;
+  float likelihood;
+  struct fgmm_reg  * regression;
+  float input,output,cvar;
+  float error=0.;
+  float x,y;
+  float in[2];
+  float out[2];
+  float cov[3];
+  float gt[2];
+  float var = 0;
+  int test_points = 1000;
+  FILE * rfuke;
   
+  srand ( time(NULL) );
   // generating data : 
 
   for(;i<data_len;i++)
@@ -27,21 +41,17 @@ int main(int argc, char ** argv)
       // printf("%f %f \n",data[2*i],data[2*i+1]); 
     }
 
-  struct gmm * gmm;
   fgmm_alloc(&gmm,10,2);
   fgmm_init_random(gmm,data,data_len);
-  float likelihood;
+
   fgmm_em(gmm,data,data_len,&likelihood,1e-3);
   
   // fgmm_dump(&gmm);
 
-  struct fgmm_reg  * regression;
   
   fgmm_regression_alloc_simple(&regression, gmm, 1);
   fgmm_regression_init(regression);
 
-  float input,output,cvar;
-  float error=0.;
   for(i=0;i<100;i++)
     {
       input = ((float) i )/100;
@@ -56,13 +66,13 @@ int main(int argc, char ** argv)
   
   fgmm_free(&gmm);
   fgmm_regression_free(&regression);
+  exit(0);
   free(data);
-
+ 
   /* multidim 4 d data set */ 
   // data_len = 100000;
   data = malloc( sizeof(float) * data_len * 4);
  
-  float x,y;
   for(i=0;i<data_len;i++)
     {
       x = (M_PI*2 / 500) *  (rand()%500) ;
@@ -82,13 +92,7 @@ int main(int argc, char ** argv)
   fgmm_regression_init(regression);
 
   error = 0.;
-  float in[2];
-  float out[2];
-  float cov[3];
-  float gt[2];
-  FILE * rfuke = fopen("result.txt","w");
-  float var = 0;
-  int test_points = 1000;
+  //rfuke = fopen("result.txt","w");
   for(i=0;i<test_points;i++)
     {
       x = (M_PI*2 / 500) *  (rand()%500) ;
@@ -101,7 +105,7 @@ int main(int argc, char ** argv)
       
       gt[0] =   sin(x) + cos(y);
       gt[1] =   cos(2*x) - sin(y+2);
-      fprintf(rfuke,"%f %f %f %f %f %f \n",x,y,gt[0],gt[1],out[0],out[1]);
+      //fprintf(rfuke,"%f %f %f %f %f %f \n",x,y,gt[0],gt[1],out[0],out[1]);
 
       error += pow(out[0] - gt[0] ,2);
       error += pow(out[1] - gt[1] ,2);
@@ -112,7 +116,7 @@ int main(int argc, char ** argv)
   var /= test_points ;
   error = sqrtf(error);
   var = sqrtf(var);
-  fclose(rfuke);
+  //fclose(rfuke);
   printf("nRMS error on the 4d sine dataset :: %f\n",error);
   assert(error < .75);
   printf(".. pass \n");

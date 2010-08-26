@@ -16,9 +16,17 @@ int main(int argc, char ** argv)
   struct smat * check = NULL;
 
   float *pm1;
+  float * pmat;
 
   float a[DIM],b[DIM],c[DIM];
+  float sq[DIM * DIM]; 
   int i=0,j=0;
+  
+  
+  float tdata[DIM*COVAR_SAMPLE];
+  float weights[COVAR_SAMPLE];
+  float mean[DIM];
+  float norm;
   
   printf("testing smat_zero \n");
   smat_zero(&check,DIM);
@@ -41,7 +49,6 @@ int main(int argc, char ** argv)
   
   printf("testing to/from square \n");
   
-  float sq[DIM * DIM]; 
   smat_as_square(m1,sq);
   assert(sq[3*DIM + 3]==1.);
   assert(sq[3*DIM + 4]==0.);
@@ -79,7 +86,7 @@ int main(int argc, char ** argv)
   printf("..pass\n");
 
  
-  float * pmat = m1->_;
+  pmat = m1->_;
   for(i=0;i<DIM;i++)
     {
       for(j=i;j<DIM;j++)
@@ -130,9 +137,6 @@ int main(int argc, char ** argv)
 
    printf("checking smat_covariance ..\n");
 
-   float tdata[DIM*COVAR_SAMPLE];
-   float weights[COVAR_SAMPLE];
-   float mean[DIM];
    for(i=0;i<COVAR_SAMPLE;i++)
      {
        weights[i]=1.;
@@ -141,7 +145,8 @@ int main(int argc, char ** argv)
      {
        tdata[i] = (float)rand()*2/RAND_MAX ;
      }
-   float norm = smat_covariance(check,COVAR_SAMPLE,weights,tdata,mean);
+   
+   norm = smat_covariance(check,COVAR_SAMPLE,weights,tdata,mean);
 
    assert(fabs(norm - COVAR_SAMPLE) < 1e-5);
 

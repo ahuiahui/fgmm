@@ -1,7 +1,5 @@
 #include "gaussian.h"
 //#include "smat.h"
-#include <math.h>
-#include <stdlib.h>
 #include <float.h>
 #include <stdio.h>
 #include <assert.h>
@@ -9,8 +7,9 @@
 
 #define ranf() ( (float) rand())/RAND_MAX
 
+
 /* fast normal law generator */
-float randn_boxmuller()
+float randn_boxmuller( void )
 {
   float x1, x2, w;
   do {
@@ -28,8 +27,8 @@ float randn_boxmuller()
 /* check the inverse covariance computation */ 
 /* #define CHECK_INVERSE  */ 
 
-float gaussian_pdf(struct gaussian* g, const float* x)
-{
+//float gaussian_pdf(struct gaussian* g, const float* x)
+//{
   
   
   /* dist = -.5 * (x - mu)^T Sigma^-1 (x-mu) */
@@ -52,12 +51,12 @@ float gaussian_pdf(struct gaussian* g, const float* x)
     {
       dist += ivect[i]*cdata[i];
     }
-  */
   
+  float dist2;
   float dist = smat_sesq(g->icovar_cholesky,g->mean,x);
   dist *= .5;
   
-  float dist2 =  expf(-dist)/g->nfactor;
+  dist2 =  expf(-dist)/g->nfactor;
   //dist = 0.2;
   // returning zero here would give weird results for EM 
   if( isnan(dist2))
@@ -68,7 +67,7 @@ float gaussian_pdf(struct gaussian* g, const float* x)
   if(dist2 == 0)
     dist2 = FLT_MIN;
   return dist2;
-}
+}*/
 
 
 void dump(struct gaussian* g)
@@ -90,9 +89,10 @@ void invert_covar(struct gaussian* g)
 {
   float det=1.;
   int i=0,j=0;
+  float * pichol, * chol;
   smat_cholesky(g->covar,g->covar_cholesky);
-  float * pichol = g->icovar_cholesky->_;
-  float * chol = g->covar_cholesky->_;
+  pichol = g->icovar_cholesky->_;
+  chol = g->covar_cholesky->_;
 
   for(i=0;i<g->dim;i++)
     {
@@ -165,24 +165,26 @@ void init_random(struct gaussian3d* g)
 void gaussian_draw(struct gaussian * g, float * out)
 {
   int i=0;
-  float tvec[g->dim];
+  float * tvec;
+  tvec = (float *) malloc(g->dim * sizeof(float)); // irk, 
   for(;i<g->dim;i++)
     tvec[i] = randn_boxmuller();
   smat_multv_lt(g->covar_cholesky,tvec,out);
   for(i=0;i<g->dim;i++)
     out[i] += g->mean[i];
+  free(tvec);
 }
 
 void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
 			   int n_dim, int * dims)
 {
+  int i=0;
   if(result->dim != n_dim)
     {
       gaussian_free(result);
       gaussian_init(result,n_dim);
     }
-  smat_get_submatrix(g->covar,result->covar,n_dim,dims);
-  int i=0;
+  smat_get_submatrix(g->covar,result->covar,n_dim,dims);  
   for(;i<n_dim;i++)
     result->mean[i] = g->mean[dims[i]];
   invert_covar(result);

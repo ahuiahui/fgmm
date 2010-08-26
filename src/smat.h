@@ -2,6 +2,10 @@
     Awesome fast positive definite matrix computations .. 
     
     florent.dhalluin@epfl.ch */
+#define _USE_MATH_DEFINES  // force visual studio to define M_PI ... sigh .. 
+#include <math.h>
+#include <stdlib.h>
+#include <float.h>
     
 /**
  * stores Symetric matrices in a efficient way : 
@@ -10,6 +14,13 @@
  * m = 2 4 5    ->  m->_ = [ 1 2 3 4 5 6] 
  *     3 5 6
  */
+
+#ifdef _MSC_VER  // change inline keyword into __inline if compiling with visual studio
+	#define inline __inline
+	#define isnan(x) _isnan(x)
+#else 
+	#define inline inline
+#endif		
 
 struct smat {
   float * _; /* data is actually stored here */
@@ -41,9 +52,23 @@ void smat_free(struct smat ** mat);
  *  out = m * v 
  */
 
-// fixme sous windows :: __inline__ 
-inline void smat_multv(const struct smat* m, const float * v,float * out);
-
+inline void smat_multv(const struct smat* m, const float * v,float * out)
+{
+  float * pcoef = m->_;
+  int i,j;
+  for(i=0;i<m->dim;i++)
+    out[i] = 0;
+  for(i=0;i<m->dim;i++)
+    {
+      for(j=i;j<m->dim;j++)
+	{
+	  out[i] += *pcoef * v[j];
+	  if(j>i)
+	    out[j] += *pcoef * v[i];
+	  pcoef++;
+	}
+    }
+};
 
 /**
  *  Matrix x Vector multiplication 
@@ -51,13 +76,31 @@ inline void smat_multv(const struct smat* m, const float * v,float * out);
  *  out = m * v 
  */
 
-inline void smat_multv_lt(const struct smat* m, const float * v,float * out);
-
+inline void smat_multv_lt(const struct smat* m, const float * v,float * out)
+{
+  float * pcoef = m->_;
+  int i,j;
+  for(i=0;i<m->dim;i++)
+    out[i] = 0;
+  for(i=0;i<m->dim;i++)
+    {
+      for(j=i;j<m->dim;j++)
+	{
+	  out[j] += *pcoef * v[i];
+	  pcoef++;
+	}
+    }
+};
 
 /**
  *  _in place _ Matrix x float  multiplication 
  */
-inline void smat_multf(struct smat* m,const float *f);
+inline void smat_multf(struct smat* m,const float *f)
+{
+  int i=0;
+  for(i=0;i<m->_size;i++)
+    m->_[i] *= *f;
+};
 
 /**
  * get the value at row col if the matrix were stored as 
@@ -117,8 +160,8 @@ void smat_ttmult(const struct smat* tri, struct smat* out);
    smat_tbackward(U,tmp,y);
 */ 
 
-inline void smat_tforward(struct smat * lower, float * b, float * y) ;
-inline void smat_tbackward(const struct smat * upper, float * b, float * y);
+void smat_tforward(struct smat * lower, float * b, float * y) ;
+void smat_tbackward(const struct smat * upper, float * b, float * y);
 
 /**
  * computes sesquilinear form :
@@ -127,7 +170,29 @@ inline void smat_tbackward(const struct smat * upper, float * b, float * y);
  * ichol is actualy the cholesky decomposition of Sigma, where its value 
  * on the diagonal are inverted ... 
  */
-inline float smat_sesq(struct smat * ichol,const float * bias,const float * x);
+inline float smat_sesq(struct smat * ichol,const float * bias,const float * x)
+{
+  float out = 0.;
+  int i,j;
+  float * cdata; //[ichol->dim];
+  float * pichol = ichol->_;
+  
+  cdata = (float *) malloc(sizeof(float) * ichol->dim);
+  for(i=0;i<ichol->dim;i++)
+    cdata[i] = 0.;      
+  for(i=0;i<ichol->dim;i++)
+    {
+      cdata[i] += x[i] - bias[i];
+      cdata[i] *= *pichol++;
+      for(j=i+1;j<ichol->dim;j++)
+	{
+	  cdata[j] -= (*pichol++)*cdata[i];
+	}
+      out += cdata[i]*cdata[i];
+    }
+  free(cdata);
+  return out;
+};
 
 /**
  * compute the weighted covariance matrix of a given dataset

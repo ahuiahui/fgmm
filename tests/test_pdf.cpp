@@ -2,6 +2,8 @@
 #include <iostream>
 #include <assert.h>
 #include <math.h>
+#include <time.h>
+
 /** 
  * test case for non diagonal covariance matrices, (and c++ ) 
  *

@@ -13,11 +13,23 @@
 
 int main(int argc,char ** argv)
 {
-  srand(time(NULL));
-  printf("gaussian test suite, each test uses %d samples \n",randn_samples);
   int i;
   float vn=0;
   int sig_perc=0, sig3_perc=0;
+  struct gaussian g;
+  float v[] = {1.,1.,1.};
+  float pdf=0;
+  float samp[3];
+  float * data;
+  float * weights;
+  int k=0;
+  struct smat * cv=NULL;
+  float mean[3];
+  float * pcv;
+  
+  srand(time(NULL));
+  printf("gaussian test suite, each test uses %d samples \n",randn_samples);
+
   printf("box_muller testing :\n");
   for(i=0;i<randn_samples;i++)
     {
@@ -34,22 +46,17 @@ int main(int argc,char ** argv)
 
   /* ----------------------------------------------- */
   printf("simple gaussian pdf test :\n");
-  struct gaussian g;
   
   gaussian_init(&g,3);
   invert_covar(&g);
   assert(g.dim == 3);
-  float v[] = {1.,1.,1.};
-  float pdf = gaussian_pdf(&g,v);
+
+  pdf = gaussian_pdf(&g,v);
   assert(fabs(pdf - value) < 1e-5);
   printf("..pass \n");
   
   /* ----------------------------------------------- */
   printf("drawing sample from gaussian test :\n");
-  float samp[3];
-  float * data;
-  float * weights;
-  int k=0;
   data = (float *) malloc( sizeof(float) * randn_samples * 3);
   weights = (float *) malloc(sizeof(float) * randn_samples);
   for(i=0;i<randn_samples;i++)
@@ -62,13 +69,12 @@ int main(int argc,char ** argv)
 	  data[3*i+k] = samp[k];
 	}
     }
-  struct smat * cv=NULL;
-  float mean[3];
+
   smat_zero(&cv,3);
   smat_covariance(cv,randn_samples,weights,data,mean);
   //  smat_pmatrix(cv);
   /* checking covariance is identity */
-  float * pcv = cv->_;
+  pcv = cv->_;
   for(i=0;i<3;i++)
     {
       assert(fabs(mean[i]) < 1e-2);

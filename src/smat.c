@@ -10,6 +10,7 @@
  out = m * v 
 
 */
+/*
 void smat_multv(const struct smat* m, const float * v,float * out)
 {
   float * pcoef = m->_;
@@ -43,24 +44,27 @@ void smat_multv_lt(const struct smat* m, const float * v,float * out)
 	}
     }
 }
+*/
 
 /* scales Matrix with a float :: 
 
    m = m*f 
 */
 
+/*
 void smat_multf(struct smat* m,const float *f)
 {
   int i=0;
   for(i=0;i<m->_size;i++)
     m->_[i] *= *f;
-}
+}*/
 
 
 /* zero the matrix and does the memory initialisation */
 void smat_zero(struct smat ** mat,int dim)
 {
   struct smat * m = *mat;
+  int i;
   if(m==NULL)
     {
       m = (struct smat *) malloc ( sizeof(struct smat));
@@ -69,7 +73,6 @@ void smat_zero(struct smat ** mat,int dim)
       m->_ = (float *) malloc(sizeof(float)*m->_size);
       *mat = m;
     }
-  int i;
   for(i=0;i<m->_size;i++)
     m->_[i] = 0.;
 }
@@ -77,6 +80,8 @@ void smat_zero(struct smat ** mat,int dim)
 float smat_get_value(struct smat * mat,int row, int col)
 {
   int tmp;
+  int i=0;
+  int idx=0;
   assert((row < mat->dim ) && (col < mat->dim));
   if(row > col)
     {
@@ -84,8 +89,6 @@ float smat_get_value(struct smat * mat,int row, int col)
       row = col;
       col = tmp;
     }
-  int i=0;
-  int idx=0;
   for(;i<row;i++)
     {
       idx += mat->dim - i;
@@ -138,7 +141,6 @@ void smat_identity(struct smat * mat)
 void smat_add_diagonal(struct smat * mat, float value)
 {
   int i=0;
-  int j;
   float * pmat = mat->_;
   for(;i<mat->dim;i++)
     {
@@ -175,33 +177,36 @@ void smat_pmatrix(const struct smat* mat)
 
 void smat_cholesky(const struct smat* in,struct smat* out)
 {
-  assert(in->dim == out->dim);
-  float tmp[in->dim][in->dim];
+  float * tmp; //[in->dim][in->dim];
   int line=0;
   int col=0;
   int i;
   float ts=0;
   float *pout = out->_;
   float *pin = in->_;
+  assert(in->dim == out->dim);
+  tmp = (float *) malloc(sizeof(float) * in->dim * in->dim);
+  
   for(line=0;line<in->dim;line++)
     {
       ts = 0;
       for(i=0;i<line;i++)
-	  ts += tmp[i][line]*tmp[i][line];
+	  ts += tmp[i*in->dim + line]*tmp[i*in->dim + line];
       assert((*pin - ts) > 0.);
-      tmp[line][line] = *pout = sqrtf( *pin - ts);
+      tmp[line*in->dim + line] = *pout = sqrtf( *pin - ts);
       pout++;
       pin++;
       for(col=line+1;col<in->dim;col++)
 	{
 	  ts = 0.;
 	  for(i=0;i<line;i++)
-	    ts += tmp[i][line]*tmp[i][col];
-	  tmp[line][col] = *pout = (*pin - ts) / tmp[line][line];
+	    ts += tmp[i*in->dim + line]*tmp[i*in->dim + col];
+	  tmp[line*in->dim + col] = *pout = (*pin - ts) / tmp[line*in->dim + line];
 	  pin++;
 	  pout++;
 	}    
     }
+	free(tmp);
 }
 
 /* L^T * L  for a triang SUP matrix  */
@@ -211,9 +216,8 @@ void smat_ttmult(const struct smat* tri, struct smat* out)
   int didx=0;
   int oidx=0;
   int line=0;
-  smat_zero(&out,tri->dim);
   int linend = tri->dim - 1;
-
+  smat_zero(&out,tri->dim);
   for(didx=0;didx<tri->_size;didx++)
     {
       
@@ -237,12 +241,15 @@ void smat_ttmult(const struct smat* tri, struct smat* out)
  *  ichol is the cholesky decomposition of Sigma, with inverted diagonal 
  */
 
+ /*
 float smat_sesq(struct smat * ichol,const float * bias,const float * x)
 {
   float out = 0.;
   int i,j;
-  float cdata[ichol->dim];
+  float * cdata; //[ichol->dim];
   float * pichol = ichol->_;
+  
+  cdata = (float *) malloc(sizeof(float) * ichol->dim);
   for(i=0;i<ichol->dim;i++)
     cdata[i] = 0.;      
   for(i=0;i<ichol->dim;i++)
@@ -255,9 +262,10 @@ float smat_sesq(struct smat * ichol,const float * bias,const float * x)
 	}
       out += cdata[i]*cdata[i];
     }
+  free(cdata);
   return out;
 }
-  
+  */
 
 /* resolve  L*y = b 
    where L is * LOWER *  triangular */ 
@@ -340,10 +348,13 @@ float smat_covariance(struct smat * cov,
   const float * pdata = data;
   const float * pweight = weight;
   float * pcov = cov->_;
-  float cdata[cov->dim]; // fixme
+  float * cdata;
   int i=0,j=0,k=0;
-  smat_zero(&cov,cov->dim);
   float norm=0;
+  
+  smat_zero(&cov,cov->dim);
+  cdata = (float *) malloc(sizeof(float) * cov->dim);
+  
   for(i=0;i<cov->dim;i++)
     {
       mean[i] = 0.;
@@ -383,6 +394,7 @@ float smat_covariance(struct smat * cov,
     }
   for(i=0;i<cov->_size;i++)
     cov->_[i] /= norm;
+  free(cdata);
   return norm;
 }
 
@@ -394,13 +406,17 @@ float smat_covariance_diag(struct smat * cov,
 {
   const float * pdata = data;
   const float * pweight = weight;
-  float * pcov = (float *) malloc(sizeof(float) * cov->dim);
-  float cdata[cov->dim];
+  float * pcov;
+  float * cdata;
   float *pmat = cov->_;
 
   int i=0,j=0,k=0;
-  smat_zero(&cov,cov->dim);
   float norm=0;
+  
+  smat_zero(&cov,cov->dim);
+  cdata = (float *) malloc(sizeof(float) * cov->dim);
+  pcov = (float *) malloc(sizeof(float) * cov->dim);
+  
   for(i=0;i<cov->dim;i++)
     {
       mean[i] = 0.;
@@ -450,5 +466,8 @@ float smat_covariance_diag(struct smat * cov,
 
   for(i=0;i<cov->_size;i++)
     cov->_[i] /= norm;
+	
+  free(cdata);
+  free(pcov);
   return norm;
 }

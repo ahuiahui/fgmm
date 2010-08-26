@@ -23,9 +23,11 @@ float fgmm_e_step(struct gmm * GMM,
       /* E step */
   float log_lik=0;
   float like;
-  float pxi[GMM->nstates];
+  float * pxi;
   int data_i=0;
   int state_i;
+  
+  pxi = (float *) malloc(sizeof(float) * GMM->nstates);
   for(;data_i<data_len;data_i++)
     {
       like=0;
@@ -55,6 +57,7 @@ float fgmm_e_step(struct gmm * GMM,
 	}
 	  
     }
+  free(pxi);
   return log_lik;
 }
 
@@ -97,11 +100,12 @@ int fgmm_em( struct gmm * GMM,
   float * pix;
   float log_lik;
   int niter=0;
-  pix = (float *) malloc( sizeof(float) * data_length * GMM->nstates);
   float oldlik=0;
   float deltalik=0;
-  
   int state_i;
+  
+  pix = (float *) malloc( sizeof(float) * data_length * GMM->nstates);
+
   for(state_i=0;state_i<GMM->nstates;state_i++)
     {
       invert_covar(&GMM->gauss[state_i]);

@@ -41,7 +41,8 @@ void fgmm_init_random(struct gmm * gmm,
   int state_i =0;
   int i=0;
   int point_idx=0;
-  float weights[data_len];
+  float * weights;
+  weights = (float *) malloc(data_len * sizeof(float));
   for(i=0;i<data_len;i++)
     {
       weights[i] = 1.;
@@ -66,6 +67,7 @@ void fgmm_init_random(struct gmm * gmm,
 	}
       fgmm_set_prior(gmm,state_i,1./gmm->nstates);
     }
+  free(weights);
 }
 
 void fgmm_draw_sample(struct gmm * gmm, float * out)
