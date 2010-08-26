@@ -5,25 +5,6 @@
 #include <assert.h>
 
 
-#define ranf() ( (float) rand())/RAND_MAX
-
-
-/* fast normal law generator */
-float randn_boxmuller( void )
-{
-  float x1, x2, w;
-  do {
-    x1 = 2.0 * ranf() - 1.0;
-    x2 = 2.0 * ranf() - 1.0;
-    w = x1 * x1 + x2 * x2;
-  } while ( w >= 1.0 );
-
-  w = sqrt( (-2.0 * log( w ) ) / w );
-  x1 *= w;
-  /* x2 *= w */   /* 2nd indpdt gaussian */
-  return x1;
-}
-
 /* check the inverse covariance computation */ 
 /* #define CHECK_INVERSE  */ 
 
@@ -116,7 +97,7 @@ void invert_covar(struct gaussian* g)
       // almost non invertible gaussian :: lets add some noise
       g->nfactor = FLT_MIN;
       smat_add_diagonal(g->covar, 1.);
-      printf("determinant :: %e %e \n", det);
+      printf("determinant :: %e\n", det);
       invert_covar(g);
       //exit(0);
     }

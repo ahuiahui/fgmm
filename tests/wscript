@@ -27,7 +27,7 @@ def build(bld) :
 	    source = src,
 	    target = targ_name,
 	    includes = '.',
-	    #lib = ['m'],
+	    uselib = ['M'],
 	    uselib_local="fgmm",
 	    install_path=False)
 
@@ -40,7 +40,7 @@ def build(bld) :
 	    source = src,
 	    target = targ_name,
 	    includes = '.',
-	   # lib = ['m'],
+	    uselib = ['M'],
 	    uselib_local="fgmm",
 	    install_path=False)
 

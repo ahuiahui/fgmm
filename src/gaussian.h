@@ -24,11 +24,11 @@ inline float gaussian_pdf(struct gaussian* g, const float* x)
   dist2 =  expf(-dist)/g->nfactor;
   //dist = 0.2;
   // returning zero here would give weird results for EM 
-  if( isnan(dist2))
+  /* if( isnan(dist2))
     {
       printf("NaN gaussian pdf .. ");
       printf(" %e %e \n ", dist, g->nfactor);
-    }
+      }*/
   if(dist2 == 0)
     dist2 = FLT_MIN;
   return dist2;
@@ -53,8 +53,25 @@ void gaussian_draw(struct gaussian* g, float * out);
 void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
 			   int n_dim, int * dims);
 
+#define ranf() ( (float) rand())/RAND_MAX
+
 /** random sample from normal law ( mu = 0, sigma = 1. ) **/ 
-inline float randn_boxmuller( void );
+inline float randn_boxmuller( void )
+{
+  float x1, x2, w;
+  do {
+    x1 = 2.0 * ranf() - 1.0;
+    x2 = 2.0 * ranf() - 1.0;
+    w = x1 * x1 + x2 * x2;
+  } while ( w >= 1.0 );
+
+  w = sqrt( (-2.0 * log( w ) ) / w );
+  x1 *= w;
+  /* x2 *= w */   /* 2nd indpdt gaussian */
+  return x1;
+};
+
+
 
 /** incremental mean/var update */
 void gaussian_update(struct gaussian * g, 

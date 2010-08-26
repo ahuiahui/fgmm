@@ -116,7 +116,6 @@ void fgmm_regression(struct fgmm_reg * reg,
 		     float * result, // outputs    (reg->output_len) /!\ alloc'd by user
 		     float * covar)  // out covar  (reg->output_len ** 2/2)  /!\ alloc'd
 {
-  float weight = 0;
   float * weights;
   float weight2 = 0;
   /*float result[reg->output_len];*/

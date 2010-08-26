@@ -50,11 +50,13 @@ def configure(conf) :
     #print "configuring"
     conf.check_tool('compiler_cc')  
     if Options.options.debug :
-        conf.env.CCFLAGS = ['-Wall','-g'] 
+        conf.env.CCFLAGS = conf.env.CCFLAGS_DEBUG
+        if conf.env.CC_NAME == "gcc" :
+            conf.env.CCFLAGS.append("-Wall")
     else :
-        conf.env.CCFLAGS = ['-Wall','-O3','--fast-math']
-        conf.env.CPPFLAGS = ['-DNDEBUG'] # no more asserts.. 
-
+        if conf.env.CC_NAME ==  "gcc" :
+            conf.env.CCFLAGS = ['-Wall','-O3','--fast-math']
+            conf.env.CPPFLAGS = ['-DNDEBUG'] # no more asserts.. 
     if Options.options.use_gprof :
         conf.env.CCFLAGS.append('-pg')
         conf.env.LINKFLAGS = ['-pg']
@@ -69,6 +71,8 @@ def configure(conf) :
     
     if Options.options.matlab or Options.options.octave :
         conf.recurse("matlab")
+
+    conf.check_cc(lib='m', uselib_store='M') # looking for libm (no need with msvc) 
 
 def build(bld) :
     bld.recurse("src")

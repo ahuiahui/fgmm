@@ -1,7 +1,11 @@
+#ifndef _SMAT_H_
+#define _SMAT_H_
+
 /** 
     Awesome fast positive definite matrix computations .. 
     
     florent.dhalluin@epfl.ch */
+
 #define _USE_MATH_DEFINES  // force visual studio to define M_PI ... sigh .. 
 #include <math.h>
 #include <stdlib.h>
@@ -19,7 +23,7 @@
 	#define inline __inline
 	#define isnan(x) _isnan(x)
 #else 
-	#define inline inline
+	#define inline static inline
 #endif		
 
 struct smat {
@@ -216,3 +220,6 @@ float smat_covariance_diag(struct smat * cov,
 			   const float * weight,
 			   const float * data,
 			   float * mean);
+
+
+#endif /* _SMAT_H_ */
