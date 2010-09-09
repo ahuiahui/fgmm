@@ -3,35 +3,46 @@
 
 /* The gateway function */
 /*
- * (pi,mean,sigma) = EM(data, nstates) 
+ * (pi,mean,sigma) = gmm_em(data, nstates)  -> random shitty init
+ * (pi,mu,sigma) = gmm_em(data, nstates ,  Priors, Mu  , Sigma)
  */
 
 void mexFunction( int nlhs, mxArray *plhs[],
                   int nrhs, const mxArray *prhs[])
 {
   double * indata;
-  if(nrhs != 2) 
+
+  double * in_priors;
+  double * in_means;
+  double * in_sigmas;
+
+  short initialize = 0;
+  if(!(nrhs == 2 || nrhs == 5) )
     {
-      mexErrMsgIdAndTxt("EM","Two inputs required. data and number of states");
+      mexErrMsgIdAndTxt("EM","Two inputs required. data number of states");
     }
-  
+
+  if(nrhs == 5)
+    initialize = 1;
+
   if(nlhs != 3) 
     {
-      mexErrMsgIdAndTxt("EM","Two outputs required. data and number of states");
+      mexErrMsgIdAndTxt("EM","Three outputs required. [Priors, Means , Sigmas]");
     }
 
   
   indata = mxGetPr(prhs[0]);
 
   int nstates = (int) mxGetScalar(prhs[1]);
-  mwSize dim = mxGetN(prhs[0]);
-  mwSize len_data = mxGetM(prhs[0]);
+  mwSize dim = mxGetM(prhs[0]);
+  mwSize len_data = mxGetN(prhs[0]);
 
   
   
   float * fdata = (float *) malloc( dim*len_data*sizeof(float));
   int i = 0;
   int j = 0;
+  int k = 0;
   for(i=0;i<dim*len_data;i++)
     fdata[i] = (float) indata[i];
 
@@ -39,6 +50,37 @@ void mexFunction( int nlhs, mxArray *plhs[],
   
   fgmm_alloc(&GMM,nstates,dim);
   fgmm_init_random(GMM,fdata,len_data);
+
+  float * _mu;
+  float * _sigma;
+  if(initialize)
+    {
+
+      in_priors = mxGetPr(prhs[2]);
+      in_means = mxGetPr(prhs[3]);
+      in_sigmas = mxGetPr(prhs[4]);
+      
+      _mu = (float *) malloc(sizeof(float) * dim);
+      _sigma = (float *) malloc(sizeof(float) * dim * dim);
+
+      for(i=0;i<nstates;i++)
+	{
+	  for(j=0;j<dim;j++)
+	    {
+	      _mu[j] = (float) in_means[i*dim + j];
+	      for(k=0;k<dim;k++)
+		_sigma[j*dim + k] = (float) in_sigmas[i*dim*dim + j*dim + k];
+	    }
+
+	  fgmm_set_prior(GMM,i, (float) in_priors[i]);
+	  fgmm_set_mean(GMM,i, _mu);
+	  fgmm_set_covar(GMM,i,_sigma);
+	  
+	}
+      free(_mu);
+      free(_sigma);
+    }
+	  
   float like;
   fgmm_em(GMM,fdata,len_data,&like,1e-4);
   
@@ -56,7 +98,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
     {
       cmean = fgmm_get_mean(GMM,i);
       for(j=0;j<dim;j++)
-	  means[i*dim + j] = (double) cmean[j];
+	{
+	  means[i + j*nstates] = (double) cmean[j];
+	}
     }
   mwSize sig_dims[3];
 
