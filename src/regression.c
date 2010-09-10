@@ -76,7 +76,9 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
   // result->covar = gr->gauss->covar - gr->reg_matrix *  (gr->subgauss->covar)^-1 gr->reg_matrix
   for(i=0;i<result->covar->_size;i++)
     {
-      result->covar->_[i] = gr->gauss->covar->_[i];
+      int index = gr->output_dim[i]*(gr->input_len+gr->output_len+1) - \
+	         (gr->output_dim[i]+1)*gr->output_dim[i]/2;
+      result->covar->_[i] = gr->gauss->covar->_[index];
     }
 
   for(i=0 ; i<gr->output_len ; i++)
@@ -96,7 +98,7 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
 	for(k=0;k<gr->input_len;k++) // scalar product here 
 	  element += gr->reg_matrix[i*gr->input_len + k]*tmp[k];
 	// column wise filling .. 
-	result->covar->_[i+off] += element;
+	result->covar->_[i+off] -= element;
 	off += (gr->input_len - j - 1); 
       }
   }
@@ -126,7 +128,7 @@ void fgmm_regression(struct fgmm_reg * reg,
   float likelihood = 0;
   int state = 0;
   int i=0;
-  
+  float ** covs  = NULL;
   weights = (float *) malloc(sizeof(float) * reg->model->nstates);
   gaussian_init(&loc_model,reg->output_len);	
   for(i=0;i<reg->output_len;i++)
@@ -136,6 +138,7 @@ void fgmm_regression(struct fgmm_reg * reg,
     {
       for(i=0;i<loc_model.covar->_size;i++)
 	covar[i] = 0.;
+      covs = (float **) malloc(sizeof(float *) * reg->model->nstates);
     }
 
   for(;state<reg->model->nstates;state++)
@@ -145,13 +148,17 @@ void fgmm_regression(struct fgmm_reg * reg,
 
       for(i=0;i<reg->output_len;i++)
 	result[i] += weights[state] *loc_model.mean[i];
-
+      if(covar != NULL)
+	{
+	  covs[state] = (float *) malloc(sizeof(float) * loc_model.covar->_size);
+	  for(i=0;i<loc_model.covar->_size;i++) 
+	    covs[state][i] = loc_model.covar->_[i];
+	}
       // weight2 = weight*weight;
       likelihood += weights[state];
     }
   assert(likelihood > FLT_MIN);
 
-      
   if(covar != NULL)
     {
       for(state=0;state<reg->model->nstates;state++)
@@ -159,10 +166,14 @@ void fgmm_regression(struct fgmm_reg * reg,
 	  weight2 = weights[state] / likelihood;
 	  weight2 *= weight2;
 	  for(i=0;i<loc_model.covar->_size;i++)
-	    covar[i] += weight2*loc_model.covar->_[i];
+ 	    covar[i] += weight2*covs[state][i];
 	}
+       
+      for(i=0;i<reg->model->nstates;i++) 
+	free(covs[i]);
+      free(covs);    
     }
-
+  
   for(i=0;i<reg->output_len;i++)
     result[i] /= likelihood;
 
