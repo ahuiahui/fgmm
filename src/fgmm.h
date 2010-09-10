@@ -203,14 +203,20 @@ void fgmm_draw_sample(struct gmm *, float * out);
  *               the k-th training point is data[dim*k]..data[dim*(k+1)] 
  * @param data_length : number of training points 
  * @param end_loglikelihood : will be set to the final loglikelihood 
- * @param likelihood_epsilon : if the loglikelihood variation is below this threshold, stops here
+ * @param likelihood_epsilon : if the loglikelihood variation is below 
+ *        this threshold, stops here
+ * @param weights : if not NULL, will perform the weighted variant of EM. 
+ *                  weight must then be an allocated array of 
+ *                  size data_length
+ *
  * @return : The number of iterations 
  */
 int fgmm_em( struct gmm * GMM,
 	     const float * data,
 	     int data_length, 
 	     float * end_loglikelihood,
-	     float likelihood_epsilon);
+	     float likelihood_epsilon,
+	     const float * weights);
 
 /**
  * return likelihood of point

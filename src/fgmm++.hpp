@@ -79,7 +79,7 @@ public :
    */
   int Em(float * data,int len, float epsilon=1e-4)
   {
-    return fgmm_em(c_gmm,data,len,&likelihood,epsilon);
+    return fgmm_em(c_gmm,data,len,&likelihood,epsilon,NULL);
   };
 
 

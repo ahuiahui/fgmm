@@ -95,7 +95,8 @@ int fgmm_em( struct gmm * GMM,
 	     const float * data,
 	     int data_length, 
 	     float * end_loglikelihood,
-	     float likelihood_epsilon)
+	     float likelihood_epsilon,
+	     const float * weights) // if not NULL, weighted version .. 
 {
   float * pix;
   float log_lik;
@@ -103,6 +104,7 @@ int fgmm_em( struct gmm * GMM,
   float oldlik=0;
   float deltalik=0;
   int state_i;
+  int d=0;
   
   pix = (float *) malloc( sizeof(float) * data_length * GMM->nstates);
 
@@ -127,6 +129,16 @@ int fgmm_em( struct gmm * GMM,
       if(fabs(deltalik) < likelihood_epsilon)
 	break;
       
+      if(weights != NULL) 
+	{
+	  for(d=0;d<data_length;d++)
+	    {
+	      for(state_i=0;state_i< GMM->nstates; state_i++)
+		pix[d*GMM->nstates + state_i] *= weights[d];
+		
+	    }
+	}
+
       fgmm_m_step(GMM,data,data_length,pix);
       //      pdata = data;
     }

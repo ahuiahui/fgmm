@@ -94,7 +94,7 @@ int main(int argc,char ** argv)
 #ifndef _MSC_VER
   struct timeval t1,t2;
   gettimeofday(&t1,NULL);
-  iterations = fgmm_em(GMM,data,n_data,&lik,1e-4);
+  iterations = fgmm_em(GMM,data,n_data,&lik,1e-4,NULL);
   gettimeofday(&t2,NULL);
   timersub(&t2,&t1,&t1);
   printf("%f ms / iterations\n",(t1.tv_sec*1000. + t1.tv_usec*.001)/iterations);
