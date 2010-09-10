@@ -3,8 +3,10 @@
 
 /* The gateway function */
 /*
- * (pi,mean,sigma) = gmm_em(data, nstates)  -> random shitty init
- * (pi,mu,sigma) = gmm_em(data, nstates ,  Priors, Mu  , Sigma)
+ * (pi,mean,sigma) = gmm_em(data, nstates , weights)  -> random shitty init
+ * (pi,mu,sigma,lik) = gmm_em(data, nstates , weights,  Priors, Mu  , Sigma)
+ * 
+ * if weights is not empty : weighted em
  */
 
 void mexFunction( int nlhs, mxArray *plhs[],
@@ -15,9 +17,11 @@ void mexFunction( int nlhs, mxArray *plhs[],
   double * in_priors;
   double * in_means;
   double * in_sigmas;
+  
+  float * weights;
 
   short initialize = 0;
-  if(!(nrhs == 2 || nrhs == 5) )
+  if(!(nrhs == 3 || nrhs == 6) )
     {
       mexErrMsgIdAndTxt("EM","Two inputs required. data number of states");
     }
@@ -25,7 +29,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
   if(nrhs == 5)
     initialize = 1;
 
-  if(nlhs != 3) 
+  if(nlhs < 3) 
     {
       mexErrMsgIdAndTxt("EM","Three outputs required. [Priors, Means , Sigmas]");
     }
@@ -36,13 +40,27 @@ void mexFunction( int nlhs, mxArray *plhs[],
   int nstates = (int) mxGetScalar(prhs[1]);
   mwSize dim = mxGetM(prhs[0]);
   mwSize len_data = mxGetN(prhs[0]);
-
-  
-  
+  mwSize len_weights = mxGetN(prhs[2]);
+ 
   float * fdata = (float *) malloc( dim*len_data*sizeof(float));
   int i = 0;
   int j = 0;
   int k = 0;
+ 
+  if(len_weights == 0)
+    weights = NULL;
+  else
+    {
+      if(len_weights != len_data)
+	{
+	  mexErrMsgIdAndTxt("EM","Weights vector has not the same size as dataset .. ");
+	}
+      weights = (float *) malloc(sizeof(float) * len_data);
+      double * _weights = mxGetPr(prhs[2]);
+      for(i=0;i<len_data;i++)
+	weights[i] = (float) _weights[i];
+    }
+
   for(i=0;i<dim*len_data;i++)
     fdata[i] = (float) indata[i];
 
@@ -56,9 +74,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
   if(initialize)
     {
 
-      in_priors = mxGetPr(prhs[2]);
-      in_means = mxGetPr(prhs[3]);
-      in_sigmas = mxGetPr(prhs[4]);
+      in_priors = mxGetPr(prhs[3]);
+      in_means = mxGetPr(prhs[4]);
+      in_sigmas = mxGetPr(prhs[5]);
       
       _mu = (float *) malloc(sizeof(float) * dim);
       _sigma = (float *) malloc(sizeof(float) * dim * dim);
@@ -82,7 +100,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
 	  
   float like;
-  fgmm_em(GMM,fdata,len_data,&like,1e-4);
+  fgmm_em(GMM,fdata,len_data,&like,1e-4,weights);
   
   plhs[0] = mxCreateDoubleMatrix(1,nstates,mxREAL); 
   double * priors = mxGetPr(plhs[0]);
@@ -109,6 +127,9 @@ void mexFunction( int nlhs, mxArray *plhs[],
   sig_dims[2] = nstates;
 
   plhs[2] = mxCreateNumericArray(3, sig_dims , mxDOUBLE_CLASS,mxREAL); 
+
+  if(nlhs >= 4)
+    plhs[3] = mxCreateDoubleScalar(like);
 
   float fsigma[dim*dim];
   double * sigma = mxGetPr(plhs[2]);
