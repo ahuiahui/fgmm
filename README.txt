@@ -53,18 +53,28 @@ Matlab/Octave wrappers
 
 For now I just wrapped the EM algorithm 
 
-compile with 
-./waf configure [--matlab | --octave]  
-./waf
+* requirements : 
 
-get the mex files in the _build_/default/matlab/ 
+tested with octave 3.2.3 and matlab  7.10.0
+with octave you'll need the octave-dev packages 
+
+* compile with 
+
+> ./waf configure [--matlab | --octave]  
+> ./waf
+
+get the mex(glx) files in the _build_/default/matlab/ 
 and put them wherever you want matlab/octave to find
-them. 
+them. (ie somewhere in the path : /usr/share/octave/packages/
+the pwd .. ) 
 
-use with 
+* usage :  (see also matlab/test_em.m) 
 
 (my data is  n datapointx x dim , you want a 8 state GMM) 
 
-[priors,mu,Sigmas] = fgmm_em(my_data, 8)  
+[priors,mu,Sigmas,likelihood] = fgmm_em(data, number_of_state, weights, 
+			                initial_priors, mu , sigmas)  
 
-This does a random initialization + EM run. 
+if weights is empty ( [] ) assume all all points have 1. for weights.
+initial parameters are optionals, in that case a random initialization 
+is performed and may lead to strange results. 
