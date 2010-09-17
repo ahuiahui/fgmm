@@ -27,5 +27,8 @@ generate_data(3,2)
 subprocess.call(["./test_smat"])
 subprocess.call(["./test_gaussian"])
 subprocess.call(["./test_em","test.txt","6"])
+print "********"
+print " -> kmenas"
+subprocess.call(["./test_kmeans","test.txt","6"])
 subprocess.call(["./test_regression"])
 subprocess.call(["./test_pdf"])

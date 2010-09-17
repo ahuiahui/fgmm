@@ -65,6 +65,11 @@ public :
     fgmm_init_random(c_gmm,data,len);
   };
 
+  void initKmeans(float * data,int len)
+  {
+    fgmm_init_kmeans(c_gmm,data,len);
+  };
+
 
   /**
    * Just print the model's parameter on stdout

@@ -107,6 +107,10 @@ void fgmm_init_random(struct gmm * gmm,
 		     const float * data,
 		     int data_len);
 
+
+void fgmm_init_kmeans( struct gmm * gmm,
+		       const float * data,
+		       int data_len);
 /**
  * set the prior of a given state 
  *
@@ -217,6 +221,13 @@ int fgmm_em( struct gmm * GMM,
 	     float * end_loglikelihood,
 	     float likelihood_epsilon,
 	     const float * weights);
+
+
+int fgmm_kmeans( struct gmm * GMM,
+		 const float * data,
+		 int data_length,
+		 float epsilon,
+		 const float * weights);
 
 /**
  * return likelihood of point

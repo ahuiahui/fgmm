@@ -70,6 +70,26 @@ void fgmm_init_random(struct gmm * gmm,
   free(weights);
 }
 
+
+void fgmm_init_kmeans(struct gmm * gmm,
+		     const float * data,
+		     int data_len)
+{
+  int state_i =0;
+  int i=0;
+  int point_idx=0;
+
+  for(;state_i < gmm->nstates;state_i++)
+    {
+      point_idx = rand()%data_len;
+      fgmm_set_mean(gmm,state_i,&data[point_idx*gmm->dim]);
+      fgmm_set_prior(gmm,state_i,1./gmm->nstates);
+    }
+
+  fgmm_kmeans(gmm, data, data_len, 1e-3, NULL);
+}
+
+
 void fgmm_draw_sample(struct gmm * gmm, float * out)
 {
   int st=-1;
