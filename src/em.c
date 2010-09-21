@@ -64,7 +64,8 @@ float fgmm_e_step(struct gmm * GMM,
 void fgmm_m_step(struct gmm * GMM,
 		 const float * data,
 		 int data_len,
-		 float * pix)
+		 float * pix,
+		 int * reestimate_flag)
 {
   int state_i,k;
   int random_point = 0;
@@ -86,6 +87,7 @@ void fgmm_m_step(struct gmm * GMM,
 	  random_point = rand()%data_len;
 	  for(k=0;k<GMM->dim;k++)
 	    GMM->gauss[state_i].mean[k] = data[random_point*GMM->dim + k];
+	  *reestimate_flag = 1; // then we shall restimate mean/covar of this cluster
 	}
       else
 	{
@@ -117,7 +119,8 @@ int fgmm_em( struct gmm * GMM,
   float deltalik=0;
   int state_i;
   int d=0;
-  
+  int reestimate_flag=0; // shall we do one more iteration ??
+
   pix = (float *) malloc( sizeof(float) * data_length * GMM->nstates);
 
   for(state_i=0;state_i<GMM->nstates;state_i++)
@@ -128,7 +131,7 @@ int fgmm_em( struct gmm * GMM,
 
   for(niter=0;niter<max_iter;niter++)
     {
-      
+      reestimate_flag = 0;
       log_lik = fgmm_e_step(GMM,data,data_length,pix);
       log_lik/=data_length;
       #ifndef NDEBUG 
@@ -138,7 +141,7 @@ int fgmm_em( struct gmm * GMM,
       deltalik = log_lik - oldlik;
       oldlik = log_lik;
       
-      if(fabs(deltalik) < likelihood_epsilon)
+      if(fabs(deltalik) < likelihood_epsilon && !reestimate_flag)
 	break;
       
       if(weights != NULL) 
@@ -151,7 +154,7 @@ int fgmm_em( struct gmm * GMM,
 	    }
 	}
 
-      fgmm_m_step(GMM,data,data_length,pix);
+      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag);
       //      pdata = data;
     }
   if(end_loglikelihood != NULL)
@@ -240,7 +243,8 @@ int fgmm_kmeans( struct gmm * GMM,
   float deltalik=0;
   int state_i;
   int d=0;
-  
+  int reestimate_flag = 0;
+
   pix = (float *) malloc( sizeof(float) * data_length * GMM->nstates);
 
   for(state_i=0;state_i<GMM->nstates;state_i++)
@@ -251,7 +255,7 @@ int fgmm_kmeans( struct gmm * GMM,
 
   for(niter=0;niter<max_iter;niter++)
     {
-      
+      reestimate_flag = 0;
       total_distance = fgmm_kmeans_e_step(GMM,data,data_length,pix);
       total_distance/=data_length;
       #ifndef NDEBUG 
@@ -261,7 +265,7 @@ int fgmm_kmeans( struct gmm * GMM,
       deltalik = total_distance - oldlik;
       oldlik = total_distance;
       
-      if(fabs(deltalik) < likelihood_epsilon)
+      if(fabs(deltalik) < likelihood_epsilon && !reestimate_flag)
 	break;
       
       if(weights != NULL) 
@@ -274,7 +278,7 @@ int fgmm_kmeans( struct gmm * GMM,
 	    }
 	}
       // the song remains the same .. 
-      fgmm_m_step(GMM,data,data_length,pix);
+      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag);
     }
 
   free(pix);
