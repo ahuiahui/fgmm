@@ -1,7 +1,8 @@
+#include <stdlib.h>
 #include "fgmm.h"
 #include "gaussian.h"
 #include <stdio.h>
-#include <stdlib.h>
+
 
 void fgmm_alloc(struct gmm ** gmm,int nstates,int dim)
 {

@@ -1,6 +1,7 @@
+#include <stdlib.h>
 #include "fgmm.h"
 #include "gaussian.h"
-#include <stdlib.h>
+
 
 void fgmm_update(struct gmm * gmm,const float * data_point)
 {

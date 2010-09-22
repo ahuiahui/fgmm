@@ -1,6 +1,6 @@
+#include <stdlib.h>
 #include "fgmm.h"
 #include "gaussian.h"
-#include <stdlib.h>
 #include <math.h> // isinf , isnan 
 #include <float.h>
 #include <stdio.h>
@@ -65,7 +65,8 @@ void fgmm_m_step(struct gmm * GMM,
 		 const float * data,
 		 int data_len,
 		 float * pix,
-		 int * reestimate_flag)
+		 int * reestimate_flag,
+		 enum COVARIANCE_TYPE covar_t)
 {
   int state_i,k;
   int random_point = 0;
@@ -75,11 +76,33 @@ void fgmm_m_step(struct gmm * GMM,
       for(k=0;k<GMM->dim;k++)
 	GMM->gauss[state_i].mean[k] = 0;
 
-      GMM->gauss[state_i].prior = smat_covariance(GMM->gauss[state_i].covar,
-						  data_len,
-						  &pix[state_i*data_len],
-						  data,
-						  GMM->gauss[state_i].mean);
+      switch(covar_t)
+	{
+	case COVARIANCE_DIAG :
+	  GMM->gauss[state_i].prior = smat_covariance_diag(GMM->gauss[state_i].covar,
+							   data_len,
+							   &pix[state_i*data_len],
+							   data,
+							   GMM->gauss[state_i].mean);
+	  break;
+
+	case COVARIANCE_SPHERE :
+	  GMM->gauss[state_i].prior = smat_covariance_single(GMM->gauss[state_i].covar,
+							     data_len,
+							     &pix[state_i*data_len],
+							     data,
+							     GMM->gauss[state_i].mean);
+	  break;
+	  
+	default :
+	  GMM->gauss[state_i].prior = smat_covariance(GMM->gauss[state_i].covar,
+						      data_len,
+						      &pix[state_i*data_len],
+						      data,
+						      GMM->gauss[state_i].mean);
+	  break;
+	}
+
 
       // If no point belong to us, reassign to a random one .. 
       if(GMM->gauss[state_i].prior == 0)
@@ -110,6 +133,7 @@ int fgmm_em( struct gmm * GMM,
 	     int data_length, 
 	     float * end_loglikelihood,
 	     float likelihood_epsilon,
+	     enum COVARIANCE_TYPE covar_t,
 	     const float * weights) // if not NULL, weighted version .. 
 {
   float * pix;
@@ -154,7 +178,7 @@ int fgmm_em( struct gmm * GMM,
 	    }
 	}
 
-      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag);
+      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag,covar_t);
       //      pdata = data;
     }
   if(end_loglikelihood != NULL)
@@ -278,7 +302,7 @@ int fgmm_kmeans( struct gmm * GMM,
 	    }
 	}
       // the song remains the same .. 
-      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag);
+      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag,COVARIANCE_SPHERE);
     }
 
   free(pix);

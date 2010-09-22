@@ -197,7 +197,14 @@ void fgmm_dump(struct gmm * gmm);
 void fgmm_draw_sample(struct gmm *, float * out);
 
 
-#define loglikelihood_eps 1e-4
+enum COVARIANCE_TYPE 
+  {
+    COVARIANCE_FULL,  // full covariance matrix
+    COVARIANCE_DIAG,  // diagonal covariance matrix
+    COVARIANCE_SPHERE // "sphered" covariance (ie same value over the diagonal
+  };
+
+//#define loglikelihood_eps 1e-4
 
 /**
  * EM algorithm 
@@ -209,18 +216,29 @@ void fgmm_draw_sample(struct gmm *, float * out);
  * @param end_loglikelihood : will be set to the final loglikelihood 
  * @param likelihood_epsilon : if the loglikelihood variation is below 
  *        this threshold, stops here
+ * @param covar_t : how would you like your covariance today ?? 
  * @param weights : if not NULL, will perform the weighted variant of EM. 
  *                  weight must then be an allocated array of 
  *                  size data_length
  *
  * @return : The number of iterations 
  */
+
 int fgmm_em( struct gmm * GMM,
 	     const float * data,
 	     int data_length, 
 	     float * end_loglikelihood,
 	     float likelihood_epsilon,
+	     enum COVARIANCE_TYPE covar_t,
 	     const float * weights);
+
+
+static int fgmm_em_simple(struct gmm * GMM, const float * data, int data_length)
+{
+  float nevermind=0;
+  return fgmm_em(GMM,data,data_length,
+		 &nevermind, 1e-4, COVARIANCE_FULL, NULL);
+};
 
 
 int fgmm_kmeans( struct gmm * GMM,

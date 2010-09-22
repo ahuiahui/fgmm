@@ -82,9 +82,10 @@ public :
   /**
    * Expectation Maximization Algorithm. 
    */
-  int Em(float * data,int len, float epsilon=1e-4)
+  int Em(float * data,int len, 
+	 float epsilon=1e-4, enum COVARIANCE_TYPE covar_t = COVARIANCE_FULL)
   {
-    return fgmm_em(c_gmm,data,len,&likelihood,epsilon,NULL);
+    return fgmm_em(c_gmm,data,len,&likelihood,epsilon,covar_t,NULL);
   };
 
 
