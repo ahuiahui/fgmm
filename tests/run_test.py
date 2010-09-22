@@ -1,7 +1,7 @@
 import numpy
 import subprocess
 
-def generate_data(states=3,dim=3,npoints=10000) :
+def generate_data(states=3,dim=3,npoints=100) :
     
     means = numpy.empty((states,dim))
     hic = 1.

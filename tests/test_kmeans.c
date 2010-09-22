@@ -103,7 +103,9 @@ int main(int argc,char ** argv)
 #endif
 
   fgmm_dump(GMM);
-  
+
+  // fgmm_em(GMM,data,n_data,&lik,1e-4,NULL);
+  fgmm_dump(GMM);
   sample_file = fopen("samples.txt","w");
   samp = (float *) malloc(sizeof(float) * dim );
   for(i=0;i<100;i++)
