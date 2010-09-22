@@ -223,4 +223,10 @@ float smat_covariance_diag(struct smat * cov,
 			   float * mean);
 
 
+float smat_covariance_single(struct smat * cov, 
+			     int ndata, 
+			     const float * weight,
+			     const float * data,
+			     float * mean);
+
 #endif /* _SMAT_H_ */

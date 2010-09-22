@@ -414,14 +414,13 @@ float smat_covariance_diag(struct smat * cov,
   const float * pdata = data;
   const float * pweight = weight;
   float * pcov;
-  float * cdata;
   float *pmat = cov->_;
+  float tmp;
 
   int i=0,j=0,k=0;
   float norm=0;
   
   smat_zero(&cov,cov->dim);
-  cdata = (float *) malloc(sizeof(float) * cov->dim);
   pcov = (float *) malloc(sizeof(float) * cov->dim);
   
   for(i=0;i<cov->dim;i++)
@@ -442,39 +441,83 @@ float smat_covariance_diag(struct smat * cov,
     }
   pdata = data;
   pweight = weight;
+
   for(i=0;i<ndata;i++)
     {      
-      pcov = cov->_;
       for(j=0;j<cov->dim;j++)
 	{
-	  cdata[j] = (*pdata++) - mean[j];
-	}
-
-      j=0;
-      /*k=0;*/
-      for(j=0;j<cov->dim;j++)
-	{
-	  pcov[j] += (*pweight) * cdata[j]*cdata[j];
-	  /* *pcov += (*pweight)*cdata[j]*cdata[k]; */
-	  /* pcov++; */
-	  /* k++; */
-	  /* if(k==cov->dim) // next line */
-	  /*   k=++j; */
+	  tmp = (*pdata++) - mean[j];
+	  pcov[j] += (*pweight) * tmp*tmp;
 	}
       pweight++;
     }
 
   for(k=0;k<cov->dim;k++)
     {
-      (*pmat++) = pcov[k];
+      (*pmat++) = pcov[k] / norm;
       for(j=k+1;j<cov->dim;j++)
 	(*pmat++) = 0.;
     }
 
-  for(i=0;i<cov->_size;i++)
-    cov->_[i] /= norm;
-	
-  free(cdata);
   free(pcov);
+  return norm;
+}
+
+float smat_covariance_single(struct smat * cov, 
+			     int ndata, 
+			     const float * weight,
+			     const float * data,
+			     float * mean)
+{
+  const float * pdata = data;
+  const float * pweight = weight;
+  float tmp;
+  float *pmat = cov->_;
+  float total_mean;
+  float variance;
+  int i=0,j=0,k=0;
+  float norm=0;
+  
+  for(i=0;i<cov->dim;i++)
+    {
+      mean[i] = 0.;
+    }
+  for(i=0;i<ndata;i++)
+    {
+      for(j=0;j<cov->dim;j++)
+	mean[j] += (*pweight)*(*pdata++);
+      norm += *pweight;
+      pweight++;
+    }
+  total_mean = 0.;
+  for(i=0;i<cov->dim;i++)
+    {
+      mean[i] /= norm;
+      total_mean += mean[i];
+    }
+
+  total_mean /= cov->dim;
+
+  variance = 0.;
+
+  pdata = data;
+  pweight = weight;
+  for(i=0;i<ndata;i++)
+    {      
+      for(j=0;j<cov->dim;j++)
+	{
+	  tmp = ((*pdata++) - total_mean);
+	  variance += *pweight * tmp * tmp;
+	}
+      pweight++;
+    }
+
+  variance /= (norm * cov->dim);
+  for(k=0;k<cov->dim;k++)
+    {
+      (*pmat++) = variance;
+      for(j=k+1;j<cov->dim;j++)
+	(*pmat++) = 0.;
+    }
   return norm;
 }
