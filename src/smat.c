@@ -171,9 +171,10 @@ void smat_pmatrix(const struct smat* mat)
   
    out is a UPPER triang matrix such as  out^T * out = in 
    
-   will fail if in is not SDP */
+   returns 1 on success, 0 on failure (like the matrix not 
+   being strictly positive or full ranked */
 
-void smat_cholesky(const struct smat* in,struct smat* out)
+int smat_cholesky(const struct smat* in,struct smat* out)
 {
   float * tmp; //[in->dim][in->dim];
   int line=0;
@@ -182,6 +183,7 @@ void smat_cholesky(const struct smat* in,struct smat* out)
   float ts=0;
   float *pout = out->_;
   float *pin = in->_;
+  
   assert(in->dim == out->dim);
   tmp = (float *) malloc(sizeof(float) * in->dim * in->dim);
   
@@ -190,7 +192,13 @@ void smat_cholesky(const struct smat* in,struct smat* out)
       ts = 0;
       for(i=0;i<line;i++)
 	  ts += tmp[i*in->dim + line]*tmp[i*in->dim + line];
-      assert((*pin - ts) > 0.);
+
+      if((*pin - ts) <= 0.) // positiveness check
+	{
+	  free(tmp);
+	  return 0.;
+	}
+
       tmp[line*in->dim + line] = *pout = sqrtf( *pin - ts);
       pout++;
       pin++;
@@ -204,7 +212,8 @@ void smat_cholesky(const struct smat* in,struct smat* out)
 	  pout++;
 	}    
     }
-	free(tmp);
+  free(tmp);
+  return 1;
 }
 
 /* L^T * L  for a triang SUP matrix  */

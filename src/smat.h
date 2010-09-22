@@ -140,10 +140,11 @@ void smat_from_square(struct smat * mat, const float * square);
 /* Cholesky decomposition 
   
    out is a UPPER triang matrix such as  out^T * out = in 
-   
-   will fail if in is not SDP */
+  
+   returns 1 on success, 0 on failure (if the matrix is not 
+   strictly positive or full ranked */
 
-void smat_cholesky(const struct smat* in,struct smat* out);
+int smat_cholesky(const struct smat* in,struct smat* out);
 
 
 /* L^T * L  for a triang SUP matrix, such as cholesky results .. */
