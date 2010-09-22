@@ -33,6 +33,40 @@ Gmm_init(GMM * self,PyObject *args,PyObject *kwds)
   return 0;
 }
 
+static PyObject *
+Gmm_init_kmeans(GMM * self, PyObject *args, PyObject *kwds)
+{
+  PyObject * input_data;
+  float * data;
+  int data_size;
+  if( ! PyArg_ParseTuple(args, "O", &input_data))
+    return NULL;
+  // had a check here .. 
+
+  PyArrayObject* arr=NULL;
+  bool new_arr = false;
+
+  if( ! PyArray_Check(input_data))
+    {
+      return NULL;
+    }
+
+  if( !PyArray_ISCONTIGUOUS(input_data) )
+    {
+      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
+      new_arr = true;
+    }
+  else 
+    arr = (PyArrayObject *) input_data;
+
+  data = (float *) PyArray_DATA(arr);
+  data_size = PyArray_DIM(arr,0);
+  self->g->initKmeans(data,data_size);
+  if(new_arr)
+    Py_DECREF(arr);
+  return PyInt_FromLong(1);
+}
+  
 
 static PyObject *
 Gmm_init_random(GMM * self,PyObject *args, PyObject *kwds)
@@ -78,11 +112,13 @@ Gmm_doEm(GMM * self,PyObject * args, PyObject *kwds)
   float * data;
   int data_size;
   float epsilon = 1e-4;
+  int covar_t = COVARIANCE_FULL;
 
-  if( !PyArg_ParseTuple(args, "O|f", &input_data,&epsilon))
+  if( !PyArg_ParseTuple(args, "O|fb", &input_data,&epsilon,&covar_t))
     return NULL;
 
   printf("delta epsilon %e\n",epsilon);
+
   PyArrayObject* arr=NULL;
   bool new_arr = false;
 
@@ -103,7 +139,7 @@ Gmm_doEm(GMM * self,PyObject * args, PyObject *kwds)
   data = (float *) PyArray_DATA(arr);
   data_size = PyArray_DIM(arr,0);
   
-  int steps = self->g->Em(data,data_size,epsilon);
+  int steps = self->g->Em(data,data_size,epsilon,COVARIANCE_TYPE(covar_t));
   if(new_arr)
     Py_DECREF(arr);
   return PyInt_FromLong(steps);
@@ -358,6 +394,7 @@ Gmm_getstate(GMM * self, PyObject * args)
 
 static PyMethodDef Gmm_methods[] = {
   {"init",(PyCFunction) Gmm_init_random,METH_VARARGS | METH_KEYWORDS, "initialize EM process ."},
+  {"kmeans",(PyCFunction) Gmm_init_kmeans,METH_VARARGS | METH_KEYWORDS, "initialize EM with k-means ."},
   {"Em",(PyCFunction) Gmm_doEm,METH_VARARGS | METH_KEYWORDS, "perform EM."},
   {"Dump",(PyCFunction) Gmm_Dump,METH_NOARGS,"dump gmm parameters on stdout"},
   {"Pdf",(PyCFunction) Gmm_Pdf,METH_VARARGS,"pdf"},
@@ -439,6 +476,9 @@ initfgmm(void)
    
    Py_INCREF(&GmmType);
    PyModule_AddObject(m, "GMM", (PyObject *)&GmmType); 
-    
+   PyModule_AddIntConstant(m,"COVARIANCE_FULL", COVARIANCE_FULL);
+   PyModule_AddIntConstant(m,"COVARIANCE_DIAG", COVARIANCE_DIAG);
+   PyModule_AddIntConstant(m,"COVARIANCE_SPHERE", COVARIANCE_SPHERE);
+   
 }
 
