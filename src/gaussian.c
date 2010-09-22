@@ -71,7 +71,15 @@ void invert_covar(struct gaussian* g)
   float det=1.;
   int i=0,j=0;
   float * pichol, * chol;
-  smat_cholesky(g->covar,g->covar_cholesky);
+  if(!smat_cholesky(g->covar,g->covar_cholesky))
+    {
+      // g->covar is not full ranked .. adding some noise
+      smat_add_diagonal(g->covar, 1.);
+      // if after that the covariance is still not positive, we are into
+      // big big trouble so let's just give up here.. something went horribly 
+      // wrong before .. 
+      assert(smat_cholesky(g->covar,g->covar_cholesky));
+    }
   pichol = g->icovar_cholesky->_;
   chol = g->covar_cholesky->_;
 
