@@ -100,7 +100,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
     }
 	  
   float like;
-  fgmm_em(GMM,fdata,len_data,&like,1e-4,weights);
+  fgmm_em(GMM,fdata,len_data,&like,1e-4, COVARIANCE_FULL, weights);
   
   plhs[0] = mxCreateDoubleMatrix(1,nstates,mxREAL); 
   double * priors = mxGetPr(plhs[0]);
