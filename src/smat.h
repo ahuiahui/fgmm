@@ -20,10 +20,10 @@
  */
 
 #ifdef _MSC_VER  // change inline keyword into __inline if compiling with visual studio
-	#define inline __inline
+	#define _minline __inline
 	#define isnan(x) _isnan(x)
 #else 
-	#define inline static inline
+        #define _minline static inline // and gcc prefers this one .
 #endif		
 
 struct smat {
@@ -56,7 +56,7 @@ void smat_free(struct smat ** mat);
  *  out = m * v 
  */
 
-inline void smat_multv(const struct smat* m, const float * v,float * out)
+_minline void smat_multv(const struct smat* m, const float * v,float * out)
 {
   float * pcoef = m->_;
   int i,j;
@@ -80,7 +80,7 @@ inline void smat_multv(const struct smat* m, const float * v,float * out)
  *  out = m * v 
  */
 
-inline void smat_multv_lt(const struct smat* m, const float * v,float * out)
+_minline void smat_multv_lt(const struct smat* m, const float * v,float * out)
 {
   float * pcoef = m->_;
   int i,j;
@@ -99,7 +99,7 @@ inline void smat_multv_lt(const struct smat* m, const float * v,float * out)
 /**
  *  _in place _ Matrix x float  multiplication 
  */
-inline void smat_multf(struct smat* m,const float *f)
+_minline void smat_multf(struct smat* m,const float *f)
 {
   int i=0;
   for(i=0;i<m->_size;i++)
@@ -175,7 +175,7 @@ void smat_tbackward(const struct smat * upper, float * b, float * y);
  * ichol is actualy the cholesky decomposition of Sigma, where its value 
  * on the diagonal are inverted ... 
  */
-inline float smat_sesq(struct smat * ichol,const float * bias,const float * x)
+_minline float smat_sesq(struct smat * ichol,const float * bias,const float * x)
 {
   float out = 0.;
   int i,j;

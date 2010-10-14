@@ -15,7 +15,7 @@ struct gaussian{
 /** compute the probability density at vector value 
     
     value should be at the same dimension than g->dim */
-inline float gaussian_pdf(struct gaussian* g, const float* x)
+_minline float gaussian_pdf(struct gaussian* g, const float* x)
 {
   float dist2;
   float dist = smat_sesq(g->icovar_cholesky,g->mean,x);
@@ -56,7 +56,7 @@ void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
 #define ranf() ( (float) rand())/RAND_MAX
 
 /** random sample from normal law ( mu = 0, sigma = 1. ) **/ 
-inline float randn_boxmuller( void )
+_minline float randn_boxmuller( void )
 {
   float x1, x2, w;
   do {
