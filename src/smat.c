@@ -1,62 +1,28 @@
+/************************************************************************/
+/* This file is part of libfgmm.				        */
+/* 								        */
+/* libfgmm is free software: you can redistribute it and/or modify      */
+/* it under the terms of the GNU Lesser General Public License as published by */
+/* the Free Software Foundation, either version 3 of the License, or    */
+/* (at your option) any later version.				        */
+/* 								        */
+/* libfgmm is distributed in the hope that it will be useful,	        */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of       */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        */
+/* GNU Lesser General Public License for more details.			        */
+/* 								        */
+/* You should have received a copy of the GNU Lesser General Public License    */
+/* along with libfgmm.  If not, see <http://www.gnu.org/licenses/>.     */
+/* 								        */
+/* Copyright 2010        LASA  - EPFL   http://lasa.epfl.ch             */
+/*                                                                      */
+/*       Florent D'halluin   <florent.dhalluin@epfl.ch>		        */
+/************************************************************************/
+
 #include <stdio.h>
 #include <assert.h>
 
 #include "smat.h"
-
-/* Matrix - Vector multiplication 
-
- out = m * v 
-
-*/
-/*
-void smat_multv(const struct smat* m, const float * v,float * out)
-{
-  float * pcoef = m->_;
-  int i,j;
-  for(i=0;i<m->dim;i++)
-    out[i] = 0;
-  for(i=0;i<m->dim;i++)
-    {
-      for(j=i;j<m->dim;j++)
-	{
-	  out[i] += *pcoef * v[j];
-	  if(j>i)
-	    out[j] += *pcoef * v[i];
-	  pcoef++;
-	}
-    }
-}
-
-void smat_multv_lt(const struct smat* m, const float * v,float * out)
-{
-  float * pcoef = m->_;
-  int i,j;
-  for(i=0;i<m->dim;i++)
-    out[i] = 0;
-  for(i=0;i<m->dim;i++)
-    {
-      for(j=i;j<m->dim;j++)
-	{
-	  out[j] += *pcoef * v[i];
-	  pcoef++;
-	}
-    }
-}
-*/
-
-/* scales Matrix with a float :: 
-
-   m = m*f 
-*/
-
-/*
-void smat_multf(struct smat* m,const float *f)
-{
-  int i=0;
-  for(i=0;i<m->_size;i++)
-    m->_[i] *= *f;
-}*/
-
 
 /* zero the matrix and does the memory initialisation */
 void smat_zero(struct smat ** mat,int dim)
