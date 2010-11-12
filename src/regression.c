@@ -96,12 +96,14 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
 	}
     }
 
-  // result->covar = gr->gauss->covar - gr->reg_matrix *  (gr->subgauss->covar)^-1 gr->reg_matrix
-  for(i=0;i<result->covar->_size;i++)
+  k=0;
+  for(i=0;i<result->covar->dim;i++)
     {
-      int index = gr->output_dim[i]*(gr->input_len+gr->output_len+1) - \
-	         (gr->output_dim[i]+1)*gr->output_dim[i]/2;
-      result->covar->_[i] = gr->gauss->covar->_[index];
+      for(j=i;j<result->covar->dim;j++)
+	{
+	  result->covar->_[k] = smat_get_value(gr->gauss->covar, i , j);
+	  k++;
+	}
     }
 
   for(i=0 ; i<gr->output_len ; i++)
