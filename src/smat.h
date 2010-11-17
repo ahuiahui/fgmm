@@ -32,6 +32,9 @@
 #include <math.h>
 #include <stdlib.h>
 #include <float.h>
+
+
+#define _fgmm_real float
     
 /**
  * stores Symetric matrices in a efficient way : 
@@ -49,7 +52,7 @@
 #endif		
 
 struct smat {
-  float * _; /* data is actually stored here */
+  _fgmm_real * _; /* data is actually stored here */
   int dim;   /* dimensionnality of the matrix */
   int _size; /* actual size of the data pointer dim * (dim+1) /2 */
 };
@@ -78,9 +81,9 @@ void smat_free(struct smat ** mat);
  *  out = m * v 
  */
 
-_minline void smat_multv(const struct smat* m, const float * v,float * out)
+_minline void smat_multv(const struct smat* m, const _fgmm_real * v,_fgmm_real * out)
 {
-  float * pcoef = m->_;
+  _fgmm_real * pcoef = m->_;
   int i,j;
   for(i=0;i<m->dim;i++)
     out[i] = 0;
@@ -102,9 +105,9 @@ _minline void smat_multv(const struct smat* m, const float * v,float * out)
  *  out = m * v 
  */
 
-_minline void smat_multv_lt(const struct smat* m, const float * v,float * out)
+_minline void smat_multv_lt(const struct smat* m, const _fgmm_real * v,_fgmm_real * out)
 {
-  float * pcoef = m->_;
+  _fgmm_real * pcoef = m->_;
   int i,j;
   for(i=0;i<m->dim;i++)
     out[i] = 0;
@@ -121,7 +124,7 @@ _minline void smat_multv_lt(const struct smat* m, const float * v,float * out)
 /**
  *  _in place _ Matrix x float  multiplication 
  */
-_minline void smat_multf(struct smat* m,const float *f)
+_minline void smat_multf(struct smat* m,const _fgmm_real *f)
 {
   int i=0;
   for(i=0;i<m->_size;i++)
@@ -132,7 +135,7 @@ _minline void smat_multf(struct smat* m,const float *f)
  * get the value at row col if the matrix were stored as 
  * square matrix 
  */
-float smat_get_value(struct smat * mat,int row,int col);
+_fgmm_real smat_get_value(struct smat * mat,int row,int col);
 
 /**
  * return the symetrical matrix considering only 
@@ -149,15 +152,15 @@ void smat_identity(struct smat * mat);
  * add value on the diagonal .. (e.g. add diag noise on 
  * a gaussian .. ) 
  */
-void smat_add_diagonal(struct smat * mat , float value );
+void smat_add_diagonal(struct smat * mat , _fgmm_real value );
 
 
 /* print matrix to screen (for debug purposes ) */ 
 void smat_pmatrix(const struct smat* mat);
 
 /* transform a symetric ordered matrix to a square one .. */ 
-void smat_as_square(const struct smat* mat, float *  square);
-void smat_from_square(struct smat * mat, const float * square);
+void smat_as_square(const struct smat* mat, _fgmm_real *  square);
+void smat_from_square(struct smat * mat, const _fgmm_real * square);
 
 /* Cholesky decomposition 
   
@@ -187,8 +190,8 @@ void smat_ttmult(const struct smat* tri, struct smat* out);
    smat_tbackward(U,tmp,y);
 */ 
 
-void smat_tforward(struct smat * lower, float * b, float * y) ;
-void smat_tbackward(const struct smat * upper, float * b, float * y);
+void smat_tforward(struct smat * lower, _fgmm_real * b, _fgmm_real * y) ;
+void smat_tbackward(const struct smat * upper, _fgmm_real * b, _fgmm_real * y);
 
 /**
  * computes sesquilinear form :
@@ -197,14 +200,14 @@ void smat_tbackward(const struct smat * upper, float * b, float * y);
  * ichol is actualy the cholesky decomposition of Sigma, where its value 
  * on the diagonal are inverted ... 
  */
-_minline float smat_sesq(struct smat * ichol,const float * bias,const float * x)
+_minline _fgmm_real smat_sesq(struct smat * ichol,const _fgmm_real * bias,const _fgmm_real * x)
 {
-  float out = 0.;
+  _fgmm_real out = 0.;
   int i,j;
-  float * cdata; //[ichol->dim];
-  float * pichol = ichol->_;
+  _fgmm_real * cdata; //[ichol->dim];
+  _fgmm_real * pichol = ichol->_;
   
-  cdata = (float *) malloc(sizeof(float) * ichol->dim);
+  cdata = (_fgmm_real *) malloc(sizeof(_fgmm_real) * ichol->dim);
   for(i=0;i<ichol->dim;i++)
     cdata[i] = 0.;      
   for(i=0;i<ichol->dim;i++)
@@ -230,25 +233,25 @@ _minline float smat_sesq(struct smat * ichol,const float * bias,const float * x)
  * mean : the computed weighted mean (must be alloc'd before , its size is cov->dim ) 
  */
 
-float smat_covariance(struct smat * cov, 
+_fgmm_real smat_covariance(struct smat * cov, 
 		      int ndata, 
-		      const float * weight,
-		      const float * data,
-		      float * mean);
+		      const _fgmm_real * weight,
+		      const _fgmm_real * data,
+		      _fgmm_real * mean);
 
 
 
-float smat_covariance_diag(struct smat * cov, 
+_fgmm_real smat_covariance_diag(struct smat * cov, 
 			   int ndata, 
-			   const float * weight,
-			   const float * data,
-			   float * mean);
+			   const _fgmm_real * weight,
+			   const _fgmm_real * data,
+			   _fgmm_real * mean);
 
 
-float smat_covariance_single(struct smat * cov, 
+_fgmm_real smat_covariance_single(struct smat * cov, 
 			     int ndata, 
-			     const float * weight,
-			     const float * data,
-			     float * mean);
+			     const _fgmm_real * weight,
+			     const _fgmm_real * data,
+			     _fgmm_real * mean);
 
 #endif /* _SMAT_H_ */

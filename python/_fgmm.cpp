@@ -2,6 +2,44 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
+/* helper func to convert a PyObject (numpy array .. ) 
+   to a _fgmm_real * array .. 
+   
+   /!\ the result must be DECREF after use .. 
+*/
+
+PyArrayObject * get_real_array(PyObject * input_data)
+{
+
+  PyArrayObject* arr=NULL;
+  PyArrayObject* res=NULL;
+  if(!PyArray_Check(input_data))
+    {
+      return NULL;
+    }
+  arr = (PyArrayObject*) PyArray_FromAny(input_data,NULL,0,2,NPY_CARRAY_RO,NULL);
+#ifdef FGMM_USE_DOUBLE
+  res = (PyArrayObject *) PyArray_Cast(arr, NPY_DOUBLE);
+#else 
+  res = (PyArrayObject *) PyArray_Cast(arr, NPY_FLOAT);
+#endif // USE DOUBLE
+  Py_DECREF(arr);
+  return res;
+};
+ 
+PyObject * get_vector(int dim, _fgmm_real * dat)
+{
+  
+  npy_intp dims[1];
+  dims[0] = dim;
+  PyObject * output_data;
+#ifdef FGMM_USE_DOUBLE
+  output_data = PyArray_SimpleNewFromData(1,dims,NPY_DOUBLE,(void *) dat);
+#else
+  output_data = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) dat);
+#endif // USE DOUBLE
+};
+
 /* the python object */
 typedef struct {
   PyObject_HEAD
@@ -37,33 +75,21 @@ static PyObject *
 Gmm_init_kmeans(GMM * self, PyObject *args, PyObject *kwds)
 {
   PyObject * input_data;
-  float * data;
+  _fgmm_real * data;
   int data_size;
   if( ! PyArg_ParseTuple(args, "O", &input_data))
     return NULL;
   // had a check here .. 
 
-  PyArrayObject* arr=NULL;
-  bool new_arr = false;
-
-  if( ! PyArray_Check(input_data))
-    {
-      return NULL;
-    }
-
-  if( !PyArray_ISCONTIGUOUS(input_data) )
-    {
-      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
-      new_arr = true;
-    }
-  else 
-    arr = (PyArrayObject *) input_data;
-
-  data = (float *) PyArray_DATA(arr);
+  PyArrayObject* arr= get_real_array(input_data);
+  if(arr == NULL)
+    return NULL;
+  data = (_fgmm_real *) PyArray_DATA(arr);
   data_size = PyArray_DIM(arr,0);
+  printf("K-means data :: %d\n", data_size);
+  printf("K-Means data :: %f %f\n", data[2 * (data_size-1)], data[2 * (data_size-1) +1 ]);
   self->g->initKmeans(data,data_size);
-  if(new_arr)
-    Py_DECREF(arr);
+  Py_DECREF(arr);
   return PyInt_FromLong(1);
 }
   
@@ -72,35 +98,21 @@ static PyObject *
 Gmm_init_random(GMM * self,PyObject *args, PyObject *kwds)
 {
   PyObject * input_data;
-  float * data;
+  _fgmm_real * data;
   int data_size;
   if( ! PyArg_ParseTuple(args, "O", &input_data))
     return NULL;
   // had a check here .. 
 
-  PyArrayObject* arr=NULL;
-  bool new_arr = false;
-
-  if( ! PyArray_Check(input_data))
-    {
-      return NULL;
-    }
-
-  if( !PyArray_ISCONTIGUOUS(input_data) )
-    {
-      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
-      new_arr = true;
-    }
-  else 
-    arr = (PyArrayObject *) input_data;
-
-  data = (float *) PyArray_DATA(arr);
+  PyArrayObject* arr= get_real_array(input_data);
+  if(arr == NULL)
+    return NULL;
+  data = (_fgmm_real *) PyArray_DATA(arr);
   data_size = PyArray_DIM(arr,0);
 
   self->g->init(data,data_size);
 
-  if(new_arr)
-    Py_DECREF(arr);
+  Py_DECREF(arr);
   return PyInt_FromLong(1);
 }
 
@@ -109,9 +121,9 @@ static PyObject *
 Gmm_doEm(GMM * self,PyObject * args, PyObject *kwds)
 {
   PyObject * input_data;
-  float * data;
+  _fgmm_real * data;
   int data_size;
-  float epsilon = 1e-4;
+  _fgmm_real epsilon = 1e-4;
   int covar_t = COVARIANCE_FULL;
 
   if( !PyArg_ParseTuple(args, "O|fb", &input_data,&epsilon,&covar_t))
@@ -119,29 +131,17 @@ Gmm_doEm(GMM * self,PyObject * args, PyObject *kwds)
 
   printf("delta epsilon %e\n",epsilon);
 
-  PyArrayObject* arr=NULL;
-  bool new_arr = false;
+  PyArrayObject* arr= get_real_array(input_data);
+  if(arr == NULL)
+    return NULL;
+  data = (_fgmm_real *) PyArray_DATA(arr);
 
-  if( ! PyArray_Check(input_data))
-    {
-      return NULL;
-    }
+  printf("EM data :: %f %f %f\n", data[0], data[1], data[2]);
 
-  if( !PyArray_ISCONTIGUOUS(input_data) )
-    {
-      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
-							
-      new_arr = true;
-    }
-  else 
-    arr = (PyArrayObject *) input_data;
-
-  data = (float *) PyArray_DATA(arr);
   data_size = PyArray_DIM(arr,0);
   
   int steps = self->g->Em(data,data_size,epsilon,COVARIANCE_TYPE(covar_t));
-  if(new_arr)
-    Py_DECREF(arr);
+  Py_DECREF(arr);
   return PyInt_FromLong(steps);
 }
 
@@ -157,35 +157,23 @@ static PyObject *
 Gmm_Pdf(GMM * self, PyObject * args)
 {
   PyObject * input_data;
-  float * output;
+  _fgmm_real * output;
 
   PyObject * output_data;
   if( ! PyArg_ParseTuple(args, "O", &input_data))
     return NULL;
 
-  if( !PyArray_Check(input_data))
+
+  PyArrayObject * arr = get_real_array(input_data);
+  if(arr == NULL)
     return NULL;
 
-  PyArrayObject * arr=NULL;
-  bool new_arr = false;
-  if( !PyArray_ISCONTIGUOUS(input_data) )
-    {
-      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
-							
-      new_arr = true;
-    }
-  else 
-    arr = (PyArrayObject *) input_data;
-
-  output = (float *) malloc( sizeof(float) * (self->g->nstates));
-  
-  self->g->Pdf((float *) PyArray_DATA(input_data), 
+  output = (_fgmm_real *) malloc( sizeof(_fgmm_real) * (self->g->nstates));
+  self->g->Pdf((_fgmm_real *) PyArray_DATA(arr), 
 	       output);
-
-  npy_intp dims[1];
-  dims[0] = self->g->nstates;
-
-  output_data = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) output);
+  
+  Py_DECREF(arr);
+  output_data = get_vector( self->g->nstates, output);
   return output_data;
 }
 
@@ -208,39 +196,24 @@ static PyObject *
 Gmm_DoRegression(GMM * self, PyObject * args)
 { 
   PyObject * input_data;
-  float * output;
+  _fgmm_real * output;
   PyObject * output_data;
   if( ! PyArg_ParseTuple(args, "O", &input_data))
     return NULL;
 
-  if( !PyArray_Check(input_data))
-    return NULL;
-
-  PyArrayObject * arr=NULL;
-  bool new_arr = false;
-  if( !PyArray_ISCONTIGUOUS(input_data) )
-    {
-      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
-							
-      new_arr = true;
-    }
-  else 
-    arr = (PyArrayObject *) input_data;
-
-  if( PyArray_DIM(input_data,0) != self->g->ninput) 
+  PyArrayObject * arr= get_real_array(input_data);
+  
+  if( arr == NULL || PyArray_DIM(input_data,0) != self->g->ninput) 
     {
       return NULL;
     }
 
-  output = (float *) malloc( sizeof(float) * (self->g->dim - self->g->ninput));
+  output = (_fgmm_real *) malloc( sizeof(_fgmm_real) * (self->g->dim - self->g->ninput));
   
-  self->g->DoRegression((float *) PyArray_DATA(input_data), 
+  self->g->DoRegression((_fgmm_real *) PyArray_DATA(input_data), 
 			output);
-
-  npy_intp dims[1];
-  dims[0] = self->g->dim - self->g->ninput;
-
-  output_data = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) output);
+  Py_DECREF(arr);
+  output_data =  get_vector( self->g->dim - self->g->ninput, output);
   return output_data;
 }
 
@@ -248,40 +221,27 @@ static PyObject *
 Gmm_DoSamplingRegression(GMM * self, PyObject * args)
 { 
   PyObject * input_data;
-  float * output;
+  _fgmm_real * output;
 
   PyObject * output_data;
   if( ! PyArg_ParseTuple(args, "O", &input_data))
     return NULL;
 
-  if( !PyArray_Check(input_data))
-    return NULL;
 
-  PyArrayObject * arr=NULL;
-  bool new_arr = false;
-  if( !PyArray_ISCONTIGUOUS(input_data) )
-    {
-      arr = (PyArrayObject*) PyArray_ContiguousFromAny(input_data,NPY_FLOAT,0,0);
-							
-      new_arr = true;
-    }
-  else 
-    arr = (PyArrayObject *) input_data;
+  PyArrayObject * arr= get_real_array(input_data);
 
-  if( PyArray_DIM(input_data,0) != self->g->ninput) 
+  if(arr==NULL)
     {
       return NULL;
     }
 
-  output = (float *) malloc( sizeof(float) * (self->g->dim - self->g->ninput));
+  output = (_fgmm_real *) malloc( sizeof(_fgmm_real) * (self->g->dim - self->g->ninput));
   
-  self->g->DoSamplingRegression((float *) PyArray_DATA(input_data), 
+  self->g->DoSamplingRegression((_fgmm_real *) PyArray_DATA(arr), 
 			output);
 
-  npy_intp dims[1];
-  dims[0] = self->g->dim - self->g->ninput;
-
-  output_data = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) output);
+  Py_DECREF(arr);
+  output_data = get_vector(self->g->dim - self->g->ninput, output);
   return output_data;
 }
 
@@ -289,14 +249,11 @@ Gmm_DoSamplingRegression(GMM * self, PyObject * args)
 static PyObject *
 Gmm_Draw(GMM * self)
 {
-  float * output;
+  _fgmm_real * output;
   PyObject * result;
-  output = (float *) malloc(sizeof(float) * self->g->dim);
+  output = (_fgmm_real *) malloc(sizeof(_fgmm_real) * self->g->dim);
   self->g->Draw(output);
-
-  npy_intp dims[1];
-  dims[0] = self->g->dim;
-  result = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) output);
+  result = get_vector(self->g->dim, output);
   return result;
 }
   
@@ -304,14 +261,14 @@ Gmm_Draw(GMM * self)
 static PyObject *
 Gmm_getMean(GMM * self,PyObject * args)
 {
-  float * output;
+  _fgmm_real * output;
   PyObject * result;
 
   int state = 0;
   if( ! PyArg_ParseTuple(args, "i", &state))
     return NULL;
 
-  output = (float *) malloc(sizeof(float) * self->g->dim);
+  output = (_fgmm_real *) malloc(sizeof(_fgmm_real) * self->g->dim);
 
   if(state > self->g->nstates) 
     {
@@ -319,10 +276,8 @@ Gmm_getMean(GMM * self,PyObject * args)
       return NULL;
     }
   self->g->GetMean(state,output);
-
-  npy_intp dims[1];
-  dims[0] = self->g->dim;
-  result = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) output);
+  printf("Mean :: %f %f \n", output[0], output[1]);
+  result = get_vector(self->g->dim, output);
   return result;
 }
 
@@ -330,20 +285,24 @@ Gmm_getMean(GMM * self,PyObject * args)
 static PyObject *
 Gmm_getCovariance(GMM * self,PyObject * args)
 {
-  float * output;
+  _fgmm_real * output;
   PyObject * result;
 
   int state = 0;
   if( ! PyArg_ParseTuple(args, "i", &state))
     return NULL;
 
-  output = (float *) malloc(sizeof(float) * self->g->dim * self->g->dim );
+  output = (_fgmm_real *) malloc(sizeof(_fgmm_real) * self->g->dim * self->g->dim );
   self->g->GetCovariance(state,output);
 
   npy_intp dims[2];
   dims[0] = self->g->dim;
   dims[1] = self->g->dim;
+#ifdef FGMM_USE_DOUBLE
+  result = PyArray_SimpleNewFromData(2,dims,NPY_DOUBLE,(void *) output);
+#else
   result = PyArray_SimpleNewFromData(2,dims,NPY_FLOAT,(void *) output);
+#endif // USE_DOUBLE
   return result;
 
 }
@@ -369,24 +328,18 @@ Gmm_getstate(GMM * self, PyObject * args)
     return NULL;
 
   
-  PyArrayObject * arr=NULL;
-  bool new_arr = false;
-  if( !PyArray_ISCONTIGUOUS(obs) )
-    {
-      arr = (PyArrayObject*) PyArray_ContiguousFromAny(obs,NPY_FLOAT,0,0);
-      new_arr = true;
-    }
-  else 
-    arr = (PyArrayObject *) obs;
+  PyArrayObject * arr= get_real_array(obs);
+  if(arr == NULL)
+    return NULL;
 
   if( PyArray_DIM(arr,0) != self->g->dim) 
     {
       return NULL;
     }
 
-  res = self->g->GetLikelyState((float *)PyArray_DATA(arr));
-  if(new_arr)
-    Py_DECREF(arr);
+  res = self->g->GetLikelyState((_fgmm_real *)PyArray_DATA(arr));
+  Py_DECREF(arr);
+
   return PyInt_FromLong(res);
 }
 

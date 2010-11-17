@@ -89,9 +89,9 @@ void dump(struct gaussian* g)
 
 void invert_covar(struct gaussian* g)
 {
-  float det=1.;
+  _fgmm_real det=1.;
   int i=0,j=0;
-  float * pichol, * chol;
+  _fgmm_real * pichol, * chol;
   if(!smat_cholesky(g->covar,g->covar_cholesky))
     {
       // g->covar is not full ranked .. adding some noise
@@ -136,7 +136,7 @@ void gaussian_init(struct gaussian * g,int dim)
 {
   int i;
   g->dim = dim;
-  g->mean = (float *) malloc(dim * sizeof(float));
+  g->mean = (_fgmm_real *) malloc(dim * sizeof(_fgmm_real));
   g->covar = NULL;
   g->covar_cholesky = NULL;
   g->icovar_cholesky = NULL;
@@ -172,11 +172,11 @@ void init_random(struct gaussian3d* g)
   }*/
   
 
-void gaussian_draw(struct gaussian * g, float * out)
+void gaussian_draw(struct gaussian * g, _fgmm_real * out)
 {
   int i=0;
-  float * tvec;
-  tvec = (float *) malloc(g->dim * sizeof(float)); // irk, 
+  _fgmm_real * tvec;
+  tvec = (_fgmm_real *) malloc(g->dim * sizeof(_fgmm_real)); // irk, 
   for(;i<g->dim;i++)
     tvec[i] = randn_boxmuller();
   smat_multv_lt(g->covar_cholesky,tvec,out);
@@ -201,8 +201,8 @@ void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
 }
       
 void gaussian_update(struct gaussian * g,
-		     const float * data, 
-		     float lr)
+		     const _fgmm_real * data, 
+		     _fgmm_real lr)
 {
   int i=0;
   int j=0;

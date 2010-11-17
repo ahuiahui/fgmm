@@ -30,22 +30,22 @@
 /** One gaussian distribution */
 
 struct gaussian{
-  float prior; /* prior probability */
+  _fgmm_real prior; /* prior probability */
   int dim;  /* dimensionality */ 
-  float * mean ;
+  _fgmm_real * mean ;
   struct smat * covar; /* covariance matrix */ 
   struct smat * covar_cholesky; /* cache for cholesky decomp of covar */ 
   struct smat * icovar_cholesky; /* cholesky matrix with inverse diagonal */
-  float nfactor; /* cache for determinant of covar */ 
+  _fgmm_real nfactor; /* cache for determinant of covar */ 
 };   
 
 /** compute the probability density at vector value 
     
     value should be at the same dimension than g->dim */
-_minline float gaussian_pdf(struct gaussian* g, const float* x)
+_minline _fgmm_real gaussian_pdf(struct gaussian* g, const _fgmm_real* x)
 {
-  float dist2;
-  float dist = smat_sesq(g->icovar_cholesky,g->mean,x);
+  _fgmm_real dist2;
+  _fgmm_real dist = smat_sesq(g->icovar_cholesky,g->mean,x);
   dist *= .5;
   
   dist2 =  expf(-dist)/g->nfactor;
@@ -73,19 +73,19 @@ void invert_covar(struct gaussian* g);
 void dump(struct gaussian* g);
 
 /* draw one sample from the gaussian */
-void gaussian_draw(struct gaussian* g, float * out);
+void gaussian_draw(struct gaussian* g, _fgmm_real * out);
 
 /* get the projection of the gaussian on the given dimensions 
  * if result in NULL or wrong dimension .. is it (re) alloc'd */
 void gaussian_get_subgauss(struct gaussian* g, struct gaussian* result,
 			   int n_dim, int * dims);
 
-#define ranf() ( (float) rand())/RAND_MAX
+#define ranf() ( (_fgmm_real) rand())/RAND_MAX
 
 /** random sample from normal law ( mu = 0, sigma = 1. ) **/ 
-_minline float randn_boxmuller( void )
+_minline _fgmm_real randn_boxmuller( void )
 {
-  float x1, x2, w;
+  _fgmm_real x1, x2, w;
   do {
     x1 = 2.0 * ranf() - 1.0;
     x2 = 2.0 * ranf() - 1.0;
@@ -102,5 +102,5 @@ _minline float randn_boxmuller( void )
 
 /** incremental mean/var update */
 void gaussian_update(struct gaussian * g, 
-		     const float * datapoint, 
-		     float learning_rate);
+		     const _fgmm_real * datapoint, 
+		     _fgmm_real learning_rate);

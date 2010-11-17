@@ -18,7 +18,7 @@ int main(int argc,char ** argv)
   int n_states = atoi(argv[2]);
   char line[1024];
   char *pline;
-  float *  data, *pdata;
+  _fgmm_real *  data, *pdata;
   int n_data=0;
   int dim=0;
 
@@ -28,7 +28,7 @@ int main(int argc,char ** argv)
   
   FILE * infile;
   FILE * sample_file;
-  float * samp;
+  _fgmm_real * samp;
   if(argc < 3)
     {
       printf("%s",usage);
@@ -69,7 +69,7 @@ int main(int argc,char ** argv)
   dim--;
   rewind(infile);
   printf("%d , %d\n",n_data,dim);
-  data = (float *) malloc(sizeof(float) * dim * n_data);
+  data = (_fgmm_real *) malloc(sizeof(_fgmm_real) * dim * n_data);
   pdata = data;
 
   for(i=0;i<n_data;i++)
@@ -107,7 +107,7 @@ int main(int argc,char ** argv)
   // fgmm_em(GMM,data,n_data,&lik,1e-4,NULL);
   fgmm_dump(GMM);
   sample_file = fopen("samples.txt","w");
-  samp = (float *) malloc(sizeof(float) * dim );
+  samp = (_fgmm_real *) malloc(sizeof(_fgmm_real) * dim );
   for(i=0;i<100;i++)
     {
       fgmm_draw_sample(GMM,samp);

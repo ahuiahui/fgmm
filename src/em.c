@@ -36,19 +36,19 @@
  * @param *pix is an alloc'd float table of dimension nstates*data_len 
  * returns total log_likelihood 
  */
-float fgmm_e_step(struct gmm * GMM,
-		   const float * data,
+_fgmm_real fgmm_e_step(struct gmm * GMM,
+		   const _fgmm_real * data,
 		  int data_len,
-		  float * pix)
+		  _fgmm_real * pix)
 {
       /* E step */
-  float log_lik=0;
-  float like;
-  float * pxi;
+  _fgmm_real log_lik=0;
+  _fgmm_real like;
+  _fgmm_real * pxi;
   int data_i=0;
   int state_i;
   
-  pxi = (float *) malloc(sizeof(float) * GMM->nstates);
+  pxi = (_fgmm_real *) malloc(sizeof(_fgmm_real) * GMM->nstates);
   for(;data_i<data_len;data_i++)
     {
       like=0;
@@ -92,9 +92,9 @@ float fgmm_e_step(struct gmm * GMM,
 */
 
 void fgmm_m_step(struct gmm * GMM,
-		 const float * data,
+		 const _fgmm_real * data,
 		 int data_len,
-		 float * pix,
+		 _fgmm_real * pix,
 		 int * reestimate_flag,
 		 enum COVARIANCE_TYPE covar_t)
 {
@@ -159,23 +159,23 @@ void fgmm_m_step(struct gmm * GMM,
  * @return  # of iterations 
  */
 int fgmm_em( struct gmm * GMM,
-	     const float * data,
+	     const _fgmm_real * data,
 	     int data_length, 
-	     float * end_loglikelihood,
-	     float likelihood_epsilon,
+	     _fgmm_real * end_loglikelihood,
+	     _fgmm_real likelihood_epsilon,
 	     enum COVARIANCE_TYPE covar_t,
-	     const float * weights) // if not NULL, weighted version .. 
+	     const _fgmm_real * weights) // if not NULL, weighted version .. 
 {
-  float * pix;
-  float log_lik;
+  _fgmm_real * pix;
+  _fgmm_real log_lik;
   int niter=0;
-  float oldlik=0;
-  float deltalik=0;
+  _fgmm_real oldlik=0;
+  _fgmm_real deltalik=0;
   int state_i;
   int d=0;
   int reestimate_flag=0; // shall we do one more iteration ??
 
-  pix = (float *) malloc( sizeof(float) * data_length * GMM->nstates);
+  pix = (_fgmm_real *) malloc( sizeof(_fgmm_real) * data_length * GMM->nstates);
 
   for(state_i=0;state_i<GMM->nstates;state_i++)
     {
@@ -229,20 +229,20 @@ int fgmm_em( struct gmm * GMM,
  * returns total distance to all clusters.
  */
 
-float fgmm_kmeans_e_step(struct gmm * GMM,
-			 const float * data,
+_fgmm_real fgmm_kmeans_e_step(struct gmm * GMM,
+			 const _fgmm_real * data,
 			 int data_len,
-			 float * pix)
+			 _fgmm_real * pix)
 {
   /* E step */
-  float total_distance=0;
-  float distance;
-  float max_distance;
+  _fgmm_real total_distance=0;
+  _fgmm_real distance;
+  _fgmm_real max_distance;
   int cstate = 0;
   int data_i=0;
   int state_i;
   int _;
-  float * pdata = data;
+  _fgmm_real * pdata = data;
 
   for(;data_i<data_len;data_i++)
     {
@@ -285,21 +285,21 @@ float fgmm_kmeans_e_step(struct gmm * GMM,
 /* do kmeans , reusing lots of code .. */ 
 
 int fgmm_kmeans( struct gmm * GMM,
-		 const float * data,
+		 const _fgmm_real * data,
 		 int data_length, 
-		 float likelihood_epsilon,
-		 const float * weights) // if not NULL, weighted version .. 
+		 _fgmm_real likelihood_epsilon,
+		 const _fgmm_real * weights) // if not NULL, weighted version .. 
 {
-  float * pix;
-  float total_distance;
+  _fgmm_real * pix;
+  _fgmm_real total_distance;
   int niter=0;
-  float oldlik=0;
-  float deltalik=0;
+  _fgmm_real oldlik=0;
+  _fgmm_real deltalik=0;
   int state_i;
   int d=0;
   int reestimate_flag = 0;
 
-  pix = (float *) malloc( sizeof(float) * data_length * GMM->nstates);
+  pix = (_fgmm_real *) malloc( sizeof(_fgmm_real) * data_length * GMM->nstates);
 
   for(state_i=0;state_i<GMM->nstates;state_i++)
     {
@@ -332,7 +332,7 @@ int fgmm_kmeans( struct gmm * GMM,
 	    }
 	}
       // the song remains the same .. 
-      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag,COVARIANCE_SPHERE);
+      fgmm_m_step(GMM,data,data_length,pix,&reestimate_flag,COVARIANCE_FULL);
     }
 
   free(pix);

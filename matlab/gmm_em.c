@@ -18,7 +18,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
   double * in_means;
   double * in_sigmas;
   
-  float * weights;
+  _fgmm_real * weights;
 
   short initialize = 0;
   if(!(nrhs == 3 || nrhs == 6) )
@@ -42,7 +42,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
   mwSize len_data = mxGetN(prhs[0]);
   mwSize len_weights = mxGetN(prhs[2]);
  
-  float * fdata = (float *) malloc( dim*len_data*sizeof(float));
+  _fgmm_real * fdata = (_fgmm_real *) malloc( dim*len_data*sizeof(_fgmm_real));
   int i = 0;
   int j = 0;
   int k = 0;
@@ -55,22 +55,22 @@ void mexFunction( int nlhs, mxArray *plhs[],
 	{
 	  mexErrMsgIdAndTxt("EM","Weights vector has not the same size as dataset .. ");
 	}
-      weights = (float *) malloc(sizeof(float) * len_data);
+      weights = (_fgmm_real *) malloc(sizeof(_fgmm_real) * len_data);
       double * _weights = mxGetPr(prhs[2]);
       for(i=0;i<len_data;i++)
-	weights[i] = (float) _weights[i];
+	weights[i] = (_fgmm_real) _weights[i];
     }
 
   for(i=0;i<dim*len_data;i++)
-    fdata[i] = (float) indata[i];
+    fdata[i] = (_fgmm_real) indata[i];
 
   struct gmm * GMM; 
   
   fgmm_alloc(&GMM,nstates,dim);
   fgmm_init_random(GMM,fdata,len_data);
 
-  float * _mu;
-  float * _sigma;
+  _fgmm_real * _mu;
+  _fgmm_real * _sigma;
   if(initialize)
     {
 
@@ -78,19 +78,19 @@ void mexFunction( int nlhs, mxArray *plhs[],
       in_means = mxGetPr(prhs[4]);
       in_sigmas = mxGetPr(prhs[5]);
       
-      _mu = (float *) malloc(sizeof(float) * dim);
-      _sigma = (float *) malloc(sizeof(float) * dim * dim);
+      _mu = (_fgmm_real *) malloc(sizeof(_fgmm_real) * dim);
+      _sigma = (_fgmm_real *) malloc(sizeof(_fgmm_real) * dim * dim);
 
       for(i=0;i<nstates;i++)
 	{
 	  for(j=0;j<dim;j++)
 	    {
-	      _mu[j] = (float) in_means[i*dim + j];
+	      _mu[j] = (_fgmm_real) in_means[i*dim + j];
 	      for(k=0;k<dim;k++)
-		_sigma[j*dim + k] = (float) in_sigmas[i*dim*dim + j*dim + k];
+		_sigma[j*dim + k] = (_fgmm_real) in_sigmas[i*dim*dim + j*dim + k];
 	    }
 
-	  fgmm_set_prior(GMM,i, (float) in_priors[i]);
+	  fgmm_set_prior(GMM,i, (_fgmm_real) in_priors[i]);
 	  fgmm_set_mean(GMM,i, _mu);
 	  fgmm_set_covar(GMM,i,_sigma);
 	  
@@ -99,7 +99,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
       free(_sigma);
     }
 	  
-  float like;
+  _fgmm_real like;
   fgmm_em(GMM,fdata,len_data,&like,1e-4, COVARIANCE_FULL, weights);
   
   plhs[0] = mxCreateDoubleMatrix(1,nstates,mxREAL); 
@@ -111,7 +111,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
   plhs[1] = mxCreateDoubleMatrix(nstates,dim ,mxREAL);
   
   double * means =mxGetPr(plhs[1]);
-  float * cmean;
+  _fgmm_real * cmean;
   for(i=0;i<nstates;i++)
     {
       cmean = fgmm_get_mean(GMM,i);
@@ -131,7 +131,7 @@ void mexFunction( int nlhs, mxArray *plhs[],
   if(nlhs >= 4)
     plhs[3] = mxCreateDoubleScalar(like);
 
-  float fsigma[dim*dim];
+  _fgmm_real fsigma[dim*dim];
   double * sigma = mxGetPr(plhs[2]);
   int size_sig = dim*dim;
   for(i=0;i<nstates;i++)

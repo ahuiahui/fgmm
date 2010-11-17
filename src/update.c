@@ -3,15 +3,15 @@
 #include "gaussian.h"
 
 
-void fgmm_update(struct gmm * gmm,const float * data_point)
+void fgmm_update(struct gmm * gmm,const _fgmm_real * data_point)
 {
   int state_i=0;
-  float * pxi;
-  float nf = 0;
-  float eta = .05;
-  float weighted_lr;
+  _fgmm_real * pxi;
+  _fgmm_real nf = 0;
+  _fgmm_real eta = .05;
+  _fgmm_real weighted_lr;
    
-  pxi = (float *) malloc( sizeof(float) * gmm->nstates);
+  pxi = (_fgmm_real *) malloc( sizeof(_fgmm_real) * gmm->nstates);
   for(;state_i<gmm->nstates;state_i++)
     {
       pxi[state_i] = gaussian_pdf(&gmm->gauss[state_i], data_point);
@@ -30,13 +30,13 @@ void fgmm_update(struct gmm * gmm,const float * data_point)
 
 /* winner take all approach */
 
-void fgmm_update_wta(struct gmm * gmm,const float * data_point)
+void fgmm_update_wta(struct gmm * gmm,const _fgmm_real * data_point)
 {
   int state_i=0;
   int the_state = 0;
-  float eta = .05;
-  float max_p = 0.;
-  float w =  0.;
+  _fgmm_real eta = .05;
+  _fgmm_real max_p = 0.;
+  _fgmm_real w =  0.;
   for(;state_i<gmm->nstates;state_i++)
     {
       w = gaussian_pdf(&gmm->gauss[state_i], data_point);

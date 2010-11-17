@@ -79,12 +79,12 @@ public :
    * @param len : # of points in the dataset
    * @param data : dim*len array, datapoints. (row order) 
    */
-  void init(float * data,int len)
+  void init(_fgmm_real * data,int len)
   {
     fgmm_init_random(c_gmm,data,len);
   };
 
-  void initKmeans(float * data,int len)
+  void initKmeans(_fgmm_real * data,int len)
   {
     fgmm_init_kmeans(c_gmm,data,len);
   };
@@ -101,14 +101,14 @@ public :
   /**
    * Expectation Maximization Algorithm. 
    */
-  int Em(float * data,int len, 
-	 float epsilon=1e-4, enum COVARIANCE_TYPE covar_t = COVARIANCE_FULL)
+  int Em(_fgmm_real * data,int len, 
+	 _fgmm_real epsilon=1e-4, enum COVARIANCE_TYPE covar_t = COVARIANCE_FULL)
   {
     return fgmm_em(c_gmm,data,len,&likelihood,epsilon,covar_t,NULL);
   };
 
 
-  float Pdf(float * obs, float * weights=NULL)
+  _fgmm_real Pdf(_fgmm_real * obs, _fgmm_real * weights=NULL)
   {
     return fgmm_get_pdf(c_gmm,obs,weights);
   };
@@ -116,7 +116,7 @@ public :
   /**
    * set Prior probability for the desired state
    */
-  void SetPrior(int state, float val)
+  void SetPrior(int state, _fgmm_real val)
   {
     fgmm_set_prior(this->c_gmm,state,val);
   };
@@ -127,7 +127,7 @@ public :
    * @param state : the state index 
    * @param mean : an array of size dim, specify the mean
    */
-  void SetMean(int state, float * mean)
+  void SetMean(int state, _fgmm_real * mean)
   {
     fgmm_set_mean(this->c_gmm,state,mean);
   };
@@ -149,7 +149,7 @@ public :
    * if not we are using a standart row order . 
    */
  
-  void SetCovariance(int state, float * covar, bool AsSymetric=true)
+  void SetCovariance(int state, _fgmm_real * covar, bool AsSymetric=true)
   {
     if(AsSymetric) 
       fgmm_set_covar_smat(this->c_gmm,state,covar);
@@ -158,19 +158,19 @@ public :
   };
 
 
-  float GetPrior(int state)
+  _fgmm_real GetPrior(int state)
   {
     return fgmm_get_prior(this->c_gmm,state);
   };
 
-  void GetMean(int state, float * output)
+  void GetMean(int state, _fgmm_real * output)
   {
-    float * pMean = fgmm_get_mean(this->c_gmm,state);
+    _fgmm_real * pMean = fgmm_get_mean(this->c_gmm,state);
     for(int i=0;i<this->c_gmm->dim;i++)
       output[i] = pMean[i];
   }
 
-  void GetCovariance(int state, float * out,bool AsSymetric=false)
+  void GetCovariance(int state, _fgmm_real * out,bool AsSymetric=false)
   {
     if(!AsSymetric)
       {
@@ -178,7 +178,7 @@ public :
       }
     else 
       {
-	float * pC = fgmm_get_covar_smat(this->c_gmm,state);
+	_fgmm_real * pC = fgmm_get_covar_smat(this->c_gmm,state);
 	for(int i=0;i<this->c_gmm->dim*(this->c_gmm->dim+1)/2;
 	    i++)
 	  out[i] = pC[i];
@@ -190,7 +190,7 @@ public :
    * @param sample : the output sample, must be alloc'd of 
    *                 size dim. 
    */
-  void Draw(float * sample) 
+  void Draw(_fgmm_real * sample) 
   {
     fgmm_draw_sample(this->c_gmm,sample);
   };
@@ -218,7 +218,7 @@ public :
    * @param covar : eventually store resulting covariance is symetric matrix
    *                order (set SetCovariance ) 
    */
-  void DoRegression(const float * input, float * output, float * covar=NULL)
+  void DoRegression(const _fgmm_real * input, _fgmm_real * output, _fgmm_real * covar=NULL)
   {
     fgmm_regression(c_reg,input,output,covar);
   };
@@ -230,7 +230,7 @@ public :
    * input subspace. 
    * you must call InitRegression before. 
    */
-   void DoSamplingRegression(const float * input, float * output)
+   void DoSamplingRegression(const _fgmm_real * input, _fgmm_real * output)
    {
      fgmm_regression_sampling(c_reg,input,output);
    };
@@ -243,7 +243,7 @@ public :
    * @param wta   : use winner take all update ( only update 
    *                 Most likely gaussian) 
    */
-  void Update(const float * point,bool wta=false)
+  void Update(const _fgmm_real * point,bool wta=false)
   {
     if(wta) 
       fgmm_update_wta(c_gmm,point);
@@ -252,7 +252,7 @@ public :
   };
 
 
-  int GetLikelyState(const float * point)
+  int GetLikelyState(const _fgmm_real * point)
   {
     return fgmm_most_likely_state(this->c_gmm,point);
   };
@@ -260,7 +260,7 @@ public :
 private :
   struct gmm * c_gmm;
   struct fgmm_reg * c_reg;
-  float likelihood;
+  _fgmm_real likelihood;
 
 };
 

@@ -57,14 +57,14 @@ void fgmm_free(struct gmm ** gmm)
 /* associate one random data point to 
    a gaussian */
 void fgmm_init_random(struct gmm * gmm,
-		     const float * data,
+		     const _fgmm_real * data,
 		     int data_len)
 {
   int state_i =0;
   int i=0;
   int point_idx=0;
-  float * weights;
-  weights = (float *) malloc(data_len * sizeof(float));
+  _fgmm_real * weights;
+  weights = (_fgmm_real *) malloc(data_len * sizeof(_fgmm_real));
   for(i=0;i<data_len;i++)
     {
       weights[i] = 1.;
@@ -94,7 +94,7 @@ void fgmm_init_random(struct gmm * gmm,
 
 
 void fgmm_init_kmeans(struct gmm * gmm,
-		     const float * data,
+		     const _fgmm_real * data,
 		     int data_len)
 {
   int state_i =0;
@@ -112,11 +112,11 @@ void fgmm_init_kmeans(struct gmm * gmm,
 }
 
 
-void fgmm_draw_sample(struct gmm * gmm, float * out)
+void fgmm_draw_sample(struct gmm * gmm, _fgmm_real * out)
 {
   int st=-1;
-  float cumprod=0.;
-  float v = ((float)rand())/RAND_MAX;
+  _fgmm_real cumprod=0.;
+  _fgmm_real v = ((_fgmm_real)rand())/RAND_MAX;
   while((cumprod < v) && ( st<(gmm->nstates-1)))
     {
       st++;
@@ -127,30 +127,30 @@ void fgmm_draw_sample(struct gmm * gmm, float * out)
 }
 
 
-void fgmm_set_prior(struct gmm * gmm,int state, float prior)
+void fgmm_set_prior(struct gmm * gmm,int state, _fgmm_real prior)
 {
   gmm->gauss[state].prior = prior;
 }
 
-float fgmm_get_prior(struct gmm * gmm, int state)
+_fgmm_real fgmm_get_prior(struct gmm * gmm, int state)
 {
   return gmm->gauss[state].prior;
 }
 
-void fgmm_set_mean(struct gmm * gmm,int state, const float * mean)
+void fgmm_set_mean(struct gmm * gmm,int state, const _fgmm_real * mean)
 {
   int i=0;
   for(;i<gmm->dim;i++)
     gmm->gauss[state].mean[i] = mean[i];
 }
 
-float * fgmm_get_mean(struct gmm * gmm,int state)
+_fgmm_real * fgmm_get_mean(struct gmm * gmm,int state)
 {
   return gmm->gauss[state].mean;
 }
 
 void fgmm_set_covar_smat(struct gmm * gmm,int state, 
-			 const float * covar)
+			 const _fgmm_real * covar)
 {
   int i=0;
   for(;i<gmm->gauss[state].covar->_size;i++)
@@ -160,7 +160,7 @@ void fgmm_set_covar_smat(struct gmm * gmm,int state,
 
 
 void fgmm_set_covar(struct gmm * gmm,int state, 
-		    const float * square_covar)
+		    const _fgmm_real * square_covar)
 {
   smat_from_square( gmm->gauss[state].covar,square_covar);
   invert_covar(&gmm->gauss[state]);
@@ -168,7 +168,7 @@ void fgmm_set_covar(struct gmm * gmm,int state,
 
 /* returns pointer to actual address of the covar matrix, 
    that SHALL NOT be altered ... */
-float * fgmm_get_covar_smat(struct gmm * gmm, int state) 
+_fgmm_real * fgmm_get_covar_smat(struct gmm * gmm, int state) 
 {
   return gmm->gauss[state].covar->_; // arghhh 
 }
@@ -176,7 +176,7 @@ float * fgmm_get_covar_smat(struct gmm * gmm, int state)
 /* safer here .. copy values of the covariance matrix */
 void fgmm_get_covar(struct gmm * gmm, 
 		    int state,
-		    float * square_covar) /* -> must be alloc'd */ 
+		    _fgmm_real * square_covar) /* -> must be alloc'd */ 
 {
   smat_as_square(gmm->gauss[state].covar, square_covar); 
 }
@@ -192,13 +192,13 @@ void fgmm_dump(struct gmm * gmm)
     }
 }
   
-float fgmm_get_pdf( struct gmm * gmm,
-		    float * point,
-		    float * weights)
+_fgmm_real fgmm_get_pdf( struct gmm * gmm,
+		    _fgmm_real * point,
+		    _fgmm_real * weights)
 {
   int state_i = 0;
-  float like=0;
-  float p=0;
+  _fgmm_real like=0;
+  _fgmm_real p=0;
   for(;state_i<gmm->nstates;state_i++)
     {
       p = gmm->gauss[state_i].prior * gaussian_pdf(&(gmm->gauss[state_i]),point);
@@ -210,12 +210,12 @@ float fgmm_get_pdf( struct gmm * gmm,
 }
 
 int fgmm_most_likely_state(struct gmm * gmm,
-			   const float * obs)
+			   const _fgmm_real * obs)
 {
   int state_i = 0;
   int r=0;
-  float max_like=0;
-  float like;
+  _fgmm_real max_like=0;
+  _fgmm_real like;
   
   for(;state_i<gmm->nstates;state_i++)
     {

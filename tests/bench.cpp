@@ -17,8 +17,8 @@ int main(int argc,char ** argv)
   for(int i=0;i<nstates;i++)
     {
 
-      float mean[dim];
-      float covar[dim*(dim+1)/2];
+      _fgmm_real mean[dim];
+      _fgmm_real covar[dim*(dim+1)/2];
       int curs = 0;
       for(int j=0;j<dim;j++)
 	{
@@ -35,7 +35,7 @@ int main(int argc,char ** argv)
       mygmm.SetMean(i,mean);
       mygmm.SetCovariance(i,covar);
     }
-  float * data = new float[dim*nsamples];
+  _fgmm_real * data = new _fgmm_real[dim*nsamples];
   for(int i=0;i<nsamples;i++)
       mygmm.Draw(&data[i*dim]);
   

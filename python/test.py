@@ -26,7 +26,7 @@ g = fgmm.GMM(nstates,2)
 
 g.kmeans(dat)
 
-g.Em(dat,1e-3,fgmm.COVARIANCE_SPHERE)
+g.Em(dat,1e-3,fgmm.COVARIANCE_FULL)
 
 g.Dump()
 

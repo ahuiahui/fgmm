@@ -52,6 +52,10 @@
  *  Or you might want some nice OO programming, then check out Gmm class
  */
 
+/* #define FGMM_USE_DOUBLE */
+/* #define _fgmm_real double */
+
+#define _fgmm_real float
 
 /**
  * opaque structure holding one state of the  gmm 
@@ -126,12 +130,12 @@ void fgmm_free(struct gmm ** gmm);
  * the model must be first alloc'd (with fgmm_alloc) 
  */
 void fgmm_init_random(struct gmm * gmm,
-		     const float * data,
+		     const _fgmm_real * data,
 		     int data_len);
 
 
 void fgmm_init_kmeans( struct gmm * gmm,
-		       const float * data,
+		       const _fgmm_real * data,
 		       int data_len);
 /**
  * set the prior of a given state 
@@ -139,7 +143,7 @@ void fgmm_init_kmeans( struct gmm * gmm,
  * @param state : index of the state
  * @param prior : the prior value (be careful to keep sum(priors) = 1. )
  */
-void fgmm_set_prior(struct gmm *,int state, float prior);
+void fgmm_set_prior(struct gmm *,int state, _fgmm_real prior);
 
 /**
  * set the mean of a given state 
@@ -148,9 +152,9 @@ void fgmm_set_prior(struct gmm *,int state, float prior);
  * @param mean : table of dim float 
  */
 
-void fgmm_set_mean(struct gmm *,int state, const float * mean);
+void fgmm_set_mean(struct gmm *,int state, const _fgmm_real * mean);
 
-float fgmm_get_prior(struct gmm * gmm, int state);
+_fgmm_real fgmm_get_prior(struct gmm * gmm, int state);
 
 /**
  * get a pointer to the given state mean 
@@ -158,7 +162,7 @@ float fgmm_get_prior(struct gmm * gmm, int state);
  * this is a pointer to the actual mean, so take care .. 
  */
 
-float * fgmm_get_mean(struct gmm * gmm,int state);
+_fgmm_real * fgmm_get_mean(struct gmm * gmm,int state);
 
 /**
  * Set the covariance of a given state 
@@ -175,14 +179,14 @@ float * fgmm_get_mean(struct gmm * gmm,int state);
  *  covar must be a float table of lenght (dim*dim+1)/2 
  */
 
-void fgmm_set_covar_smat(struct gmm *,int state, const float * covar);
+void fgmm_set_covar_smat(struct gmm *,int state, const _fgmm_real * covar);
 
 /**
  * Set the covariance of a given state from a square 
  * matrix (row order : [i*dim + j] =  [i][j] )
  */
 void fgmm_set_covar(struct gmm * gmm,int state, 
-		    const float * square_covar);
+		    const _fgmm_real * square_covar);
 
 /**
  * get the address of the symetric form of the covar matrix
@@ -190,7 +194,7 @@ void fgmm_set_covar(struct gmm * gmm,int state,
  * this is the actuall address of covariance matrix, all kind 
  * of trouble can happen to you with this .. 
  */
-float * fgmm_get_covar_smat(struct gmm * gmm, int state) ;
+_fgmm_real * fgmm_get_covar_smat(struct gmm * gmm, int state) ;
 
 /**
  * copy the covariance matrix in a square matrix ( row 
@@ -202,7 +206,7 @@ float * fgmm_get_covar_smat(struct gmm * gmm, int state) ;
  */
 void fgmm_get_covar(struct gmm * gmm, 
 		    int state,
-		    float * square_covar); /* -> must be alloc'd */ 
+		    _fgmm_real * square_covar); /* -> must be alloc'd */ 
 
 /**
  * print the gmm parameters to screen 
@@ -216,7 +220,7 @@ void fgmm_dump(struct gmm * gmm);
  * @param out : *alloc'd * table of dim 
  *
  */
-void fgmm_draw_sample(struct gmm *, float * out);
+void fgmm_draw_sample(struct gmm *, _fgmm_real * out);
 
 
 enum COVARIANCE_TYPE 
@@ -247,35 +251,35 @@ enum COVARIANCE_TYPE
  */
 
 int fgmm_em( struct gmm * GMM,
-	     const float * data,
+	     const _fgmm_real * data,
 	     int data_length, 
-	     float * end_loglikelihood,
-	     float likelihood_epsilon,
+	     _fgmm_real * end_loglikelihood,
+	     _fgmm_real likelihood_epsilon,
 	     enum COVARIANCE_TYPE covar_t,
-	     const float * weights);
+	     const _fgmm_real * weights);
 
 
-static int fgmm_em_simple(struct gmm * GMM, const float * data, int data_length)
+static int fgmm_em_simple(struct gmm * GMM, const _fgmm_real * data, int data_length)
 {
-  float nevermind=0;
+  _fgmm_real nevermind=0;
   return fgmm_em(GMM,data,data_length,
 		 &nevermind, 1e-4, COVARIANCE_FULL, NULL);
 };
 
 
 int fgmm_kmeans( struct gmm * GMM,
-		 const float * data,
+		 const _fgmm_real * data,
 		 int data_length,
-		 float epsilon,
-		 const float * weights);
+		 _fgmm_real epsilon,
+		 const _fgmm_real * weights);
 
 /**
  * return likelihood of point
  * if weights != NULL , return normalized weights of each gaussian
  */
-float fgmm_get_pdf( struct gmm * gmm,
-		    float * point,
-		    float * weights);
+_fgmm_real fgmm_get_pdf( struct gmm * gmm,
+		    _fgmm_real * point,
+		    _fgmm_real * weights);
 
 
 /**
@@ -326,8 +330,8 @@ void fgmm_regression_init(struct fgmm_reg * reg);
 /**
  * does the regression 
  */
-void fgmm_regression(struct fgmm_reg * reg, const float * inputs, 
-		     float * outputs, float * covar);
+void fgmm_regression(struct fgmm_reg * reg, const _fgmm_real * inputs, 
+		     _fgmm_real * outputs, _fgmm_real * covar);
 
 
 /**
@@ -336,25 +340,25 @@ void fgmm_regression(struct fgmm_reg * reg, const float * inputs,
  * draw a sample in the output subspace, given the input point 
  * out ~ p(x | input) 
  */
-void fgmm_regression_sampling(struct fgmm_reg * reg,const float * inputs,
-			      float * output);
+void fgmm_regression_sampling(struct fgmm_reg * reg,const _fgmm_real * inputs,
+			      _fgmm_real * output);
 
 
 /**
  * return index of the most likely state, given an observation
  */
-int fgmm_most_likely_state(struct gmm *, const float * obs);
+int fgmm_most_likely_state(struct gmm *, const _fgmm_real * obs);
 
 /**
  * incremental updates, update the model with a new datapoint
  * 
  * Highly experimental .. 
  */
-void fgmm_update(struct gmm * gmm, const float * data_point);
+void fgmm_update(struct gmm * gmm, const _fgmm_real * data_point);
 
 /**
  * on-line update, with winner take all (only update the most 
  * likely gaussian ) 
  */
-void fgmm_update_wta(struct gmm * gmm, const float * data_point);
+void fgmm_update_wta(struct gmm * gmm, const _fgmm_real * data_point);
 

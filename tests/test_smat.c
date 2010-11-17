@@ -15,18 +15,18 @@ int main(int argc, char ** argv)
   struct smat * chol = NULL;
   struct smat * check = NULL;
 
-  float *pm1;
-  float * pmat;
+  _fgmm_real *pm1;
+  _fgmm_real * pmat;
 
-  float a[DIM],b[DIM],c[DIM];
-  float sq[DIM * DIM]; 
+  _fgmm_real a[DIM],b[DIM],c[DIM];
+  _fgmm_real sq[DIM * DIM]; 
   int i=0,j=0;
   
   
-  float tdata[DIM*COVAR_SAMPLE];
-  float weights[COVAR_SAMPLE];
-  float mean[DIM];
-  float norm;
+  _fgmm_real tdata[DIM*COVAR_SAMPLE];
+  _fgmm_real weights[COVAR_SAMPLE];
+  _fgmm_real mean[DIM];
+  _fgmm_real norm;
   
   printf("testing smat_zero \n");
   smat_zero(&check,DIM);
@@ -76,7 +76,7 @@ int main(int argc, char ** argv)
 
   printf("testing smat_multv \n");
   for(i=0;i<DIM;i++)
-    a[i]= (float) i;
+    a[i]= (_fgmm_real) i;
   smat_multv(m1,a,b);
   for(i=0;i<DIM;i++)
     {
@@ -143,7 +143,7 @@ int main(int argc, char ** argv)
      }
    for(i=0;i<DIM*COVAR_SAMPLE;i++)
      {
-       tdata[i] = (float)rand()*2/RAND_MAX ;
+       tdata[i] = (_fgmm_real)rand()*2/RAND_MAX ;
      }
    
    norm = smat_covariance(check,COVAR_SAMPLE,weights,tdata,mean);

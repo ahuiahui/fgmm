@@ -15,18 +15,18 @@ int main(int argc, char ** argv)
  
   int data_len = 1000;
   int i=0;
-  float * data = (float *)malloc( sizeof(float)*data_len*2);
+  _fgmm_real * data = (_fgmm_real *)malloc( sizeof(_fgmm_real)*data_len*2);
   struct gmm * gmm;
   float likelihood;
   struct fgmm_reg  * regression;
-  float input,output,cvar;
-  float error=0.;
-  float x,y;
-  float in[2];
-  float out[2];
-  float cov[3];
-  float gt[2];
-  float var = 0;
+  _fgmm_real input,output,cvar;
+  _fgmm_real error=0.;
+  _fgmm_real x,y;
+  _fgmm_real in[2];
+  _fgmm_real out[2];
+  _fgmm_real cov[3];
+  _fgmm_real gt[2];
+  _fgmm_real var = 0;
   int test_points = 1000;
   FILE * rfuke;
   
@@ -35,7 +35,7 @@ int main(int argc, char ** argv)
 
   for(;i<data_len;i++)
     {
-      data[2*i] = ((float)i)/data_len;
+      data[2*i] = ((_fgmm_real)i)/data_len;
       data[2*i+1] = sin( 2 * data[2*i] * M_PI) + (0.1 * rand())/RAND_MAX;
       // printf("%f %f \n",data[2*i],data[2*i+1]); 
     }
@@ -53,7 +53,7 @@ int main(int argc, char ** argv)
 
   for(i=0;i<100;i++)
     {
-      input = ((float) i )/100;
+      input = ((_fgmm_real) i )/100;
       fgmm_regression(regression,&input,&output,&cvar);
       error += pow(output-sin(2*input*M_PI),2);
       }
@@ -70,7 +70,7 @@ int main(int argc, char ** argv)
  
   /* multidim 4 d data set */ 
   // data_len = 100000;
-  data = malloc( sizeof(float) * data_len * 4);
+  data = malloc( sizeof(_fgmm_real) * data_len * 4);
  
   for(i=0;i<data_len;i++)
     {

@@ -34,14 +34,14 @@ void smat_zero(struct smat ** mat,int dim)
       m = (struct smat *) malloc ( sizeof(struct smat));
       m->dim = dim;
       m->_size = dim*(dim+1)/2;
-      m->_ = (float *) malloc(sizeof(float)*m->_size);
+      m->_ = (_fgmm_real *) malloc(sizeof(_fgmm_real)*m->_size);
       *mat = m;
     }
   for(i=0;i<m->_size;i++)
     m->_[i] = 0.;
 }
 
-float smat_get_value(struct smat * mat,int row, int col)
+_fgmm_real smat_get_value(struct smat * mat,int row, int col)
 {
   int tmp;
   int i=0;
@@ -66,7 +66,7 @@ void smat_get_submatrix(struct smat * mat , struct smat * res,
 {
   int i=0;
   int j;
-  float *pres = res->_;
+  _fgmm_real *pres = res->_;
 
   for(;i<n_dims;i++)
     {
@@ -93,7 +93,7 @@ void smat_identity(struct smat * mat)
 {
   int i=0;
   int j;
-  float * pmat = mat->_;
+  _fgmm_real * pmat = mat->_;
   for(;i<mat->dim;i++)
     {
       (*pmat++) = 1.;
@@ -102,10 +102,10 @@ void smat_identity(struct smat * mat)
     }
 }
 
-void smat_add_diagonal(struct smat * mat, float value)
+void smat_add_diagonal(struct smat * mat, _fgmm_real value)
 {
   int i=0;
-  float * pmat = mat->_;
+  _fgmm_real * pmat = mat->_;
   for(;i<mat->dim;i++)
     {
       *pmat += value;      
@@ -118,7 +118,7 @@ void smat_add_diagonal(struct smat * mat, float value)
 void smat_pmatrix(const struct smat* mat)
 {
   int i,j;
-  float * pmat = mat->_;
+  _fgmm_real * pmat = mat->_;
   for(i=0;i<mat->dim;i++)
     {
       for(j=0;j<i;j++)
@@ -142,16 +142,16 @@ void smat_pmatrix(const struct smat* mat)
 
 int smat_cholesky(const struct smat* in,struct smat* out)
 {
-  float * tmp; //[in->dim][in->dim];
+  _fgmm_real * tmp; //[in->dim][in->dim];
   int line=0;
   int col=0;
   int i;
-  float ts=0;
-  float *pout = out->_;
-  float *pin = in->_;
+  _fgmm_real ts=0;
+  _fgmm_real *pout = out->_;
+  _fgmm_real *pin = in->_;
   
   assert(in->dim == out->dim);
-  tmp = (float *) malloc(sizeof(float) * in->dim * in->dim);
+  tmp = (_fgmm_real *) malloc(sizeof(_fgmm_real) * in->dim * in->dim);
   
   for(line=0;line<in->dim;line++)
     {
@@ -243,10 +243,10 @@ float smat_sesq(struct smat * ichol,const float * bias,const float * x)
 /* resolve  L*y = b 
    where L is * LOWER *  triangular */ 
 
-void smat_tforward(struct smat * lower, float * b, float * y) 
+void smat_tforward(struct smat * lower, _fgmm_real * b, _fgmm_real * y) 
 {
   int i,j;
-  float * pL = lower->_;
+  _fgmm_real * pL = lower->_;
   for(i=0;i<lower->dim;i++)
     y[i] = b[i];
   for(i=0;i<lower->dim;i++)
@@ -261,10 +261,10 @@ void smat_tforward(struct smat * lower, float * b, float * y)
     }
 }
 
-void smat_as_square(const struct smat * mat, float * square) 
+void smat_as_square(const struct smat * mat, _fgmm_real * square) 
 {
   int i,j;
-  float * pmat = mat->_;
+  _fgmm_real * pmat = mat->_;
   for(i=0;i<mat->dim;i++) 
     {
       square[i*mat->dim + i] = (*pmat++);
@@ -277,10 +277,10 @@ void smat_as_square(const struct smat * mat, float * square)
     }
 }
 
-void smat_from_square(struct smat * mat, const float * square)
+void smat_from_square(struct smat * mat, const _fgmm_real * square)
 {
   int i,j;
-  float * pmat = mat->_;
+  _fgmm_real * pmat = mat->_;
   for(i=0;i<mat->dim;i++) 
     {
       (*pmat++) = square[i*mat->dim + i];
@@ -295,10 +295,10 @@ void smat_from_square(struct smat * mat, const float * square)
 /* resolve L*y = b 
    where L is upper triangular (like the result of cholesky ..) */
 
-void smat_tbackward(const struct smat * upper, float * b, float * y)
+void smat_tbackward(const struct smat * upper, _fgmm_real * b, _fgmm_real * y)
 {
   int i,j;
-  float * pU = upper->_ + upper->_size -1; // points to the end  
+  _fgmm_real * pU = upper->_ + upper->_size -1; // points to the end  
   for (i = upper->dim - 1; i >= 0; i--)
   {
     y[i] = b[i];
@@ -312,21 +312,21 @@ void smat_tbackward(const struct smat * upper, float * b, float * y)
   }
 }
 
-float smat_covariance(struct smat * cov, 
+_fgmm_real smat_covariance(struct smat * cov, 
 		     int ndata, 
-		     const float * weight,
-		     const float * data,
-		     float * mean)
+		     const _fgmm_real * weight,
+		     const _fgmm_real * data,
+		     _fgmm_real * mean)
 {
-  const float * pdata = data;
-  const float * pweight = weight;
-  float * pcov = cov->_;
-  float * cdata;
+  const _fgmm_real * pdata = data;
+  const _fgmm_real * pweight = weight;
+  _fgmm_real * pcov = cov->_;
+  _fgmm_real * cdata;
   int i=0,j=0,k=0;
-  float norm=0;
+  _fgmm_real norm=0;
   
   smat_zero(&cov,cov->dim);
-  cdata = (float *) malloc(sizeof(float) * cov->dim);
+  cdata = (_fgmm_real *) malloc(sizeof(_fgmm_real) * cov->dim);
   
   for(i=0;i<cov->dim;i++)
     {
@@ -371,23 +371,23 @@ float smat_covariance(struct smat * cov,
   return norm;
 }
 
-float smat_covariance_diag(struct smat * cov, 
+_fgmm_real smat_covariance_diag(struct smat * cov, 
 			   int ndata, 
-			   const float * weight,
-			   const float * data,
-			   float * mean)
+			   const _fgmm_real * weight,
+			   const _fgmm_real * data,
+			   _fgmm_real * mean)
 {
-  const float * pdata = data;
-  const float * pweight = weight;
-  float * pcov;
-  float *pmat = cov->_;
-  float tmp;
+  const _fgmm_real * pdata = data;
+  const _fgmm_real * pweight = weight;
+  _fgmm_real * pcov;
+  _fgmm_real *pmat = cov->_;
+  _fgmm_real tmp;
 
   int i=0,j=0,k=0;
-  float norm=0;
+  _fgmm_real norm=0;
   
   smat_zero(&cov,cov->dim);
-  pcov = (float *) malloc(sizeof(float) * cov->dim);
+  pcov = (_fgmm_real *) malloc(sizeof(_fgmm_real) * cov->dim);
   
   for(i=0;i<cov->dim;i++)
     {
@@ -429,20 +429,20 @@ float smat_covariance_diag(struct smat * cov,
   return norm;
 }
 
-float smat_covariance_single(struct smat * cov, 
+_fgmm_real smat_covariance_single(struct smat * cov, 
 			     int ndata, 
-			     const float * weight,
-			     const float * data,
-			     float * mean)
+			     const _fgmm_real * weight,
+			     const _fgmm_real * data,
+			     _fgmm_real * mean)
 {
-  const float * pdata = data;
-  const float * pweight = weight;
-  float tmp;
-  float *pmat = cov->_;
-  float total_mean;
-  float variance;
+  const _fgmm_real * pdata = data;
+  const _fgmm_real * pweight = weight;
+  _fgmm_real tmp;
+  _fgmm_real *pmat = cov->_;
+  _fgmm_real total_mean;
+  _fgmm_real variance;
   int i=0,j=0,k=0;
-  float norm=0;
+  _fgmm_real norm=0;
   
   for(i=0;i<cov->dim;i++)
     {

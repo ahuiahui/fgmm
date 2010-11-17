@@ -18,7 +18,7 @@ int main(int argc,char ** argv)
   int dim=0;
 
   int i=0,j=0;
-  float *data, *pdata,*samp;
+  _fgmm_real *data, *pdata,*samp;
   struct gmm * GMM;
   
   if(argc < 3)
@@ -62,7 +62,7 @@ int main(int argc,char ** argv)
   dim--;
   rewind(infile);
   printf("%d , %d\n",n_data,dim);
-  data = (float *) malloc(sizeof(float) * dim * n_data);
+  data = (_fgmm_real *) malloc(sizeof(_fgmm_real) * dim * n_data);
   pdata = data;
   
   for(i=0;i<n_data;i++)
@@ -91,7 +91,7 @@ int main(int argc,char ** argv)
   
   infile = fopen("samples.txt","w");
 
-  samp = (float *) malloc(sizeof(float) *dim);
+  samp = (_fgmm_real *) malloc(sizeof(_fgmm_real) *dim);
   for(i=0;i<1000;i++)
     {
       fgmm_draw_sample(GMM,samp);

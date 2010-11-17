@@ -19,13 +19,13 @@ int main(int argc,char ** argv)
   struct gaussian g;
   float v[] = {1.,1.,1.};
   float pdf=0;
-  float samp[3];
-  float * data;
-  float * weights;
+  _fgmm_real samp[3];
+  _fgmm_real * data;
+  _fgmm_real * weights;
   int k=0;
   struct smat * cv=NULL;
-  float mean[3];
-  float * pcv;
+  _fgmm_real mean[3];
+  _fgmm_real * pcv;
   
   srand(time(NULL));
   printf("gaussian test suite, each test uses %d samples \n",randn_samples);
@@ -57,8 +57,8 @@ int main(int argc,char ** argv)
   
   /* ----------------------------------------------- */
   printf("drawing sample from gaussian test :\n");
-  data = (float *) malloc( sizeof(float) * randn_samples * 3);
-  weights = (float *) malloc(sizeof(float) * randn_samples);
+  data = (_fgmm_real *) malloc( sizeof(_fgmm_real) * randn_samples * 3);
+  weights = (_fgmm_real *) malloc(sizeof(_fgmm_real) * randn_samples);
   for(i=0;i<randn_samples;i++)
     {
       weights[i] = 1.;

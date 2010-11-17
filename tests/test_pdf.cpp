@@ -15,11 +15,11 @@ int main(int argc, char *argv[])
 {
   srand(time(0));
   Gmm gmm(1,2); // one state 2 d 
-  float cov[3] = { 10 , -4. , 2.};
+  _fgmm_real cov[3] = { 10 , -4. , 2.};
   gmm.SetCovariance(0,cov);
   
-  float sample[2];
-  float mean = 0.;
+  _fgmm_real sample[2];
+  _fgmm_real mean = 0.;
   int count = 0;
    
   while(count < 500)

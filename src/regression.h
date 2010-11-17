@@ -31,7 +31,7 @@ struct gaussian_reg {
   int * output_dim;
   int input_len;
   int output_len;
-  float * reg_matrix; // store in->out A matrix 
+  _fgmm_real * reg_matrix; // store in->out A matrix 
 };
 
 
