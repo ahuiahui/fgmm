@@ -98,9 +98,11 @@ int main(int argc, char ** argv)
     }
   //smat_pmatrix(m1);
   printf("testing get_value \n");
-  printf("%f %f \n",smat_get_value(m1,1,1),smat_get_value(m1,1,2));
+  printf("%f %f \n",smat_get_value(m1,1,1),smat_get_value(m1,DIM/2,DIM/2));
   assert( smat_get_value(m1,0,0) == DIM);
   assert( smat_get_value(m1,1,1) == DIM);
+  assert( smat_get_value(m1,DIM/2,DIM/2) == DIM);
+  assert( smat_get_value(m1,DIM/2,DIM/2 + 10) == DIM - 10);
   assert( smat_get_value(m1,1,2) == DIM - 1 );
   printf("..pass\n");
   printf("testing cholesky \n");
