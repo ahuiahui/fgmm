@@ -9,7 +9,7 @@ import numpy as np
 import fgmm
 from matplotlib import pyplot
 
-nstates = 4
+nstates = 8
 
 t = np.linspace(0,6,1000)
 #t = np.hstack([t[:300], t[600:] ])
@@ -36,13 +36,16 @@ g.InitRegression(a)
 
 inp = np.linspace(0,6,100) 
 r = []
+gmr = []
 print "jahldfuablfjhbl"
 
 for t in inp :                                                
-    r.append(g.DoSamplingRegression(np.array([t],dtype=np.dtype('f4'))))
+    r.append(g.DoSamplingRegression(np.array([t])))
+    gmr.append(g.DoRegression(np.array([t])))
 
 s=np.vstack([g.Draw() for _ in range(1000)])
 pyplot.plot(inp,r,'r-',linewidth=3)
+pyplot.plot(inp,gmr,'g-',linewidth=5)
 pyplot.plot(s[:,0],s[:,1],'b.')
 
 _t = np.linspace(0,2*np.pi,50)

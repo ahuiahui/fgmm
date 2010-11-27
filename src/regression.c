@@ -123,8 +123,10 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
 	for(k=0;k<gr->input_len;k++) // scalar product here 
 	  element += gr->reg_matrix[i*gr->input_len + k]*tmp[k];
 	// column wise filling .. 
+	/* printf("%d %d \n",i+off, result->covar->dim * (result->covar->dim + 1 ) /2 ); */
+	/* assert(i+off < result->covar->dim * (result->covar->dim + 1 ) /2 ); */
 	result->covar->_[i+off] -= element;
-	off += (gr->input_len - j - 1); 
+	off += (gr->output_len - j - 1); 
       }
   }
   free(tmp);
@@ -202,7 +204,6 @@ void fgmm_regression(struct fgmm_reg * reg,
   for(i=0;i<reg->output_len;i++)
     result[i] /= likelihood;
 
-  gaussian_free(&loc_model);
   free(weights);
 }
 

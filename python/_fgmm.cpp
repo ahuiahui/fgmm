@@ -32,12 +32,16 @@ PyObject * get_vector(int dim, _fgmm_real * dat)
   
   npy_intp dims[1];
   dims[0] = dim;
+
   PyObject * output_data;
+
 #ifdef FGMM_USE_DOUBLE
   output_data = PyArray_SimpleNewFromData(1,dims,NPY_DOUBLE,(void *) dat);
 #else
   output_data = PyArray_SimpleNewFromData(1,dims,NPY_FLOAT,(void *) dat);
 #endif // USE DOUBLE
+
+  return output_data;
 };
 
 /* the python object */
@@ -210,7 +214,7 @@ Gmm_DoRegression(GMM * self, PyObject * args)
 
   output = (_fgmm_real *) malloc( sizeof(_fgmm_real) * (self->g->dim - self->g->ninput));
   
-  self->g->DoRegression((_fgmm_real *) PyArray_DATA(input_data), 
+  self->g->DoRegression((_fgmm_real *) PyArray_DATA(arr), 
 			output);
   Py_DECREF(arr);
   output_data =  get_vector( self->g->dim - self->g->ninput, output);
