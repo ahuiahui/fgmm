@@ -56,7 +56,7 @@ _fgmm_real smat_get_value(struct smat * mat,int row, int col)
   for(;i<row;i++)
     {
       idx += mat->dim - i;
-      col -= (i+1);
+      col --;
     }
   return mat->_[idx+col];
 }
