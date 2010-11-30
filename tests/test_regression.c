@@ -13,7 +13,7 @@
 int main(int argc, char ** argv)
 {
  
-  int data_len = 1000;
+  int data_len = 5000;
   int i=0;
   _fgmm_real * data = (_fgmm_real *)malloc( sizeof(_fgmm_real)*data_len*2);
   struct gmm * gmm;
@@ -60,12 +60,11 @@ int main(int argc, char ** argv)
   error /= 100.;
   error = sqrtf(error);
   printf("RMS error on the toy - sine dataset :: %f\n",error);
-  assert(error < .25);
+  assert(error < .1);
   printf(".. pass \n");
   
-  fgmm_free(&gmm);
   fgmm_regression_free(&regression);
-  exit(0);
+  fgmm_free(&gmm);
   free(data);
  
   /* multidim 4 d data set */ 
@@ -83,7 +82,7 @@ int main(int argc, char ** argv)
       //printf("%f %f %f %f \n",data[4*i], data[4*i+1], data[4*i+2], data[4*i+3]);
     }
   
-  fgmm_alloc(&gmm , 16 , 4 );
+  fgmm_alloc(&gmm , 32 , 4 );
   fgmm_init_random(gmm,data,data_len);
   fgmm_em(gmm,data,data_len,&likelihood,1e-2,COVARIANCE_FULL,NULL);
  
@@ -113,11 +112,10 @@ int main(int argc, char ** argv)
 
   error /= test_points;
   var /= test_points ;
-  error = sqrtf(error);
-  var = sqrtf(var);
+  error = sqrtf(error/var);
   //fclose(rfuke);
   printf("nRMS error on the 4d sine dataset :: %f\n",error);
-  assert(error < .75);
+  assert(error < .1); // we can get to this precision with 32 states 
   printf(".. pass \n");
   return 0;
 }
