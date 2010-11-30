@@ -33,9 +33,7 @@ void fgmm_regression_init_g(struct gaussian_reg * gr)
   struct smat * fcov = gr->gauss->covar;
   gr->subgauss = (struct gaussian *) malloc(sizeof(struct gaussian));
   gaussian_init(gr->subgauss,gr->input_len);
-  smat_cholesky(gr->gauss->covar, gr->gauss->covar_cholesky);
-  gaussian_get_subgauss(gr->gauss,gr->subgauss,
-			gr->input_len,gr->input_dim);
+  gaussian_get_subgauss(gr->gauss,gr->subgauss, gr->input_len, gr->input_dim);
   // reg_matrix = (Sigma^00)-1 * (Sigma^0i)
   if(gr->reg_matrix != NULL)
     free(gr->reg_matrix);
@@ -90,7 +88,7 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
   for(i=0;i<gr->output_len;i++)
     {
       result->mean[i] = gr->gauss->mean[ gr->output_dim[i]];
-      for(;j<gr->input_len;j++)
+      for(j=0;j<gr->input_len;j++)
 	{
 	  result->mean[i] += gr->reg_matrix[i * gr->input_len + j]*tmp[j];
 	}
@@ -101,7 +99,9 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
     {
       for(j=i;j<result->covar->dim;j++)
 	{
-	  result->covar->_[k] = smat_get_value(gr->gauss->covar, i , j);
+	  result->covar->_[k] = smat_get_value(gr->gauss->covar, 
+					       gr->output_dim[i] , 
+					       gr->output_dim[j]);
 	  k++;
 	}
     }
