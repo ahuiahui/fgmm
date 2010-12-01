@@ -32,20 +32,20 @@ void fgmm_regression_init_g(struct gaussian_reg * gr)
   int i,j;
   struct smat * fcov = gr->gauss->covar;
   gr->subgauss = (struct gaussian *) malloc(sizeof(struct gaussian));
-  gaussian_init(gr->subgauss,gr->input_len);
-  gaussian_get_subgauss(gr->gauss,gr->subgauss, gr->input_len, gr->input_dim);
+  gaussian_init(gr->subgauss,gr->reg->input_len);
+  gaussian_get_subgauss(gr->gauss,gr->subgauss, gr->reg->input_len, gr->reg->input_dim);
   // reg_matrix = (Sigma^00)-1 * (Sigma^0i)
   if(gr->reg_matrix != NULL)
     free(gr->reg_matrix);
-  gr->reg_matrix =(_fgmm_real*)  malloc(sizeof(_fgmm_real) * gr->input_len * gr->output_len);
+  gr->reg_matrix =(_fgmm_real*)  malloc(sizeof(_fgmm_real) * gr->reg->input_len * gr->reg->output_len);
  
-  for(j=0;j<gr->output_len;j++)
+  for(j=0;j<gr->reg->output_len;j++)
     {
-      for(i=0;i<gr->input_len;i++)
+      for(i=0;i<gr->reg->input_len;i++)
 	{
-	  gr->reg_matrix[j * gr->input_len + i] = smat_get_value(fcov,
-							 gr->output_dim[j],
-							 gr->input_dim[i]);
+	  gr->reg_matrix[j * gr->reg->input_len + i] = smat_get_value(fcov,
+								      gr->reg->output_dim[j],
+								      gr->reg->input_dim[i]);
 	}
     }
   //dump(gr->subgauss);
@@ -74,24 +74,24 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
   int off,k;
  
   // FIXME : malloc, not suitable for RT
-  tmp = (_fgmm_real *) malloc(sizeof(_fgmm_real) * gr->input_len);
-  tmp2 = (_fgmm_real *) malloc(sizeof(_fgmm_real) * gr->input_len);
+  tmp = (_fgmm_real *) malloc(sizeof(_fgmm_real) * gr->reg->input_len);
+  tmp2 = (_fgmm_real *) malloc(sizeof(_fgmm_real) * gr->reg->input_len);
   
   /* OPT : this computation is also done for the 
      subgauss pdf (ie weight of the gaussian in the regression .. */
 
-  for(;i<gr->input_len;i++)
+  for(;i<gr->reg->input_len;i++)
       tmp[i] = inputs[i] - gr->subgauss->mean[i];
 
   smat_tforward(gr->subgauss->covar_cholesky,tmp,tmp2);
   smat_tbackward(gr->subgauss->covar_cholesky,tmp2,tmp);
 
-  for(i=0;i<gr->output_len;i++)
+  for(i=0;i<gr->reg->output_len;i++)
     {
-      result->mean[i] = gr->gauss->mean[ gr->output_dim[i]];
-      for(j=0;j<gr->input_len;j++)
+      result->mean[i] = gr->gauss->mean[ gr->reg->output_dim[i]];
+      for(j=0;j<gr->reg->input_len;j++)
 	{
-	  result->mean[i] += gr->reg_matrix[i * gr->input_len + j]*tmp[j];
+	  result->mean[i] += gr->reg_matrix[i * gr->reg->input_len + j]*tmp[j];
 	}
     }
 
@@ -101,17 +101,17 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
       for(j=i;j<result->covar->dim;j++)
 	{
 	  result->covar->_[k] = smat_get_value(gr->gauss->covar, 
-					       gr->output_dim[i] , 
-					       gr->output_dim[j]);
+					       gr->reg->output_dim[i] , 
+					       gr->reg->output_dim[j]);
 	  k++;
 	}
     }
 
-  for(i=0 ; i<gr->output_len ; i++)
+  for(i=0 ; i<gr->reg->output_len ; i++)
   {
     
-    for(j=0;j<gr->input_len;j++)
-      tmp[j] = gr->reg_matrix[i*gr->input_len+j];
+    for(j=0;j<gr->reg->input_len;j++)
+      tmp[j] = gr->reg_matrix[i*gr->reg->input_len+j];
 
     smat_tforward(gr->subgauss->covar_cholesky,tmp,tmp2);
     smat_tbackward(gr->subgauss->covar_cholesky,tmp2,tmp);
@@ -121,13 +121,13 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
     
     for(j=0;j<(i+1);j++)
       {
-	for(k=0;k<gr->input_len;k++) // scalar product here 
-	  element += gr->reg_matrix[i*gr->input_len + k]*tmp[k];
+	for(k=0;k<gr->reg->input_len;k++) // scalar product here 
+	  element += gr->reg_matrix[i*gr->reg->input_len + k]*tmp[k];
 	// column wise filling .. 
 	/* printf("%d %d \n",i+off, result->covar->dim * (result->covar->dim + 1 ) /2 ); */
 	/* assert(i+off < result->covar->dim * (result->covar->dim + 1 ) /2 ); */
 	result->covar->_[i+off] -= element;
-	off += (gr->output_len - j - 1); 
+	off += (gr->reg->output_len - j - 1); 
       }
   }
   free(tmp);
@@ -241,10 +241,7 @@ void fgmm_regression_alloc(struct fgmm_reg ** regression,
   for(;state < reg->model->nstates ; state++)
     {
       reg->subgauss[state].gauss = &gmm->gauss[state];
-      reg->subgauss[state].input_len = input_len;
-      reg->subgauss[state].output_len = output_len;
-      reg->subgauss[state].output_dim = reg->output_dim;
-      reg->subgauss[state].input_dim = reg->input_dim;
+      reg->subgauss[state].reg = reg;
       reg->subgauss[state].reg_matrix = NULL;
       reg->subgauss[state].subgauss = NULL;
     }

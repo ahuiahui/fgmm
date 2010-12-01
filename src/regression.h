@@ -24,23 +24,22 @@
 #include "gaussian.h"
 #include "fgmm.h"
 
+struct fgmm_reg;
+
 struct gaussian_reg {
-  struct gaussian * gauss;
+  struct gaussian * gauss;    // the gaussian we will do regression 
   struct gaussian * subgauss; // input subgaussian Used to compute the weight of this
-  int * input_dim;
-  int * output_dim;
-  int input_len;
-  int output_len;
+  struct fgmm_reg * reg;             // pointer to reg structure holding info on in/out dimensions ..
   _fgmm_real * reg_matrix; // store in->out A matrix 
 };
 
 
 struct fgmm_reg {
-  struct gmm * model;
-  int * input_dim;
-  int * output_dim;
-  int input_len;
+  struct gmm * model; // the actual GMM model
+  int * input_dim;    // input dimension indexes
+  int * output_dim;   // output dimension indexes
+  int input_len;      
   int output_len;
-  struct gaussian_reg * subgauss;
+  struct gaussian_reg * subgauss; // array of gaussian_reg
 };
 
