@@ -93,7 +93,7 @@ public :
   /**
    * Just print the model's parameter on stdout
    */
-  void Dump()
+  void dump()
   {
     fgmm_dump(this->c_gmm);
   };
@@ -101,14 +101,14 @@ public :
   /**
    * Expectation Maximization Algorithm. 
    */
-  int Em(_fgmm_real * data,int len, 
+  int em(_fgmm_real * data,int len, 
 	 _fgmm_real epsilon=1e-4, enum COVARIANCE_TYPE covar_t = COVARIANCE_FULL)
   {
     return fgmm_em(c_gmm,data,len,&likelihood,epsilon,covar_t,NULL);
   };
 
 
-  _fgmm_real Pdf(_fgmm_real * obs, _fgmm_real * weights=NULL)
+  _fgmm_real pdf(_fgmm_real * obs, _fgmm_real * weights=NULL)
   {
     return fgmm_get_pdf(c_gmm,obs,weights);
   };
@@ -116,7 +116,7 @@ public :
   /**
    * set Prior probability for the desired state
    */
-  void SetPrior(int state, _fgmm_real val)
+  void setPrior(int state, _fgmm_real val)
   {
     fgmm_set_prior(this->c_gmm,state,val);
   };
@@ -127,7 +127,7 @@ public :
    * @param state : the state index 
    * @param mean : an array of size dim, specify the mean
    */
-  void SetMean(int state, _fgmm_real * mean)
+  void setMean(int state, _fgmm_real * mean)
   {
     fgmm_set_mean(this->c_gmm,state,mean);
   };
@@ -149,7 +149,7 @@ public :
    * if not we are using a standart row order . 
    */
  
-  void SetCovariance(int state, _fgmm_real * covar, bool AsSymetric=true)
+  void setCovariance(int state, _fgmm_real * covar, bool AsSymetric=true)
   {
     if(AsSymetric) 
       fgmm_set_covar_smat(this->c_gmm,state,covar);
@@ -158,19 +158,19 @@ public :
   };
 
 
-  _fgmm_real GetPrior(int state)
+  _fgmm_real getPrior(int state)
   {
     return fgmm_get_prior(this->c_gmm,state);
   };
 
-  void GetMean(int state, _fgmm_real * output)
+  void getMean(int state, _fgmm_real * output)
   {
     _fgmm_real * pMean = fgmm_get_mean(this->c_gmm,state);
     for(int i=0;i<this->c_gmm->dim;i++)
       output[i] = pMean[i];
   }
 
-  void GetCovariance(int state, _fgmm_real * out,bool AsSymetric=false)
+  void getCovariance(int state, _fgmm_real * out,bool AsSymetric=false)
   {
     if(!AsSymetric)
       {
@@ -190,7 +190,7 @@ public :
    * @param sample : the output sample, must be alloc'd of 
    *                 size dim. 
    */
-  void Draw(_fgmm_real * sample) 
+  void draw(_fgmm_real * sample) 
   {
     fgmm_draw_sample(this->c_gmm,sample);
   };
@@ -202,7 +202,7 @@ public :
    * @param ninput : the first ninput dimension are the inputs, 
    *                 remaining dimensions are outputs. 
    */
-  void InitRegression(int ninput){
+  void initRegression(int ninput){
     if( c_reg != NULL) 
       fgmm_regression_free(&c_reg);
     this->ninput = ninput;
@@ -218,7 +218,7 @@ public :
    * @param covar : eventually store resulting covariance is symetric matrix
    *                order (set SetCovariance ) 
    */
-  void DoRegression(const _fgmm_real * input, _fgmm_real * output, _fgmm_real * covar=NULL)
+  void doRegression(const _fgmm_real * input, _fgmm_real * output, _fgmm_real * covar=NULL)
   {
     fgmm_regression(c_reg,input,output,covar);
   };
@@ -230,7 +230,7 @@ public :
    * input subspace. 
    * you must call InitRegression before. 
    */
-   void DoSamplingRegression(const _fgmm_real * input, _fgmm_real * output)
+   void doSamplingRegression(const _fgmm_real * input, _fgmm_real * output)
    {
      fgmm_regression_sampling(c_reg,input,output);
    };
@@ -243,7 +243,7 @@ public :
    * @param wta   : use winner take all update ( only update 
    *                 Most likely gaussian) 
    */
-  void Update(const _fgmm_real * point,bool wta=false)
+  void update(const _fgmm_real * point,bool wta=false)
   {
     if(wta) 
       fgmm_update_wta(c_gmm,point);
@@ -251,8 +251,9 @@ public :
       fgmm_update(c_gmm,point);
   };
 
-
-  int GetLikelyState(const _fgmm_real * point)
+  /** returns state index with the highest likelihood 
+   */
+  int getLikelyState(const _fgmm_real * point)
   {
     return fgmm_most_likely_state(this->c_gmm,point);
   };
@@ -261,6 +262,5 @@ private :
   struct gmm * c_gmm;
   struct fgmm_reg * c_reg;
   _fgmm_real likelihood;
-
 };
 

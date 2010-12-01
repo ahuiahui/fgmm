@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
   srand(time(0));
   Gmm gmm(1,2); // one state 2 d 
   _fgmm_real cov[3] = { 10 , -4. , 2.};
-  gmm.SetCovariance(0,cov);
+  gmm.setCovariance(0,cov);
   
   _fgmm_real sample[2];
   _fgmm_real mean = 0.;
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
    
   while(count < 500)
     {
-      gmm.Draw(sample);
+      gmm.draw(sample);
       if(sample[0] > 5.)
 	{
 	  mean += sample[1];

@@ -144,21 +144,21 @@ Gmm_doEm(GMM * self,PyObject * args, PyObject *kwds)
 
   data_size = PyArray_DIM(arr,0);
   
-  int steps = self->g->Em(data,data_size,epsilon,COVARIANCE_TYPE(covar_t));
+  int steps = self->g->em(data,data_size,epsilon,COVARIANCE_TYPE(covar_t));
   Py_DECREF(arr);
   return PyInt_FromLong(steps);
 }
 
 
 static PyObject *
-Gmm_Dump(GMM * self)
+Gmm_dump(GMM * self)
 {
-  self->g->Dump();
+  self->g->dump();
   return PyInt_FromLong(1);
 }
 
 static PyObject *
-Gmm_Pdf(GMM * self, PyObject * args)
+Gmm_pdf(GMM * self, PyObject * args)
 {
   PyObject * input_data;
   _fgmm_real * output;
@@ -173,7 +173,7 @@ Gmm_Pdf(GMM * self, PyObject * args)
     return NULL;
 
   output = (_fgmm_real *) malloc( sizeof(_fgmm_real) * (self->g->nstates));
-  self->g->Pdf((_fgmm_real *) PyArray_DATA(arr), 
+  self->g->pdf((_fgmm_real *) PyArray_DATA(arr), 
 	       output);
   
   Py_DECREF(arr);
@@ -182,7 +182,7 @@ Gmm_Pdf(GMM * self, PyObject * args)
 }
 
 static PyObject *
-Gmm_InitRegression(GMM * self, PyObject * args)
+Gmm_initRegression(GMM * self, PyObject * args)
 { 
 
   int input_dim = 0;
@@ -190,14 +190,14 @@ Gmm_InitRegression(GMM * self, PyObject * args)
     return NULL;
 
   printf("init :: %d \n",input_dim);
-  self->g->InitRegression(input_dim);
+  self->g->initRegression(input_dim);
   
   return PyInt_FromLong(1);
 }
 
 
 static PyObject *
-Gmm_DoRegression(GMM * self, PyObject * args)
+Gmm_doRegression(GMM * self, PyObject * args)
 { 
   PyObject * input_data;
   _fgmm_real * output;
@@ -214,7 +214,7 @@ Gmm_DoRegression(GMM * self, PyObject * args)
 
   output = (_fgmm_real *) malloc( sizeof(_fgmm_real) * (self->g->dim - self->g->ninput));
   
-  self->g->DoRegression((_fgmm_real *) PyArray_DATA(arr), 
+  self->g->doRegression((_fgmm_real *) PyArray_DATA(arr), 
 			output);
   Py_DECREF(arr);
   output_data =  get_vector( self->g->dim - self->g->ninput, output);
@@ -222,7 +222,7 @@ Gmm_DoRegression(GMM * self, PyObject * args)
 }
 
 static PyObject *
-Gmm_DoSamplingRegression(GMM * self, PyObject * args)
+Gmm_doSamplingRegression(GMM * self, PyObject * args)
 { 
   PyObject * input_data;
   _fgmm_real * output;
@@ -241,7 +241,7 @@ Gmm_DoSamplingRegression(GMM * self, PyObject * args)
 
   output = (_fgmm_real *) malloc( sizeof(_fgmm_real) * (self->g->dim - self->g->ninput));
   
-  self->g->DoSamplingRegression((_fgmm_real *) PyArray_DATA(arr), 
+  self->g->doSamplingRegression((_fgmm_real *) PyArray_DATA(arr), 
 			output);
 
   Py_DECREF(arr);
@@ -251,12 +251,12 @@ Gmm_DoSamplingRegression(GMM * self, PyObject * args)
 
 
 static PyObject *
-Gmm_Draw(GMM * self)
+Gmm_draw(GMM * self)
 {
   _fgmm_real * output;
   PyObject * result;
   output = (_fgmm_real *) malloc(sizeof(_fgmm_real) * self->g->dim);
-  self->g->Draw(output);
+  self->g->draw(output);
   result = get_vector(self->g->dim, output);
   return result;
 }
@@ -279,7 +279,7 @@ Gmm_getMean(GMM * self,PyObject * args)
       printf("Wrong index for GetMean, got %d out of %d\n",state,self->g->nstates);
       return NULL;
     }
-  self->g->GetMean(state,output);
+  self->g->getMean(state,output);
   printf("Mean :: %f %f \n", output[0], output[1]);
   result = get_vector(self->g->dim, output);
   return result;
@@ -297,7 +297,7 @@ Gmm_getCovariance(GMM * self,PyObject * args)
     return NULL;
 
   output = (_fgmm_real *) malloc(sizeof(_fgmm_real) * self->g->dim * self->g->dim );
-  self->g->GetCovariance(state,output);
+  self->g->getCovariance(state,output);
 
   npy_intp dims[2];
   dims[0] = self->g->dim;
@@ -318,7 +318,7 @@ Gmm_getPrior(GMM * self, PyObject * args)
   int state=0;
   if( ! PyArg_ParseTuple(args, "i", &state))
     return NULL;
-  float p = self->g->GetPrior(state);
+  float p = self->g->getPrior(state);
   return PyFloat_FromDouble((double) p);
 }
 
@@ -341,7 +341,7 @@ Gmm_getstate(GMM * self, PyObject * args)
       return NULL;
     }
 
-  res = self->g->GetLikelyState((_fgmm_real *)PyArray_DATA(arr));
+  res = self->g->getLikelyState((_fgmm_real *)PyArray_DATA(arr));
   Py_DECREF(arr);
 
   return PyInt_FromLong(res);
@@ -353,12 +353,12 @@ static PyMethodDef Gmm_methods[] = {
   {"init",(PyCFunction) Gmm_init_random,METH_VARARGS | METH_KEYWORDS, "initialize EM process ."},
   {"kmeans",(PyCFunction) Gmm_init_kmeans,METH_VARARGS | METH_KEYWORDS, "initialize EM with k-means ."},
   {"Em",(PyCFunction) Gmm_doEm,METH_VARARGS | METH_KEYWORDS, "perform EM."},
-  {"Dump",(PyCFunction) Gmm_Dump,METH_NOARGS,"dump gmm parameters on stdout"},
-  {"Pdf",(PyCFunction) Gmm_Pdf,METH_VARARGS,"pdf"},
-  {"InitRegression",(PyCFunction) Gmm_InitRegression,METH_VARARGS, "initialize Regression"},
-  {"DoRegression",(PyCFunction) Gmm_DoRegression,METH_VARARGS, "Do Regression"},
-  {"DoSamplingRegression",(PyCFunction) Gmm_DoSamplingRegression,METH_VARARGS, ""},
-  {"Draw",(PyCFunction) Gmm_Draw,METH_NOARGS,"draw a random point from model"},
+  {"Dump",(PyCFunction) Gmm_dump,METH_NOARGS,"dump gmm parameters on stdout"},
+  {"Pdf",(PyCFunction) Gmm_pdf,METH_VARARGS,"pdf"},
+  {"InitRegression",(PyCFunction) Gmm_initRegression,METH_VARARGS, "initialize Regression"},
+  {"DoRegression",(PyCFunction) Gmm_doRegression,METH_VARARGS, "Do Regression"},
+  {"DoSamplingRegression",(PyCFunction) Gmm_doSamplingRegression,METH_VARARGS, ""},
+  {"Draw",(PyCFunction) Gmm_draw,METH_NOARGS,"draw a random point from model"},
   {"GetCovariance",(PyCFunction) Gmm_getCovariance,METH_VARARGS, "covariances"},
   {"GetMean",(PyCFunction) Gmm_getMean,METH_VARARGS, "covariances"},
   {"GetPrior",(PyCFunction) Gmm_getPrior,METH_NOARGS, "priors .."},
