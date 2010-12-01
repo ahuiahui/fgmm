@@ -25,6 +25,7 @@
 #include "smat.h"
 
 /* zero the matrix and does the memory initialisation */
+/* FIXME : should also resize matrix .. */
 void smat_zero(struct smat ** mat,int dim)
 {
   struct smat * m = *mat;
