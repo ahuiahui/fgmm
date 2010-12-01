@@ -36,5 +36,5 @@ int main(int argc, char *argv[])
   mean /= count;
   assert( fabs(mean + 2.55) < 1e-1);
   std::cout << "pdf test Pass : " << mean << std::endl;
-  return 0;
+  return EXIT_SUCCESS;
 }

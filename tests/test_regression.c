@@ -93,8 +93,8 @@ int main(int argc, char ** argv)
   //rfuke = fopen("result.txt","w");
   for(i=0;i<test_points;i++)
     {
-      x = (M_PI*2 / 500) *  (rand()%500) ;
-      y =  (M_PI*2/500)  * (rand()%500 );
+      x = (M_PI*2/500) *  (rand()%500) ;
+      y = (M_PI*2/500)  * (rand()%500 );
 
       in[0] = x;
       in[1] = y;
@@ -117,6 +117,12 @@ int main(int argc, char ** argv)
   printf("nRMS error on the 4d sine dataset :: %f\n",error);
   assert(error < .1); // we can get to this precision with 32 states 
   printf(".. pass \n");
-  return 0;
+  
+  fgmm_regression_free(&regression);
+  fgmm_free(&gmm);
+  free(data);
+ 
+
+  return EXIT_SUCCESS;
 }
 				     

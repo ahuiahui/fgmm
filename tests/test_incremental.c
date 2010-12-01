@@ -85,7 +85,7 @@ int main(int argc,char ** argv)
   
   printf("end loading file\n");
   
-  for(i=0;i<n_data*10;i++)
+  for(i=0;i<n_data*10;i++) // 10 pass , should be eventually randomised 
     fgmm_update(GMM,&data[(i%n_data)*dim]);
   fgmm_dump(GMM);
   

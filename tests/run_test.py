@@ -1,8 +1,8 @@
 import numpy
 import subprocess
 
-def generate_data(states=3,dim=3,npoints=100) :
-    
+def generate_data(states=3,dim=3,npoints=100) :    
+
     means = numpy.empty((states,dim))
     hic = 1.
 
@@ -13,7 +13,6 @@ def generate_data(states=3,dim=3,npoints=100) :
         if (i+1)%dim == 0 :
             hic += 1
 
-    print means
     f = open("test.txt",'w')
     for k in range(npoints):
         cm = numpy.random.randint(states)
@@ -23,12 +22,22 @@ def generate_data(states=3,dim=3,npoints=100) :
         f.write("\n")
     f.close()
 
-generate_data(3,2)
-subprocess.call(["./test_smat"])
-subprocess.call(["./test_gaussian"])
-subprocess.call(["./test_em","test.txt","6"])
-print "********"
-print " -> kmenas"
-subprocess.call(["./test_kmeans","test.txt","6"])
-subprocess.call(["./test_regression"])
-subprocess.call(["./test_pdf"])
+def run_test(path) :
+    print path
+    p = subprocess.Popen(path, stdout = subprocess.PIPE)
+    out,err = p.communicate()
+    if(p.returncode != 0) :
+#        print out
+        exit(1)
+    print "pass"
+
+generate_data(6,4,10000)
+
+
+#subprocess.call(["./test_smat"])
+run_test(["./test_smat"])
+run_test(["./test_gaussian"])
+run_test(["./test_em","test.txt","6"])
+run_test(["./test_kmeans","test.txt","6"])
+run_test(["./test_regression"])
+run_test(["./test_pdf"])

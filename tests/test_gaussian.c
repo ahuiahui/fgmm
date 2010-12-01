@@ -83,9 +83,7 @@ int main(int argc,char ** argv)
 	assert(fabs(*pcv++) < 1e-2);
       
     }
-  printf("..pass\n");
-
-  
-  return 1;
+  printf("..pass\n");  
+  return EXIT_SUCCESS;
 }
   

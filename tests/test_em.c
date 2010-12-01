@@ -117,6 +117,6 @@ int main(int argc,char ** argv)
   fgmm_free(&GMM);
   free(data);
   free(samp);
-  return 0;
+  return EXIT_SUCCESS;
 }
 
