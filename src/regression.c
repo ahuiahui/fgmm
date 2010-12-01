@@ -73,10 +73,9 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
   _fgmm_real element;
   int off,k;
  
-  // FIXME : malloc, not suitable for RT
-  tmp = (_fgmm_real *) malloc(sizeof(_fgmm_real) * gr->reg->input_len);
-  tmp2 = (_fgmm_real *) malloc(sizeof(_fgmm_real) * gr->reg->input_len);
-  
+  tmp = gr->reg->vec1;
+  tmp2 = gr->reg->vec2;
+
   /* OPT : this computation is also done for the 
      subgauss pdf (ie weight of the gaussian in the regression .. */
 
@@ -130,8 +129,6 @@ void fgmm_regression_gaussian(struct gaussian_reg* gr,
 	off += (gr->reg->output_len - j - 1); 
       }
   }
-  free(tmp);
-  free(tmp2);
 }
 
 /** use a fgmm_ref struct to perform regression 
@@ -146,44 +143,33 @@ void fgmm_regression(struct fgmm_reg * reg,
 		     _fgmm_real * result, // outputs    (reg->output_len) /!\ alloc'd by user
 		     _fgmm_real * covar)  // out covar  (reg->output_len ** 2/2)  /!\ alloc'd
 {
-  _fgmm_real * weights;
   _fgmm_real weight2 = 0;
-  /*float result[reg->output_len];*/
-  //float tmp[reg->output_len];
-
-  struct gaussian loc_model ;
-
   _fgmm_real likelihood = 0;
   int state = 0;
   int i=0;
-  _fgmm_real ** covs  = NULL;
-  weights = (_fgmm_real *) malloc(sizeof(_fgmm_real) * reg->model->nstates);
-  gaussian_init(&loc_model,reg->output_len); // FIXME : malloc, not suitable for RT	
+
   for(i=0;i<reg->output_len;i++)
     result[i] = 0;
   
   if(covar != NULL)
     {
-      for(i=0;i<loc_model.covar->_size;i++)
+      for(i=0;i<reg->loc_model->covar->_size;i++)
 	covar[i] = 0.;
-      covs = (_fgmm_real **) malloc(sizeof(_fgmm_real *) * reg->model->nstates);
     }
 
   for(;state<reg->model->nstates;state++)
     {
-      weights[state] = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
-      fgmm_regression_gaussian(&reg->subgauss[state],inputs,&loc_model);
+      reg->weights[state] = gaussian_pdf(reg->subgauss[state].subgauss,inputs);
+      fgmm_regression_gaussian(&reg->subgauss[state],inputs,reg->loc_model);
 
       for(i=0;i<reg->output_len;i++)
-	result[i] += weights[state] *loc_model.mean[i];
+	result[i] += reg->weights[state] * reg->loc_model->mean[i];
       if(covar != NULL)
 	{
-	  covs[state] = (_fgmm_real *) malloc(sizeof(_fgmm_real) * loc_model.covar->_size);
-	  for(i=0;i<loc_model.covar->_size;i++) 
-	    covs[state][i] = loc_model.covar->_[i];
+	  for(i=0;i<reg->loc_model->covar->_size;i++) 
+	    reg->covs[state][i] = reg->loc_model->covar->_[i];
 	}
-      // weight2 = weight*weight;
-      likelihood += weights[state];
+      likelihood += reg->weights[state];
     }
   assert(likelihood > FLT_MIN);
 
@@ -191,21 +177,15 @@ void fgmm_regression(struct fgmm_reg * reg,
     {
       for(state=0;state<reg->model->nstates;state++)
 	{
-	  weight2 = weights[state] / likelihood;
+	  weight2 = reg->weights[state] / likelihood;
 	  weight2 *= weight2;
-	  for(i=0;i<loc_model.covar->_size;i++)
- 	    covar[i] += weight2*covs[state][i];
+	  for(i=0;i<reg->loc_model->covar->_size;i++)
+ 	    covar[i] += weight2* reg->covs[state][i];
 	}
-       
-      for(i=0;i<reg->model->nstates;i++) 
-	free(covs[i]);
-      free(covs);    
     }
   
   for(i=0;i<reg->output_len;i++)
     result[i] /= likelihood;
-  gaussian_free(&loc_model);
-  free(weights);
 }
 
 
@@ -236,7 +216,15 @@ void fgmm_regression_alloc(struct fgmm_reg ** regression,
   reg->output_dim = (int*) malloc(sizeof(int)*output_len);
   for(i=0;i<output_len;i++)
     reg->output_dim[i] = output_dim[i]; 
- 
+
+  // for holding temp results in computations .. 
+  reg->vec1 = (_fgmm_real *) malloc(sizeof(_fgmm_real) * input_len);
+  reg->vec2 = (_fgmm_real *) malloc(sizeof(_fgmm_real) * input_len);
+  reg->weights = (_fgmm_real *) malloc(sizeof(_fgmm_real) * gmm->nstates);
+  reg->loc_model = (struct gaussian *) malloc(sizeof(struct gaussian));
+  gaussian_init(reg->loc_model, output_len);
+  reg->covs = (_fgmm_real **) malloc(sizeof(_fgmm_real*) * gmm->nstates);
+
   reg->subgauss = (struct gaussian_reg*) malloc(sizeof(struct gaussian_reg) * reg->model->nstates);
   for(;state < reg->model->nstates ; state++)
     {
@@ -244,6 +232,7 @@ void fgmm_regression_alloc(struct fgmm_reg ** regression,
       reg->subgauss[state].reg = reg;
       reg->subgauss[state].reg_matrix = NULL;
       reg->subgauss[state].subgauss = NULL;
+      reg->covs[state] = (_fgmm_real *) malloc(sizeof(_fgmm_real) * reg->loc_model->covar->_size);
     }
   *regression = reg;
 }
@@ -289,9 +278,11 @@ void fgmm_regression_free(struct fgmm_reg ** regression)
   
   free(reg->input_dim);
   free(reg->output_dim);
-  
+  free(reg->vec1);
+  free(reg->vec2);
   for(;g<reg->model->nstates;g++)
     {
+      free(reg->covs[g]);
       if(reg->subgauss[g].reg_matrix != NULL)
 	free( reg->subgauss[g].reg_matrix );
       if(reg->subgauss[g].subgauss != NULL)
@@ -300,6 +291,10 @@ void fgmm_regression_free(struct fgmm_reg ** regression)
 	  free(reg->subgauss[g].subgauss);
 	}	    
     }
+  free(reg->covs);
+  free(reg->weights);
+  gaussian_free(reg->loc_model);
+  free(reg->loc_model);
   free( reg->subgauss );
   free( reg );
   *regression = NULL;

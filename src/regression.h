@@ -41,5 +41,18 @@ struct fgmm_reg {
   int input_len;      
   int output_len;
   struct gaussian_reg * subgauss; // array of gaussian_reg
+
+  /* these are only to serve as temporary holders for computations. 
+     for realtime use, we may want to not use any memory allocation during 
+     a regression query, so we allocate memory there for the further computation
+     once at init... 
+  */
+
+  _fgmm_real * vec1; // hold the local projection of input on the current gaussian
+  _fgmm_real * vec2; // .... for inversion. 
+  _fgmm_real * weights; // weight of each gaussian
+  struct gaussian * loc_model; // holding reg result for one gaussian
+  _fgmm_real ** covs;          // holding covariances for every gaussian
+  
 };
 
