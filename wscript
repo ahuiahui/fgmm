@@ -55,7 +55,7 @@ def configure(conf) :
             conf.env.CCFLAGS.append("-Wall")
     else :
         if conf.env.CC_NAME ==  "gcc" :
-            conf.env.CCFLAGS = ['-Wall','-O3','--fast-math']
+            conf.env.CCFLAGS = ['-Wall','-O2','--fast-math']
             conf.env.CPPFLAGS = ['-DNDEBUG'] # no more asserts.. 
     if Options.options.use_gprof :
         conf.env.CCFLAGS.append('-pg')
@@ -86,6 +86,10 @@ def build(bld) :
     if bld.env.matlab or bld.env.octave :
         bld.recurse("matlab")
 
+def doc(ctx) :
+    subprocess.call(["doxygen","Doxfile"])
+    subprocess.call(["sphinx-build","-b","html","docsrc", "doc/sphinx/"])
+
 import Scripting, Build, Environment,Utils
 import os,sys,subprocess
 
@@ -101,11 +105,9 @@ def test(ctx) :
     bld.load_envs()
     
     pybin = sys.executable  # hey you should have a python exe to run this .. 
-
-    
-
     for v in bld.lst_variants :
         trunner = subprocess.Popen([pybin,os.path.join(proj['srcdir'],"tests",'run_test.py')],
                                    cwd = os.path.join(bld.bdir,v,"tests"))
-        trunner.wait()
+        if(trunner.wait() != 0) :
+            raise Utils.WafError("test failed " )
         
