@@ -126,7 +126,7 @@ void invert_covar(struct gaussian* g)
       // almost non invertible gaussian :: lets add some noise
       g->nfactor = FLT_MIN;
       smat_add_diagonal(g->covar, 1.);
-      printf("determinant :: %e\n", det);
+      fprintf(stderr,"determinant :: %e\n", det);
       invert_covar(g);
       //exit(0);
     }

@@ -225,12 +225,12 @@ void fgmm_draw_sample(struct gmm *, _fgmm_real * out);
 
 enum COVARIANCE_TYPE 
   {
-    COVARIANCE_FULL,  // full covariance matrix
-    COVARIANCE_DIAG,  // diagonal covariance matrix
-    COVARIANCE_SPHERE // "sphered" covariance (ie same value over the diagonal
+    COVARIANCE_FULL,  /* full covariance matrix */
+    COVARIANCE_DIAG,  /* diagonal covariance matrix */
+    COVARIANCE_SPHERE /* "sphered" covariance (ie same value over the diagonal */
   };
 
-//#define loglikelihood_eps 1e-4
+/* #define loglikelihood_eps 1e-4 */
 
 /**
  * EM algorithm 

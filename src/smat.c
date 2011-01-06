@@ -473,7 +473,7 @@ _fgmm_real smat_covariance_single(struct smat * cov,
     {      
       for(j=0;j<cov->dim;j++)
 	{
-	  tmp = ((*pdata++) - total_mean);
+	  tmp = ((*pdata++) - mean[j]); // total_mean);
 	  variance += *pweight * tmp * tmp;
 	}
       pweight++;
