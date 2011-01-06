@@ -63,9 +63,18 @@ _fgmm_real fgmm_e_step(struct gmm * GMM,
 	}
       if(like<= FLT_MIN)
 	{
-	  printf("too far from current distrib %d\n",data_i);
-	  exit(0);
+	  /* printf("too far from current distrib %d\n",data_i); */ 
+	  // in order to avoid us some numerical instabilities, 
+	  // we are gooing to boost the likelihood for this point
+	  // 
+	  // yep .. 
+	  
+	  for(state_i = 0;state_i<GMM->nstates;state_i++)
+	    pxi[state_i] += FLT_MIN;
+	  like = FLT_MIN * GMM->nstates;
+
 	}
+
       log_lik += log(like);
       /* if(isnan(log_lik) || isinf(log_lik))
 	 exit(0); */
